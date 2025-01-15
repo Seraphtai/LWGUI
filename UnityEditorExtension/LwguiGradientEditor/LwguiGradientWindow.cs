@@ -188,11 +188,14 @@ namespace LWGUI.LwguiGradientEditor
         public static void RegisterSerializedObjectUndo(Object targetObject)
         {
             Undo.RegisterCompleteObjectUndo(targetObject, "Lwgui Gradient Editor");
+            EditorUtility.SetDirty(targetObject);
         }
 
         public static void RegisterRampMapUndo(Object texture, Object assetImporter)
         {
             Undo.RecordObjects(new Object[]{ texture, assetImporter }, "Set Lwgui Gradient To Texture");
+            EditorUtility.SetDirty(texture);
+            EditorUtility.SetDirty(assetImporter);
         }
 
         private void OnGUI()
