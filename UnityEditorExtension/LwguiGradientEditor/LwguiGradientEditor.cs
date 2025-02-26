@@ -17,6 +17,8 @@ namespace LWGUI.LwguiGradientEditor
             public Vector4 selectedVectorValue = Vector4.negativeInfinity;
             public float selectedFloatValue = float.NegativeInfinity;
             public float selectedTime = float.NegativeInfinity;
+            public float selectedKeysAverageTime = 0;
+            public uint selectedChannel = 0;
             public bool isOnlyColorKeySelected;
             public LwguiGradient.LwguiMergedColorCurves mergedCurves;
             
@@ -33,11 +35,15 @@ namespace LWGUI.LwguiGradientEditor
                 
                 if (curveEditor?.selectedCurves is { Count: > 0 })
                 {
+	                int selectedKeyCount = 0;
                     foreach (var curveSelection in curveEditor.selectedCurves.Where(selection => selection != null))
                     {
                         var channelID = curveSelection.curveID;
                         var key = curveEditor.GetKeyframeFromSelection(curveSelection);
                         selectedAnimationCurves[channelID].AddKey(key);
+                        selectedKeysAverageTime += key.time;
+                        selectedKeyCount++;
+                        selectedChannel |= 1u << channelID;
 
                         if (selectedTime != float.NegativeInfinity && selectedTime != key.time)
                             hasMixedTime = true;
@@ -52,10 +58,12 @@ namespace LWGUI.LwguiGradientEditor
                         selectedFloatValue = key.value;
                     }
 
-                    for (int i = 0; i < 4; i++)
+                    selectedKeysAverageTime /= selectedKeyCount;
+
+                    for (int c = 0; c < (int)LwguiGradient.Channel.Num; c++)
                     {
-                        if (selectedVectorValue[i] == Vector4.negativeInfinity[i])
-                            selectedVectorValue[i] = 0;
+                        if (selectedVectorValue[c] == Vector4.negativeInfinity[c])
+                            selectedVectorValue[c] = 0;
                     }
 
                     if (selectedFloatValue == float.NegativeInfinity)
@@ -71,6 +79,11 @@ namespace LWGUI.LwguiGradientEditor
                 {
                     mergedCurves = new LwguiGradient.LwguiMergedColorCurves();
                 }
+            }
+
+            public bool HasSelectedChannel(int channelIndex)
+            {
+	            return (selectedChannel & 1u << channelIndex) != 0;
             }
         }
         
@@ -242,6 +255,7 @@ namespace LWGUI.LwguiGradientEditor
                 if (EditorGUI.EndChangeCheck())
                 {
                     _changed = true;
+                    EditorGUI.EndEditingActiveTextField();
                     ApplyGradientChangesToCurve();
                 }
 
@@ -343,11 +357,15 @@ namespace LWGUI.LwguiGradientEditor
                     rect.width = locationTextWidth + locationWidth;
                     EditorGUIUtility.labelWidth = locationTextWidth;
                     EditorGUI.showMixedValue = selectionInfo.hasMixedTime;
+                    
                     EditorGUI.BeginChangeCheck();
                     var newTime = EditorGUI.FloatField(rect, "Time", selectionInfo.selectedTime * (int)gradientTimeRange) / (int)gradientTimeRange;
                     // When two keys have the same time, they will be merged, so avoid modifying the time in real time and only apply the changes at the end of the change
                     var hasChange = EditorGUI.EndChangeCheck();
-                    if (hasChange) _lastEditingTime = newTime;
+                    
+                    if (hasChange)
+	                    _lastEditingTime = newTime;
+                    
                     if (_lastEditingTime != selectionInfo.selectedTime
                         && _lastEditingTime != float.NegativeInfinity
                         // End editing text
@@ -355,10 +373,16 @@ namespace LWGUI.LwguiGradientEditor
                             // Mouse drag
                             || !EditorGUI.IsEditingTextField() && hasChange))
                     {
-                        _changed = true;
-                        _curveEditor.SetSelectedKeyPositions(Mathf.Clamp01(_lastEditingTime), 0, true, false);
-                        InitGradientEditor(true);
-                        SyncSelectionFromCurveToGradient(true);
+                        var clampedNewTime = Mathf.Clamp01(_lastEditingTime);
+                        var offsetedNewKeyTime = clampedNewTime;
+                        if (HandleNewKeyTimeConflicts(ref offsetedNewKeyTime, clampedNewTime, selectionInfo))
+                        {
+	                        _changed = true;
+			                _lastEditingTime = offsetedNewKeyTime;
+							_curveEditor.SetSelectedKeyPositions(offsetedNewKeyTime, 0, true, false);
+	                        InitGradientEditor(true);
+	                        SyncSelectionFromCurveToGradient(true);
+                        }
                     }
                 }
                 
@@ -449,6 +473,83 @@ namespace LWGUI.LwguiGradientEditor
                 EditorGUIUtility.labelWidth = labelWidth;
                 EditorGUI.showMixedValue = showMixedValue;
             }
+        }
+
+        /// <summary>
+        /// If the new time of the key is too close to the existing key, Curve Editor will discard one of them.
+        /// To avoid this, Key conflicts need to be detected and fixed
+        /// </summary>
+        private bool HandleNewKeyTimeConflicts(ref float outOffsetedNewKeyTime, float newKeyTime, CurveSelectionInfo selectionInfo)
+        {
+	        const float MinimumInterval = 0.0001f;
+	        const float NearbyKeyThreshold = MinimumInterval * 10;
+	        
+	        // Collect nearby keys
+	        var nearbyKeyTimes = new List<float>();
+	        for (int c = 0; c < _curveEditor.animationCurves.Length; c++)
+	        {
+		        if (!selectionInfo.HasSelectedChannel(c))
+			        continue;
+		                        
+		        foreach (var key in _curveEditor.animationCurves[c].curve.keys)
+		        {
+			        if (Mathf.Abs(key.time - newKeyTime) < NearbyKeyThreshold
+			            && !nearbyKeyTimes.Contains(key.time))
+				        nearbyKeyTimes.Add(key.time);
+		        }
+	        }
+
+	        // Offset New Time to avoid conflicts with existing Keys
+	        if (nearbyKeyTimes.Count > 0)
+	        {
+		        Debug.LogWarning($"LWGUI Gradient Editor: { nearbyKeyTimes.Count } keys that are too close are detected near the new time, " +
+		                         $"and LWGUI will automatically fix the conflicts of the times. " +
+		                         $"\n But too many nearby keys may still cause some problems, please be careful to use.");
+		        
+		        bool isNewTimeOnTheLeft = newKeyTime < selectionInfo.selectedKeysAverageTime;
+		        float offsetDirection = isNewTimeOnTheLeft ? 1 : -1;
+		        
+		        nearbyKeyTimes.Sort();
+		        if (!isNewTimeOnTheLeft)
+			        nearbyKeyTimes.Reverse();
+
+		        for (int i = 0; i < nearbyKeyTimes.Count; i++)
+		        {
+			        var currentNearbyKeyTime = nearbyKeyTimes[i];
+			        if ((newKeyTime - currentNearbyKeyTime) * offsetDirection > MinimumInterval)
+				        continue;
+
+			        var lastNearbyKeyTime = nearbyKeyTimes[Mathf.Max(0, i - 1)];
+			                        
+			        // No conflict, no offset required
+			        if (Mathf.Abs(outOffsetedNewKeyTime - currentNearbyKeyTime) >= MinimumInterval
+			            && Mathf.Abs(outOffsetedNewKeyTime - lastNearbyKeyTime) >= MinimumInterval)
+			        {
+				        break;
+			        }
+			        // Has conflict, offset to the selectedKeysAverageTime
+			        else
+			        {
+				        if (Mathf.Abs(outOffsetedNewKeyTime - lastNearbyKeyTime) < MinimumInterval)
+				        {
+					        outOffsetedNewKeyTime = lastNearbyKeyTime + MinimumInterval * offsetDirection;
+				        }
+				        if (Mathf.Abs(outOffsetedNewKeyTime - currentNearbyKeyTime) < MinimumInterval)
+				        {
+					        outOffsetedNewKeyTime = currentNearbyKeyTime + MinimumInterval * offsetDirection;
+				        }
+			        }
+		        }
+
+		        var offsetedNewKeyTime = outOffsetedNewKeyTime;
+		        if (nearbyKeyTimes.Any(time => Mathf.Abs(offsetedNewKeyTime - time) < MinimumInterval))
+		        {
+			        EditorUtility.DisplayDialog("LWGUI Gradient Editor",
+				        "Time conflicts of Keys were detected! \nPlease avoid the time when inputting too close to existing Keys!", "OK");
+			        return false;
+		        }
+	        }
+			return true;
         }
 
         private void ShowGradientSwatchArray(Rect rect, List<GradientEditor.Swatch> swatches, LwguiGradient.ChannelMask drawingChannelMask)
