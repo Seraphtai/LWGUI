@@ -1174,6 +1174,10 @@ namespace LWGUI
 			{
 				preset = shaderPropertyPreset.presets[index];
 			}
+			else
+			{
+				Debug.LogError($"LWGUI: { inProp.name } out of Preset index range!");
+			}
 			return preset;
 		}
 
@@ -1228,18 +1232,31 @@ namespace LWGUI
 				return;
 			}
 
-			var presetNames = presetFile.presets.Select((inPreset) => new GUIContent(inPreset.presetName)).ToArray();
-			if (EditorGUI.showMixedValue)
-				index = -1;
-			else
-				Helper.AdaptiveFieldWidth(EditorStyles.popup, presetNames[index]);
-			int newIndex = EditorGUI.Popup(rect, label, index, presetNames);
-			if (Helper.EndChangeCheck(metaDatas, prop))
+			if (index < presetFile.presets.Count)
 			{
-				prop.floatValue = newIndex;
-				presetFile.presets[newIndex].ApplyToEditingMaterial(prop.targets, metaDatas.perMaterialData);
+				var presetNames = presetFile.presets.Select((inPreset) => new GUIContent(inPreset.presetName)).ToArray();
+				if (EditorGUI.showMixedValue)
+					index = -1;
+				else
+					Helper.AdaptiveFieldWidth(EditorStyles.popup, presetNames[index]);
+				int newIndex = EditorGUI.Popup(rect, label, index, presetNames);
+				if (Helper.EndChangeCheck(metaDatas, prop))
+				{
+					prop.floatValue = newIndex;
+					presetFile.presets[newIndex].ApplyToEditingMaterial(prop.targets, metaDatas.perMaterialData);
+				}
+				EditorGUI.showMixedValue = false;
 			}
-			EditorGUI.showMixedValue = false;
+			else
+			{
+				var color = GUI.color;
+				GUI.color = Color.red;
+				editor.DefaultShaderProperty(position, prop, label.text + " (Out of Index Range)");
+				GUI.color = color;
+				
+				Debug.LogError($"LWGUI: { prop.name } out of Preset index range!");
+			}
+
 		}
 
 		public override void Apply(MaterialProperty prop)
