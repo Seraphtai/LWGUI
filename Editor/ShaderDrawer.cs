@@ -1174,10 +1174,6 @@ namespace LWGUI
 			{
 				preset = shaderPropertyPreset.presets[index];
 			}
-			else
-			{
-				Debug.LogError($"LWGUI: { inProp.name } out of Preset index range!");
-			}
 			return preset;
 		}
 
