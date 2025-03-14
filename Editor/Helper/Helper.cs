@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using LWGUI.Timeline;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -16,11 +17,6 @@ namespace LWGUI
 	public class Helper
 	{
 		#region Engine Misc
-
-		public static void ObsoleteWarning(string obsoleteStr, string newStr)
-		{
-			Debug.LogWarning("LWGUI: '" + obsoleteStr + "' is Obsolete! Please use '" + newStr + "'!");
-		}
 
 		public static bool PropertyValueEquals(MaterialProperty prop1, MaterialProperty prop2)
 		{
@@ -40,54 +36,54 @@ namespace LWGUI
 			return (prop.flags & MaterialProperty.PropFlags.HideInInspector) != 0;
 		}
 
-		public static string GetKeyWord(string keyWord, string propName)
+		public static string GetKeywordName(string keyword, string propName)
 		{
 			string k;
-			if (string.IsNullOrEmpty(keyWord) || keyWord == "__")
+			if (string.IsNullOrEmpty(keyword) || keyword == "__")
 			{
 				k = propName.ToUpperInvariant() + "_ON";
 			}
 			else
 			{
-				k = keyWord.ToUpperInvariant();
+				k = keyword.ToUpperInvariant();
 			}
 			return k;
 		}
 
-		public static void SetShaderKeyWord(Object[] materials, string keyWord, bool isEnable)
+		public static void SetShaderKeywordEnabled(Object[] materials, string keywordName, bool isEnable)
 		{
-			if (string.IsNullOrEmpty(keyWord) || string.IsNullOrEmpty(keyWord)) return;
+			if (string.IsNullOrEmpty(keywordName) || string.IsNullOrEmpty(keywordName)) return;
 
 			foreach (Material m in materials)
 			{
 				// delete "_" keywords
-				if (keyWord == "_")
+				if (keywordName == "_")
 				{
-					if (m.IsKeywordEnabled(keyWord))
+					if (m.IsKeywordEnabled(keywordName))
 					{
-						m.DisableKeyword(keyWord);
+						m.DisableKeyword(keywordName);
 					}
 					continue;
 				}
 
-				if (m.IsKeywordEnabled(keyWord))
+				if (m.IsKeywordEnabled(keywordName))
 				{
-					if (!isEnable) m.DisableKeyword(keyWord);
+					if (!isEnable) m.DisableKeyword(keywordName);
 				}
 				else
 				{
-					if (isEnable) m.EnableKeyword(keyWord);
+					if (isEnable) m.EnableKeyword(keywordName);
 				}
 			}
 		}
 
-		public static void SetShaderKeyWord(Object[] materials, string[] keyWords, int index)
+		public static void SelectShaderKeyword(Object[] materials, string[] keywordNames, int index)
 		{
-			Debug.Assert(keyWords.Length >= 1 && index < keyWords.Length && index >= 0,
-						 "KeyWords Length: " + keyWords.Length + " or Index: " + index + " Error! ");
-			for (int i = 0; i < keyWords.Length; i++)
+			Debug.Assert(keywordNames.Length >= 1 && index < keywordNames.Length && index >= 0,
+						 "KeyWords Length: " + keywordNames.Length + " or Index: " + index + " Error! ");
+			for (int i = 0; i < keywordNames.Length; i++)
 			{
-				SetShaderKeyWord(materials, keyWords[i], index == i);
+				SetShaderKeywordEnabled(materials, keywordNames[i], index == i);
 			}
 		}
 
@@ -912,14 +908,14 @@ namespace LWGUI
 
 					if (activePreset.GetPropertyValue(prop.name) != null)
 					{
-						menus.AddItem(new GUIContent("Update to Preset/" + presetPropDisplayName + "/" + "All"), false, () => EditPresetEvent("Update", presetAsset, presetAsset.presets, prop, metaDatas));
+						menus.AddItem(new GUIContent("Update to Preset/" + presetPropDisplayName + "/" + "All"), false, () => EditPresetEvent("Update", presetAsset, presetAsset.GetPresets(), prop, metaDatas));
 						menus.AddItem(new GUIContent("Update to Preset/" + presetPropDisplayName + "/" + activePreset.presetName), false, () => EditPresetEvent("Update", presetAsset, new List<ShaderPropertyPreset.Preset>(){activePreset}, prop, metaDatas));
-						menus.AddItem(new GUIContent("Remove from Preset/" + presetPropDisplayName + "/" + "All"), false, () => EditPresetEvent("Remove", presetAsset, presetAsset.presets, prop, metaDatas));
+						menus.AddItem(new GUIContent("Remove from Preset/" + presetPropDisplayName + "/" + "All"), false, () => EditPresetEvent("Remove", presetAsset, presetAsset.GetPresets(), prop, metaDatas));
 						menus.AddItem(new GUIContent("Remove from Preset/" + presetPropDisplayName + "/" + activePreset.presetName), false, () => EditPresetEvent("Remove", presetAsset, new List<ShaderPropertyPreset.Preset>(){activePreset}, prop, metaDatas));
 					}
 					else
 					{
-						menus.AddItem(new GUIContent("Add to Preset/" + presetPropDisplayName + "/" + "All"), false, () => EditPresetEvent("Add", presetAsset, presetAsset.presets, prop, metaDatas));
+						menus.AddItem(new GUIContent("Add to Preset/" + presetPropDisplayName + "/" + "All"), false, () => EditPresetEvent("Add", presetAsset, presetAsset.GetPresets(), prop, metaDatas));
 						menus.AddItem(new GUIContent("Add to Preset/" + presetPropDisplayName + "/" + activePreset.presetName), false, () => EditPresetEvent("Add", presetAsset, new List<ShaderPropertyPreset.Preset>(){activePreset}, prop, metaDatas));
 					}
 				}

@@ -2,9 +2,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace LWGUI
@@ -41,6 +43,9 @@ namespace LWGUI
 
         #region MaterialEditor
 
+        private static readonly Type MaterialEditor_Type = typeof(MaterialEditor);
+        private static readonly PropertyInfo MaterialEditor_RendererForAnimationMode_Property = MaterialEditor_Type.GetProperty("rendererForAnimationMode", BindingFlags.NonPublic | BindingFlags.Instance);
+
         public static float DoPowerRangeProperty(Rect position, MaterialProperty prop, GUIContent label, float power)
         {
             return MaterialEditor.DoPowerRangeProperty(position, prop, label, power);
@@ -62,17 +67,20 @@ namespace LWGUI
                 GameObject gameObject = property.tracker.activeEditors[0].target as GameObject;
                 if (gameObject)
                 {
-                    outRenderers.AddRange(gameObject.GetComponents<MeshRenderer>());
-                    outRenderers.AddRange(gameObject.GetComponents<SkinnedMeshRenderer>());
+                    outRenderers.AddRange(gameObject.GetComponents<Renderer>());
                 }
             }
 
             return outRenderers;
         }
 
+        public static Renderer GetRendererForAnimationMode(this MaterialEditor materialEditor)
+        {
+            return MaterialEditor_RendererForAnimationMode_Property.GetValue(materialEditor, null) as Renderer;
+        }
+
         #endregion
-
-
+        
         #region EditorUtility
 
         public static void DisplayCustomMenuWithSeparators(Rect position, string[] options, bool[] enabled, bool[] separator, int[] selected, EditorUtility.SelectMenuItemFunction callback, object userData = null, bool showHotkey = false)
@@ -82,19 +90,17 @@ namespace LWGUI
 
         #endregion
 
-
         #region EditorGUI
 
         public static float EditorGUI_Indent => EditorGUI.indentLevel;
 
         #endregion
-
+        
         #region EditorGUILayout
 
         public static float EditorGUILayout_kLabelFloatMinW => EditorGUILayout.kLabelFloatMinW;
 
         #endregion
-
 
         #region MaterialEnumDrawer
 
@@ -126,8 +132,7 @@ namespace LWGUI
         }
 
         #endregion
-
-
+        
         #region MaterialProperty.PropertyData
 
 #if UNITY_2022_1_OR_NEWER
@@ -153,6 +158,15 @@ namespace LWGUI
 
         #endregion
 
+        #region Animation
+
+        public static bool MaterialAnimationUtility_OverridePropertyColor(MaterialProperty materialProp, Renderer target, out Color color)
+        {
+            return MaterialAnimationUtility.OverridePropertyColor(materialProp, target, out color);
+        }
+
+        #endregion
+        
         #region GUI
 
         private static readonly MethodInfo gui_Button_Method = typeof(GUI).GetMethod("Button", BindingFlags.Static | BindingFlags.NonPublic);

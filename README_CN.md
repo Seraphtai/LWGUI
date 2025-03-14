@@ -16,7 +16,9 @@
 
 | ![image-20240716183800118](./README_CN.assets/image-20240716183800118.png) | ![image-20240716184045776](./README_CN.assets/image-20240716184045776.png) |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| NEW: 比UE更加强大的Gradient编辑器, 同时支持Shader和C#        | NEW: 直接在ShaderGUI中插入图片, 无需跳转浏览器即可支持复杂文档的显示 |
+| 比UE更加强大的Gradient编辑器, 同时支持Shader和C#             | 直接在ShaderGUI中插入图片, 无需跳转浏览器即可支持复杂文档的显示 |
+| ![image-20250314160119094](./README_CN.assets/image-20250314160119094.png) |                                                              |
+| **NEW: Timeline中录制材质参数动画时, 自动捕获Toggle的Keyword更改, 以便运行时切换材质Keyword** |                                                              |
 | ![image-20220926025611208](./README_CN.assets/image-20220926025611208.png) | ![image-20230821205439889](./README_CN.assets/image-20230821205439889.png) |
 | 搜索栏亦可筛选已修改的属性                                   | 右键以按类型粘贴属性值                                       |
 
@@ -748,7 +750,13 @@ Example:
 
 ![image-20231023010204399](./README_CN.assets/image-20231023010204399.png)
 
+### LWGUI Timeline Tracks
 
+#### MaterialKeywordToggleTrack
+
+录制材质参数动画时自动捕获Keyword改动并添加该轨道到Timeline Asset, 运行时根据float值设置Keyword状态.
+
+支持带Keyword的Toggle类型的Drawer.
 
 ### Unity Builtin Drawers
 

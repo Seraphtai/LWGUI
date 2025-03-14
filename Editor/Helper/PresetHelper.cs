@@ -43,7 +43,7 @@ namespace LWGUI
 			}
 		}
 
-		public static ShaderPropertyPreset GetPresetFile(string presetFileName)
+		public static ShaderPropertyPreset GetPresetAsset(string presetFileName)
 		{
 			if (string.IsNullOrEmpty(presetFileName))
 				return null;
@@ -53,7 +53,7 @@ namespace LWGUI
 
 			if (!_loadedPresets.ContainsKey(presetFileName) || !_loadedPresets[presetFileName])
 			{
-				Debug.LogError("LWGUI: Invalid ShaderPropertyPreset: ‘" + presetFileName + "’ !");
+				Debug.LogError("LWGUI: Invalid ShaderPropertyPreset path: ‘" + presetFileName + "’ !");
 				return null;
 			}
 
@@ -71,7 +71,7 @@ namespace LWGUI
 				// Apply active preset
 				if (drawer != null && drawer is IBasePresetDrawer)
 				{
-					var activePreset = (drawer as IBasePresetDrawer).GetActivePreset(prop, PresetHelper.GetPresetFile((drawer as PresetDrawer).presetFileName));
+					var activePreset = (drawer as IBasePresetDrawer).GetActivePreset(prop, PresetHelper.GetPresetAsset((drawer as PresetDrawer).presetFileName));
 					if (activePreset != null)
 						activePreset.ApplyToDefaultMaterial(material);
 				}

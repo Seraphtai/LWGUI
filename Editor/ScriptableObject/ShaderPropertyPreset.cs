@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LWGUI.Timeline;
 using UnityEngine;
 using UnityEditor;
 using Object = UnityEngine.Object;
@@ -167,24 +168,28 @@ namespace LWGUI
 					material.renderQueue = renderQueue;
 			}
 
-			public void ApplyToEditingMaterial(Object[] materials, PerMaterialData perMaterialData)
+			public void ApplyToEditingMaterial(MaterialEditor editor, PerMaterialData perMaterialData)
 			{
-				for (int i = 0; i < materials.Length; i++)
+				for (int i = 0; i < editor.targets.Length; i++)
 				{
-					var material = materials[i] as Material;
+					var material = editor.targets[i] as Material;
 					foreach (var propertyValue in propertyValues)
 						propertyValue.Apply(material, false, i == 0 ? perMaterialData : null);
 					foreach (var enabledKeyword in enabledKeywords)
+					{
 						material.EnableKeyword(enabledKeyword);
+					}
 					foreach (var disabledKeyword in disabledKeywords)
+					{
 						material.DisableKeyword(disabledKeyword);
+					}
 
 					if (renderQueue >= 0)
 						material.renderQueue = renderQueue;
 				}
 				
-				Helper.SetShaderPassEnabled(materials, enabledPasses.Select(s => s.ToUpper()).ToArray(), true);
-				Helper.SetShaderPassEnabled(materials, disabledPasses.Select(s => s.ToUpper()).ToArray(), false);
+				Helper.SetShaderPassEnabled(editor.targets, enabledPasses.Select(s => s.ToUpper()).ToArray(), true);
+				Helper.SetShaderPassEnabled(editor.targets, disabledPasses.Select(s => s.ToUpper()).ToArray(), false);
 			}
 
 			public void ApplyKeywordsAndPassesToMaterials(Object[] materials)
@@ -255,8 +260,30 @@ namespace LWGUI
 		}
 
 
-		public List<Preset> presets;
+		[SerializeField]
+		private List<Preset> presets;
 
+		public List<Preset> GetPresets() => presets;
+
+		public int GetPresetCount() => presets?.Count ?? 0;
+
+		public Preset GetPreset(int index)
+		{
+			if (presets == null)
+				return null;
+
+			if (index < presets.Count)
+			{
+				return presets[index];
+			}
+			else
+			{
+				Debug.LogError($"LWGUI: Index ({ index }) is out of range when accessing PresetFile: { name }");
+				return null;
+			}
+		}
+
+		public Preset GetPreset(float index) => GetPreset((int)index);
 		
 		private void OnValidate()
 		{

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using LWGUI.LwguiGradientEditor;
 using LWGUI.Runtime.LwguiGradient;
+using LWGUI.Timeline;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -107,8 +108,10 @@ namespace LWGUI
 			if (Helper.EndChangeCheck(metaDatas, prop))
 			{
 				prop.floatValue = toggleResult ? 1.0f : 0.0f;
-				Helper.SetShaderKeyWord(editor.targets, Helper.GetKeyWord(_keyword, prop.name), toggleResult);
-				PresetHelper.GetPresetFile(_presetFileName)?.presets[(int)prop.floatValue].ApplyToEditingMaterial(prop.targets, metaDatas.perMaterialData);
+				var keyword = Helper.GetKeywordName(_keyword, prop.name);
+				Helper.SetShaderKeywordEnabled(editor.targets, keyword, toggleResult);
+				PresetHelper.GetPresetAsset(_presetFileName)?.GetPreset(prop.floatValue)?.ApplyToEditingMaterial(editor, metaDatas.perMaterialData);
+				TimelineHelper.SetKeywordToggleToTimeline(prop, editor, keyword);
 			}
 			EditorGUI.showMixedValue = showMixedValue;
 		}
@@ -125,7 +128,7 @@ namespace LWGUI
 			base.Apply(prop);
 			if (!prop.hasMixedValue)
 			{
-				Helper.SetShaderKeyWord(prop.targets, Helper.GetKeyWord(_keyword, prop.name), prop.floatValue > 0f);
+				Helper.SetShaderKeywordEnabled(prop.targets, Helper.GetKeywordName(_keyword, prop.name), prop.floatValue > 0f);
 				PresetDrawer.ApplyPreset(_presetFileName, prop);
 			}
 		}
@@ -238,12 +241,13 @@ namespace LWGUI
 			EditorGUI.BeginChangeCheck();
 			EditorGUI.showMixedValue = prop.hasMixedValue;
 			var value = EditorGUI.Toggle(position, label, prop.floatValue > 0.0f);
-			string k = Helper.GetKeyWord(_keyWord, prop.name);
 			if (Helper.EndChangeCheck(metaDatas, prop))
 			{
 				prop.floatValue = value ? 1.0f : 0.0f;
-				Helper.SetShaderKeyWord(editor.targets, k, value);
-				PresetHelper.GetPresetFile(_presetFileName)?.presets[(int)prop.floatValue].ApplyToEditingMaterial(prop.targets, metaDatas.perMaterialData);
+				var keyword = Helper.GetKeywordName(_keyWord, prop.name);
+				Helper.SetShaderKeywordEnabled(editor.targets, keyword, value);
+				PresetHelper.GetPresetAsset(_presetFileName)?.GetPreset(prop.floatValue)?.ApplyToEditingMaterial(editor, metaDatas.perMaterialData);
+				TimelineHelper.SetKeywordToggleToTimeline(prop, editor, keyword);
 			}
 			EditorGUI.showMixedValue = false;
 		}
@@ -253,7 +257,7 @@ namespace LWGUI
 			base.Apply(prop);
 			if (!prop.hasMixedValue)
 			{
-				Helper.SetShaderKeyWord(prop.targets, Helper.GetKeyWord(_keyWord, prop.name), prop.floatValue > 0f);
+				Helper.SetShaderKeywordEnabled(prop.targets, Helper.GetKeywordName(_keyWord, prop.name), prop.floatValue > 0f);
 				PresetDrawer.ApplyPreset(_presetFileName, prop);
 			}
 		}
@@ -560,7 +564,7 @@ namespace LWGUI
 			if (Helper.EndChangeCheck(metaDatas, prop))
 			{
 				prop.floatValue = _values[newIndex];
-				Helper.SetShaderKeyWord(editor.targets, keyWords, newIndex);
+				Helper.SelectShaderKeyword(editor.targets, keyWords, newIndex);
 			}
 		}
 
@@ -569,7 +573,7 @@ namespace LWGUI
 			base.Apply(prop);
 			if (!prop.hasMixedValue)
 			{
-				Helper.SetShaderKeyWord(prop.targets, GetKeywords(prop), (int)prop.floatValue);
+				Helper.SelectShaderKeyword(prop.targets, GetKeywords(prop), (int)prop.floatValue);
 			}
 		}
 	}
@@ -1163,29 +1167,29 @@ namespace LWGUI
 
 		public static void SetPresetAssetToStaticData(PropertyStaticData inoutPropertyStaticData, string presetFileName)
 		{
-			inoutPropertyStaticData.propertyPresetAsset = PresetHelper.GetPresetFile(presetFileName);
+			inoutPropertyStaticData.propertyPresetAsset = PresetHelper.GetPresetAsset(presetFileName);
 		}
 
 		public static ShaderPropertyPreset.Preset GetActivePresetFromFloatProperty(MaterialProperty inProp, ShaderPropertyPreset shaderPropertyPreset)
 		{
 			ShaderPropertyPreset.Preset preset = null;
 			var index = (int)inProp.floatValue;
-			if (shaderPropertyPreset && index >= 0 && index < shaderPropertyPreset.presets.Count)
+			if (shaderPropertyPreset && index >= 0 && index < shaderPropertyPreset.GetPresetCount())
 			{
-				preset = shaderPropertyPreset.presets[index];
+				preset = shaderPropertyPreset.GetPreset(index);
 			}
 			return preset;
 		}
 
 		public static void ApplyPreset(string presetFileName, MaterialProperty prop)
 		{
-			var presetFile = PresetHelper.GetPresetFile(presetFileName);
+			var presetFile = PresetHelper.GetPresetAsset(presetFileName);
 			if (presetFile != null
-			    && prop.floatValue < presetFile.presets.Count
+			    && prop.floatValue < presetFile.GetPresetCount()
 			    && ShowIfDecorator.GetShowIfResultToFilterDrawerApplying(prop)
 			   )
 			{
-				presetFile.presets[(int)prop.floatValue].ApplyKeywordsAndPassesToMaterials(prop.targets);
+				presetFile.GetPreset(prop.floatValue)?.ApplyKeywordsAndPassesToMaterials(prop.targets);
 			}
 		}
 
@@ -1202,8 +1206,8 @@ namespace LWGUI
 			var index = (int)inDefaultProp.floatValue;
 			var propertyPreset = inPerShaderData.propStaticDatas[inProp.name].propertyPresetAsset;
 
-			if (propertyPreset && index < propertyPreset.presets.Count && index >= 0)
-				inoutPerMaterialData.propDynamicDatas[inProp.name].defaultValueDescription = propertyPreset.presets[index].presetName;
+			if (propertyPreset && index < propertyPreset.GetPresetCount() && index >= 0)
+				inoutPerMaterialData.propDynamicDatas[inProp.name].defaultValueDescription = propertyPreset.GetPreset(index).presetName;
 		}
 
 		public ShaderPropertyPreset.Preset GetActivePreset(MaterialProperty inProp, ShaderPropertyPreset shaderPropertyPreset) =>
@@ -1217,8 +1221,8 @@ namespace LWGUI
 			var rect = position;
 
 			int index = (int)Mathf.Max(0, prop.floatValue);
-			var presetFile = PresetHelper.GetPresetFile(presetFileName);
-			if (presetFile == null || presetFile.presets.Count == 0)
+			var presetFile = PresetHelper.GetPresetAsset(presetFileName);
+			if (presetFile == null || presetFile.GetPresetCount() == 0)
 			{
 				var c = GUI.color;
 				GUI.color = Color.red;
@@ -1228,9 +1232,9 @@ namespace LWGUI
 				return;
 			}
 
-			if (index < presetFile.presets.Count)
+			if (index < presetFile.GetPresetCount())
 			{
-				var presetNames = presetFile.presets.Select((inPreset) => new GUIContent(inPreset.presetName)).ToArray();
+				var presetNames = presetFile.GetPresets().Select((inPreset) => new GUIContent(inPreset.presetName)).ToArray();
 				if (EditorGUI.showMixedValue)
 					index = -1;
 				else
@@ -1239,7 +1243,7 @@ namespace LWGUI
 				if (Helper.EndChangeCheck(metaDatas, prop))
 				{
 					prop.floatValue = newIndex;
-					presetFile.presets[newIndex].ApplyToEditingMaterial(prop.targets, metaDatas.perMaterialData);
+					presetFile.GetPreset(newIndex).ApplyToEditingMaterial(editor, metaDatas.perMaterialData);
 				}
 				EditorGUI.showMixedValue = false;
 			}

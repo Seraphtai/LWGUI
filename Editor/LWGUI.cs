@@ -1,4 +1,5 @@
 ﻿// Copyright (c) Jason Ma
+
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -197,20 +198,22 @@ namespace LWGUI
 			OnValidate(metaDatas?.GetMaterialEditor()?.targets);
 		}
 		
-		// Called after edit or undo
-		public override void ValidateMaterial(Material material)
-		{
-			base.ValidateMaterial(material);
-			// Undo
-			if (metaDatas == null)
-			{
-				OnValidate(new Object[] { material });
-			}
-			// Edit
-			else
-			{
-				OnValidate(metaDatas);
-			}
-		}
+		// Called after Edit/Undo/MaterialEditor.GetMaterialProperties()
+		// BUG: When modifying the material in Timeline in Unity 2022, this function cannot correctly obtain the modified value, so it is not used for the time being.
+// 		public override void ValidateMaterial(Material material)
+// 		{
+// 			base.ValidateMaterial(material);
+// Debug.Log($"ValidateMaterial: _TestToggle = {material.GetFloat("_TestToggle")}");
+// 			// Undo
+// 			if (metaDatas == null)
+// 			{
+// 				OnValidate(new Object[] { material });
+// 			}
+// 			// Edit
+// 			else
+// 			{
+// 				OnValidate(metaDatas);
+// 			}
+// 		}
 	}
 } //namespace LWGUI

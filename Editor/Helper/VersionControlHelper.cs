@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace LWGUI
 {
-	public class VersionControlHelper
+	public static class VersionControlHelper
 	{
 		public static bool isVCEnabled => Provider.enabled && Provider.isActive;
 
@@ -98,6 +98,26 @@ namespace LWGUI
 			}
 
 			return true;
+		}
+
+		public static bool IsWriteable(UnityEngine.Object obj)
+		{
+			if (!AssetDatabase.Contains(obj))
+				return true;
+
+			bool isWriteable = true;
+			
+			var projectRelativedPath = AssetDatabase.GetAssetPath(obj);
+
+			if (isVCEnabled)
+			{
+				var vcAsset = Provider.GetAssetByPath(projectRelativedPath);
+				if (isWriteable &= vcAsset != null)
+				{
+					isWriteable &= Provider.IsOpenForEdit(vcAsset);
+				}
+			}
+			return isWriteable;
 		}
 	}
 }

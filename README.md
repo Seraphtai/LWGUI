@@ -14,11 +14,13 @@ Having been validated through numerous large-scale commercial projects, employin
 
 
 
-| ![image-20240716183800118](./README_CN.assets/image-20240716183800118.png)        | ![image-20240716184045776](./README_CN.assets/image-20240716184045776.png) |
-|-----------------------------------------------------------------------------------| ------------------------------------------------------------ |
+| ![image-20240716183800118](./README_CN.assets/image-20240716183800118.png) | ![image-20240716184045776](./README_CN.assets/image-20240716184045776.png) |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
 | NEW: A more powerful Gradient editor than UE, with support for both Shader and C# | NEW: Insert images directly into the ShaderGUI to support the display of complex documents without having to jump to the browser |
-| ![image-20220926025611208](./README_CN.assets/image-20220926025611208.png)        | ![image-20230821205439889](./README_CN.assets/image-20230821205439889.png) |
-| The search bar can also filter for properties that have been modified             | Right-click to paste the attribute value by type                                       |
+| ![image-20250314160119094](./README_CN.assets/image-20250314160119094.png) |                                                              |
+| **NEW: When recording material parameter animations in Timeline, automatically capture changes to Toggle's Keywords to enable switching material Keywords at runtime.** |                                                              |
+| ![image-20220926025611208](./README_CN.assets/image-20220926025611208.png) | ![image-20230821205439889](./README_CN.assets/image-20230821205439889.png) |
+| The search bar can also filter for properties that have been modified | Right-click to paste the attribute value by type             |
 
 
 
@@ -750,6 +752,14 @@ Example:
 ![image-20231023010204399](./README_CN.assets/image-20231023010204399.png)
 
 
+
+### LWGUI Timeline Tracks
+
+#### MaterialKeywordToggleTrack
+
+When recording material parameter animation, Keyword changes are automatically captured and the track is added to the Timeline Asset. The Keyword state is set according to the float value during runtime.
+
+Supports Toggle-type Drawer with Keyword.
 
 
 
