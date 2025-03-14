@@ -188,6 +188,7 @@ namespace LWGUI
 
 		public static void OnValidate(Object[] materials)
 		{
+			VersionControlHelper.Checkout(materials);
 			UnityEditorExtension.ApplyMaterialPropertyAndDecoratorDrawers(materials);
 			MetaDataHelper.ForceUpdateMaterialsMetadataCache(materials);
 		}

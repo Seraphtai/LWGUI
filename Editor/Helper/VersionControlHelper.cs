@@ -100,23 +100,34 @@ namespace LWGUI
 			return true;
 		}
 
-		public static bool IsWriteable(UnityEngine.Object obj)
+		public static bool IsWriteable(UnityEngine.Object obj) => IsWriteable(new[] { obj });
+
+		public static bool IsWriteable(UnityEngine.Object[] objs)
 		{
-			if (!AssetDatabase.Contains(obj))
-				return true;
+			if (objs == null)
+				return false;
 
 			bool isWriteable = true;
 			
-			var projectRelativedPath = AssetDatabase.GetAssetPath(obj);
-
 			if (isVCEnabled)
 			{
-				var vcAsset = Provider.GetAssetByPath(projectRelativedPath);
-				if (isWriteable &= vcAsset != null)
+				foreach (var obj in objs)
 				{
-					isWriteable &= Provider.IsOpenForEdit(vcAsset);
+					if (!AssetDatabase.Contains(obj))
+						continue;
+
+					var projectRelativedPath = AssetDatabase.GetAssetPath(obj);
+					var vcAsset = Provider.GetAssetByPath(projectRelativedPath);
+					if (isWriteable &= vcAsset != null)
+					{
+						isWriteable &= Provider.IsOpenForEdit(vcAsset);
+					}
+					
+					if (!isWriteable)
+						break;
 				}
 			}
+			
 			return isWriteable;
 		}
 	}

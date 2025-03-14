@@ -126,7 +126,7 @@ namespace LWGUI
 		public override void Apply(MaterialProperty prop)
 		{
 			base.Apply(prop);
-			if (!prop.hasMixedValue)
+			if (!prop.hasMixedValue && VersionControlHelper.IsWriteable(prop.targets))
 			{
 				Helper.SetShaderKeywordEnabled(prop.targets, Helper.GetKeywordName(_keyword, prop.name), prop.floatValue > 0f);
 				PresetDrawer.ApplyPreset(_presetFileName, prop);
@@ -255,7 +255,7 @@ namespace LWGUI
 		public override void Apply(MaterialProperty prop)
 		{
 			base.Apply(prop);
-			if (!prop.hasMixedValue)
+			if (!prop.hasMixedValue && VersionControlHelper.IsWriteable(prop.targets))
 			{
 				Helper.SetShaderKeywordEnabled(prop.targets, Helper.GetKeywordName(_keyWord, prop.name), prop.floatValue > 0f);
 				PresetDrawer.ApplyPreset(_presetFileName, prop);
@@ -571,7 +571,7 @@ namespace LWGUI
 		public override void Apply(MaterialProperty prop)
 		{
 			base.Apply(prop);
-			if (!prop.hasMixedValue)
+			if (!prop.hasMixedValue && VersionControlHelper.IsWriteable(prop.targets))
 			{
 				Helper.SelectShaderKeyword(prop.targets, GetKeywords(prop), (int)prop.floatValue);
 			}
@@ -1262,7 +1262,7 @@ namespace LWGUI
 		public override void Apply(MaterialProperty prop)
 		{
 			base.Apply(prop);
-			if (!prop.hasMixedValue)
+			if (!prop.hasMixedValue && VersionControlHelper.IsWriteable(prop.targets))
 			{
 				ApplyPreset(presetFileName, prop);
 			}
@@ -1601,14 +1601,14 @@ namespace LWGUI
 
 		public override void DrawProp(Rect position, MaterialProperty prop, GUIContent label, MaterialEditor editor)
 		{
-			if (!prop.hasMixedValue)
+			if (!prop.hasMixedValue && VersionControlHelper.IsWriteable(prop.targets))
 				Helper.SetShaderPassEnabled(prop.targets, _lightModeNames, prop.floatValue > 0);
 		}
 
 		public override void Apply(MaterialProperty prop)
 		{
 			base.Apply(prop);
-			if (!prop.hasMixedValue)
+			if (!prop.hasMixedValue && VersionControlHelper.IsWriteable(prop.targets))
 			{
 				if (ShowIfDecorator.GetShowIfResultToFilterDrawerApplying(prop))
 					Helper.SetShaderPassEnabled(prop.targets, _lightModeNames, prop.floatValue > 0);
