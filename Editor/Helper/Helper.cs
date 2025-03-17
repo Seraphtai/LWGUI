@@ -14,23 +14,31 @@ namespace LWGUI
 	/// <summary>
 	/// Misc Function
 	/// </summary>
-	public class Helper
+	public static class Helper
 	{
-		#region Engine Misc
+		#region Math
 
+		public const double Float_Epsilon = 1e-10;
+
+		public static bool Approximately(float a, float b) => Mathf.Abs(a - b) < Float_Epsilon;
+		
 		public static bool PropertyValueEquals(MaterialProperty prop1, MaterialProperty prop2)
 		{
 			if (prop1.textureValue == prop2.textureValue
 			 && prop1.vectorValue == prop2.vectorValue
 			 && prop1.colorValue == prop2.colorValue
-			 && prop1.floatValue == prop2.floatValue
+			 && Approximately(prop1.floatValue, prop2.floatValue)
 			 && prop1.intValue == prop2.intValue
 			   )
 				return true;
 			else
 				return false;
 		}
+		
+		#endregion
 
+		#region Engine Misc
+		
 		public static bool IsPropertyHideInInspector(MaterialProperty prop)
 		{
 			return (prop.flags & MaterialProperty.PropFlags.HideInInspector) != 0;

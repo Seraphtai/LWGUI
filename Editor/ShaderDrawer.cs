@@ -103,7 +103,7 @@ namespace LWGUI
 			EditorGUI.showMixedValue = prop.hasMixedValue;
 			EditorGUI.BeginChangeCheck();
 
-			bool toggleResult = Helper.DrawFoldout(position, ref metaDatas.GetPropStaticData(prop).isExpanding, prop.floatValue > 0, _defaultToggleDisplayed, label);
+			bool toggleResult = Helper.DrawFoldout(position, ref metaDatas.GetPropStaticData(prop).isExpanding, !Helper.Approximately(prop.floatValue, 0), _defaultToggleDisplayed, label);
 
 			if (Helper.EndChangeCheck(metaDatas, prop))
 			{
@@ -240,7 +240,7 @@ namespace LWGUI
 		{
 			EditorGUI.BeginChangeCheck();
 			EditorGUI.showMixedValue = prop.hasMixedValue;
-			var value = EditorGUI.Toggle(position, label, prop.floatValue > 0.0f);
+			var value = EditorGUI.Toggle(position, label, !Helper.Approximately(prop.floatValue, 0));
 			if (Helper.EndChangeCheck(metaDatas, prop))
 			{
 				prop.floatValue = value ? 1.0f : 0.0f;

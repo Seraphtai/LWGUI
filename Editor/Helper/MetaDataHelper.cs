@@ -77,7 +77,7 @@ namespace LWGUI
 
 		private static Dictionary<Shader, PerShaderCache> _perShaderCachesDic = new Dictionary<Shader, PerShaderCache>();
 
-		public static LWGUIMetaDatas BuildMetaDatas(Shader shader, Material material, MaterialEditor materialEditor, LWGUI lwgui, MaterialProperty[] props)
+		public static LWGUIMetaDatas BuildMetaDatas(Shader shader, Material material, MaterialEditor editor, LWGUI lwgui, MaterialProperty[] props)
 		{
 			var outDatas = new LWGUIMetaDatas();
 
@@ -90,18 +90,18 @@ namespace LWGUI
 
 			// perMaterialData
 			if (!perShaderCache.perMaterialDataCachesDic.ContainsKey(material))
-				perShaderCache.perMaterialDataCachesDic.Add(material, new PerMaterialCache() { perMaterialData = new PerMaterialData(shader, material, props, outDatas.perShaderData) });
+				perShaderCache.perMaterialDataCachesDic.Add(material, new PerMaterialCache() { perMaterialData = new PerMaterialData(shader, material, editor, props, outDatas.perShaderData) });
 
 			var perMaterialCache = perShaderCache.perMaterialDataCachesDic[material];
 			outDatas.perMaterialData = perMaterialCache.perMaterialData;
-			outDatas.perMaterialData.Update(shader, material, props, outDatas.perShaderData);
+			outDatas.perMaterialData.Update(shader, material, editor, props, outDatas.perShaderData);
 
 			// perInspectorData
 			if (!perMaterialCache.perInspectorDataCachesDic.ContainsKey(lwgui))
 				perMaterialCache.perInspectorDataCachesDic.Add(lwgui, new PerInspectorData());
 
 			outDatas.perInspectorData = perMaterialCache.perInspectorDataCachesDic[lwgui];
-			outDatas.perInspectorData.Update(materialEditor);
+			outDatas.perInspectorData.Update(editor);
 
 			return outDatas;
 		}

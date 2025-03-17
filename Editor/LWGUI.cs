@@ -23,13 +23,13 @@ namespace LWGUI
 		/// <summary>
 		/// Called every frame when the content is updated, such as the mouse moving in the material editor
 		/// </summary>
-		public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props)
+		public override void OnGUI(MaterialEditor editor, MaterialProperty[] props)
 		{
 			//-----------------------------------------------------------------------------
 			// Init Datas
-			var material = materialEditor.target as Material;
+			var material = editor.target as Material;
 			var shader = material.shader;
-			this.metaDatas = MetaDataHelper.BuildMetaDatas(shader, material, materialEditor, this, props);
+			this.metaDatas = MetaDataHelper.BuildMetaDatas(shader, material, editor, this, props);
 
 
 			//-----------------------------------------------------------------------------
@@ -56,7 +56,7 @@ namespace LWGUI
 			// Draw Properties
 			{
 				// move fields left to make rect for Revert Button
-				materialEditor.SetDefaultGUIWidths();
+				editor.SetDefaultGUIWidths();
 				RevertableHelper.InitRevertableGUIWidths();
 
 				// start drawing properties
@@ -105,7 +105,7 @@ namespace LWGUI
 					EditorGUI.indentLevel = indentLevel;
 				}
 
-				materialEditor.SetDefaultGUIWidths();
+				editor.SetDefaultGUIWidths();
 			}
 
 
@@ -117,10 +117,10 @@ namespace LWGUI
 
 			// Render settings
 			if (SupportedRenderingFeatures.active.editableMaterialRenderQueue)
-				materialEditor.RenderQueueField();
-			materialEditor.EnableInstancingField();
-			materialEditor.LightmapEmissionProperty();
-			materialEditor.DoubleSidedGIField();
+				editor.RenderQueueField();
+			editor.EnableInstancingField();
+			editor.LightmapEmissionProperty();
+			editor.DoubleSidedGIField();
 
 			// Custom Footer
 			if (onDrawCustomFooter != null)
@@ -200,21 +200,22 @@ namespace LWGUI
 		}
 		
 		// Called after Edit/Undo/MaterialEditor.GetMaterialProperties()
-		// BUG: When modifying the material in Timeline in Unity 2022, this function cannot correctly obtain the modified value, so it is not used for the time being.
-// 		public override void ValidateMaterial(Material material)
-// 		{
-// 			base.ValidateMaterial(material);
-// Debug.Log($"ValidateMaterial: _TestToggle = {material.GetFloat("_TestToggle")}");
-// 			// Undo
-// 			if (metaDatas == null)
-// 			{
-// 				OnValidate(new Object[] { material });
-// 			}
-// 			// Edit
-// 			else
-// 			{
-// 				OnValidate(metaDatas);
-// 			}
-// 		}
+		public override void ValidateMaterial(Material material)
+		{
+			base.ValidateMaterial(material);
+
+			// Undo/Edit in Timeline
+			// Note: When modifying the material in Timeline in Unity 2022, this function cannot correctly obtain the modified value.
+			if (metaDatas == null)
+			{
+				// OnValidate(new Object[] { material });
+				MetaDataHelper.ForceUpdateMaterialMetadataCache(material);
+			}
+			// Edit
+			else
+			{
+				OnValidate(metaDatas);
+			}
+		}
 	}
-} //namespace LWGUI
+}
