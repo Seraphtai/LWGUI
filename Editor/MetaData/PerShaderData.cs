@@ -31,6 +31,9 @@ namespace LWGUI
 		public bool IsDefaultDisplayMode() { return !(showAllAdvancedProperties || showAllHiddenProperties || showOnlyModifiedProperties || showOnlyModifiedGroups); }
 	}
 
+	/// <summary>
+	/// The static metadata of Material Property is only related to Shader.
+	/// </summary>
 	public partial class PropertyStaticData
 	{
 		public string name        = string.Empty;
@@ -55,7 +58,7 @@ namespace LWGUI
 		public string                           conditionalDisplayKeyword = string.Empty;                           // [Group(groupName_conditionalDisplayKeyword)]
 
 		// Drawers
-		public IBasePresetDrawer presetDrawer = null;
+		public IPresetDrawer presetDrawer = null;
 		public List<IBaseDrawer> baseDrawers  = null;
 
 		// Metadata
@@ -109,8 +112,8 @@ namespace LWGUI
 				{
 					var drawer = ReflectionHelper.GetPropertyDrawer(shader, prop, out var decoratorDrawers);
 
-					if (drawer is IBasePresetDrawer)
-						propStaticData.presetDrawer = drawer as IBasePresetDrawer;
+					if (drawer is IPresetDrawer)
+						propStaticData.presetDrawer = drawer as IPresetDrawer;
 
 					var baseDrawer = drawer as IBaseDrawer;
 					if (baseDrawer != null)

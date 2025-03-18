@@ -8,25 +8,25 @@
 
 已经过诸多大型商业项目的验证, 使用简洁的Material Property Drawer语法实现功能强大的Shader GUI, 节省大量开发时间, 易于使用和扩展, 有效提升美术人员的使用体验.
 
-![809c4a1c-ce80-48b1-b415-7e8d4bea716e](README_CN.assets/809c4a1c-ce80-48b1-b415-7e8d4bea716e-16616214059841.png)
+![809c4a1c-ce80-48b1-b415-7e8d4bea716e](assets/809c4a1c-ce80-48b1-b415-7e8d4bea716e-16616214059841.png)
 
-![LWGUI](README_CN.assets/LWGUI.png)
+![LWGUI](assets/LWGUI.png)
 
 
 
-| ![image-20240716183800118](./README_CN.assets/image-20240716183800118.png) | ![image-20240716184045776](./README_CN.assets/image-20240716184045776.png) |
+| ![image-20240716183800118](./assets/image-20240716183800118.png) | ![image-20240716184045776](./assets/image-20240716184045776.png) |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | 比UE更加强大的Gradient编辑器, 同时支持Shader和C#             | 直接在ShaderGUI中插入图片, 无需跳转浏览器即可支持复杂文档的显示 |
-| ![image-20250314160119094](./README_CN.assets/image-20250314160119094.png) |                                                              |
+| ![image-20250314160119094](./assets/image-20250314160119094.png) |                                                              |
 | **NEW: Timeline中录制材质参数动画时, 自动捕获Toggle的Keyword更改, 以便运行时切换材质Keyword** |                                                              |
-| ![image-20220926025611208](./README_CN.assets/image-20220926025611208.png) | ![image-20230821205439889](./README_CN.assets/image-20230821205439889.png) |
+| ![image-20220926025611208](./assets/image-20220926025611208.png) | ![image-20230821205439889](./assets/image-20230821205439889.png) |
 | 搜索栏亦可筛选已修改的属性                                   | 右键以按类型粘贴属性值                                       |
 
 
 
 | With your sponsorship, I will update more actively. | 有你的赞助我会更加积极地更新                                 |
 | --------------------------------------------------- | ------------------------------------------------------------ |
-| [paypal.me/JasonMa0012](paypal.me/JasonMa0012)      | ![723ddce6-fb86-48ff-9683-a12cf6cff7a0](./README_CN.assets/723ddce6-fb86-48ff-9683-a12cf6cff7a0.jpg) |
+| [paypal.me/JasonMa0012](paypal.me/JasonMa0012)      | ![723ddce6-fb86-48ff-9683-a12cf6cff7a0](./assets/723ddce6-fb86-48ff-9683-a12cf6cff7a0.jpg) |
 
 
 <!--ts-->
@@ -75,7 +75,7 @@
       * [Custom Header and Footer](#custom-header-and-footer)
       * [Custom Drawer](#custom-drawer)
    * [Contribution](#contribution)
-<!--te-->
+   <!--te-->
 
 
 ## Installation
@@ -91,9 +91,7 @@
    - 你也可以选择手动从Github下载Zip，然后从`Package Manager > Add package from disk`添加Local Package
    - **对于Unity 2017, 请直接将Zip解压到Assets目录**
 
-## Usage
-
-### Getting Started
+## Getting Started
 
 1. 新建一个Shader或使用现有的Shader
 2. 在代码编辑器中打开Shader
@@ -104,9 +102,9 @@
    - 每个Property可以有多个Decorator
 
 
-### LWGUI Drawers
+## Basic Drawers
 
-#### Main & Sub
+### Main & Sub
 
 ```c#
 /// Create a Folding Group
@@ -115,7 +113,7 @@
 /// default Folding State: "on" or "off" (Default: off)
 /// default Toggle Displayed: "on" or "off" (Default: on)
 /// preset File Name: "Shader Property Preset" asset name, see Preset() for detail (Default: none)
-/// Target Property Type: FLoat, express Toggle value
+/// Target Property Type: Float/Integer, express Toggle value
 public MainDrawer() : this(String.Empty) { }
 public MainDrawer(string group) : this(group, String.Empty) { }
 public MainDrawer(string group, string keyword) : this(group, keyword, "off") { }
@@ -171,11 +169,15 @@ _enum ("KWEnum", float) = 0
 
 Default result:
 
-![image-20220828003026556](README_CN.assets/image-20220828003026556.png)
+![image-20220828003026556](assets/image-20220828003026556.png)
 
 Then change values:
 
-![image-20220828003129588](README_CN.assets/image-20220828003129588.png)
+![image-20220828003129588](assets/image-20220828003129588.png)
+
+## Extra Drawers
+
+### Numeric
 
 #### SubToggle
 
@@ -184,7 +186,7 @@ Then change values:
 /// group: father group name, support suffix keyword for conditional display (Default: none)
 /// keyword: keyword used for toggle, "_" = ignore, none or "__" = Property Name +  "_ON", always Upper (Default: none)
 /// preset File Name: "Shader Property Preset" asset name, see Preset() for detail (Default: none)
-/// Target Property Type: FLoat
+/// Target Property Type: Float
 public SubToggleDrawer() { }
 public SubToggleDrawer(string group) : this(group, String.Empty, String.Empty) { }
 public SubToggleDrawer(string group, string keyWord) : this(group, keyWord, String.Empty) { }
@@ -243,7 +245,7 @@ Example:
 
 Result:
 
-![image-20220828003810353](README_CN.assets/image-20220828003810353.png)
+![image-20220828003810353](assets/image-20220828003810353.png)
 
 
 
@@ -256,7 +258,7 @@ Result:
 /// n(s): display name
 /// k(s): keyword
 /// v(s): value
-/// Target Property Type: FLoat, express current keyword index
+/// Target Property Type: Float, express current keyword index
 /// </summary>
 public KWEnumDrawer(string n1, string k1)
 public KWEnumDrawer(string n1, string k1, string n2, string k2)
@@ -300,184 +302,6 @@ public SubKeywordEnumDrawer(string group, string kw1, string kw2, string kw3, st
 
 
 
-#### Tex & Color
-
-```c#
-/// Draw a Texture property in single line with a extra property
-/// group: father group name, support suffix keyword for conditional display (Default: none)
-/// extraPropName: extra property name  (Default: none)
-/// Target Property Type: Texture
-/// Extra Property Type: Color, Vector
-public TexDrawer() { }
-public TexDrawer(string group) : this(group, String.Empty) { }
-public TexDrawer(string group, string extraPropName)
-
-```
-
-```c#
-/// Display up to 4 colors in a single line
-/// group: father group name, support suffix keyword for conditional display (Default: none)
-/// color2-4: extra color property name 
-/// Target Property Type: Color
-public ColorDrawer(string group, string color2) : this(group, color2, String.Empty, String.Empty) { }
-public ColorDrawer(string group, string color2, string color3) : this(group, color2, color3, String.Empty) { }
-public ColorDrawer(string group, string color2, string color3, string color4)
-
-```
-
-Example:
-
-```c#
-[Main(Group3, _, on)] _group3 ("Group - Tex and Color Samples", float) = 0
-[Tex(Group3, _color)] _tex_color ("Tex with Color", 2D) = "white" { }
-[HideInInspector] _color (" ", Color) = (1, 0, 0, 1)
-[Tex(Group3, _textureChannelMask1)] _tex_channel ("Tex with Channel", 2D) = "white" { }
-[HideInInspector] _textureChannelMask1(" ", Vector) = (0,0,0,1)
-
-// Display up to 4 colors in a single line
-[Color(Group3, _mColor1, _mColor2, _mColor3)]
-_mColor ("Multi Color", Color) = (1, 1, 1, 1)
-[HideInInspector] _mColor1 (" ", Color) = (1, 0, 0, 1)
-[HideInInspector] _mColor2 (" ", Color) = (0, 1, 0, 1)
-[HideInInspector] [HDR] _mColor3 (" ", Color) = (0, 0, 1, 1)
-
-```
-
-Result:
-
-![image-20220828003507825](README_CN.assets/image-20220828003507825.png)
-
-#### Image
-
-```c#
-/// Draw an image preview.
-/// display name: The path of the image file relative to the Unity project, such as: "Assets/test.png", "Doc/test.png", "../test.png"
-/// group: father group name, support suffix keyword for conditional display (Default: none)
-public ImageDrawer() { }
-public ImageDrawer(string group)
-```
-
-Result:
-
-![image-20240416142736663](./README_CN.assets/image-20240416142736663.png)
-
-#### Channel
-
-```c#
-/// Draw a R/G/B/A drop menu:
-/// 	R = (1, 0, 0, 0)
-/// 	G = (0, 1, 0, 0)
-/// 	B = (0, 0, 1, 0)
-/// 	A = (0, 0, 0, 1)
-/// 	RGB Average = (1f / 3f, 1f / 3f, 1f / 3f, 0)
-/// 	RGB Luminance = (0.2126f, 0.7152f, 0.0722f, 0)
-///		None = (0, 0, 0, 0)
-/// group: father group name, support suffix keyword for conditional display (Default: none)
-/// Target Property Type: Vector, used to dot() with Texture Sample Value 
-public ChannelDrawer() { }
-public ChannelDrawer(string group)
-```
-
-Example:
-
-```c#
-[Title(_, Channel Samples)]
-[Channel(_)]_textureChannelMask("Texture Channel Mask (Default G)", Vector) = (0,1,0,0)
-
-......
-
-float selectedChannelValue = dot(tex2D(_Tex, uv), _textureChannelMask);
-```
-
-
-
-![image-20220822010511978](README_CN.assets/image-20220822010511978.png)
-
-#### Ramp
-
-##### ShaderLab
-
-```c#
-/// Draw an unreal style Ramp Map Editor (Default Ramp Map Resolution: 512 * 2)
-/// NEW: The new LwguiGradient type has both the Gradient and Curve editors, and can be used in C# scripts and runtime, and is intended to replace UnityEngine.Gradient
-/// group: father group name, support suffix keyword for conditional display (Default: none)
-/// defaultFileName: default Ramp Map file name when create a new one (Default: RampMap)
-/// rootPath: the path where ramp is stored, replace '/' with '.' (for example: Assets.Art.Ramps). when selecting ramp, it will also be filtered according to the path (Default: Assets)
-/// colorSpace: switch sRGB / Linear in ramp texture import setting (Default: sRGB)
-/// defaultWidth: default Ramp Width (Default: 512)
-/// viewChannelMask: editable channels. (Default: RGBA)
-/// timeRange: the abscissa display range (1/24/2400), is used to optimize the editing experience when the abscissa is time of day. (Default: 1)
-/// Target Property Type: Texture2D
-public RampDrawer() : this(String.Empty) { }
-public RampDrawer(string group) : this(group, "RampMap") { }
-public RampDrawer(string group, string defaultFileName) : this(group, defaultFileName, DefaultRootPath, 512) { }
-public RampDrawer(string group, string defaultFileName, float defaultWidth) : this(group, defaultFileName, DefaultRootPath, defaultWidth) { }
-public RampDrawer(string group, string defaultFileName, string rootPath, float defaultWidth) : this(group, defaultFileName, rootPath, "sRGB", defaultWidth) { }
-public RampDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, "RGBA") { }
-public RampDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, string viewChannelMask) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, viewChannelMask, 1) { }
-public RampDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, string viewChannelMask, float timeRange)
-```
-
-Example:
-
-```c#
-[Ramp(_, RampMap, Assets.Art, 512)] _Ramp ("Ramp Map", 2D) = "white" { }
-```
-
-Result:
-
-![image-20230625185730363](./README_CN.assets/image-20230625185730363.png)
-
-你**必须手动保存编辑结果**, 如果有未保存的修改, Save按钮将显示黄色.
-
-**在你移动或者复制RampMap的时候, 切记要连同.meta文件一起移动, 否则将无法再次编辑!**
-
-##### C#
-
-Example:
-
-```c#
-public class Test : MonoBehaviour
-{
-    public LwguiGradient lwguiGradientSrgb = new LwguiGradient();
-
-    [LwguiGradientUsage(ColorSpace.Linear, LwguiGradient.ChannelMask.RGB, LwguiGradient.GradientTimeRange.TwentyFourHundred)]
-    public LwguiGradient lwguiGradientLinear = new LwguiGradient();
-}
-```
-
-Result:
-
-![image-20240717104144821](./README_CN.assets/image-20240717104144821.png)![image-20240717104206365](./README_CN.assets/image-20240717104206365.png)
-
-可以使用LwguiGradientUsage() Attribute设置默认的显示设置.
-
-##### Gradient Editor
-
-新的LWGUI Gradient Editor集成了Unity内置的[Gradient Editor](https://docs.unity3d.com/Manual/EditingValueProperties.html)和[Curve Editor](https://docs.unity3d.com/Manual/EditingCurves.html), 实现了比UE的Gradient Editor更加强大的功能. 
-
-![image-20241126110012922](./README_CN.assets/image-20241126110012922.png)
-
-| 编辑器                | 解释                                                         |
-| --------------------- | ------------------------------------------------------------ |
-| Time Range            | 横轴的显示范围, 可以选择0-1 / 0-24 / 0-2400, 当横轴为时间时非常有用. 注意, 只影响显示, 横轴实际存储的值始终为0-1. |
-| Channels              | 显示的通道, 可以单独只显示某些通道.                          |
-| sRGB Preview          | 当Gradient的值为颜色时应该勾选以预览正确的颜色, 否则不需要勾选. 只影响显示, Gradient和Ramp Map存储的值始终为Linear. |
-| Value / R / G / B / A | 用于编辑已选中的Key的Value, 可以同时编辑多个Key的Value.      |
-| Time                  | 用于编辑已选中的Key的Time, 可以同时编辑多个Key的Time. 如果手动输入数字, 必须要**按回车**以结束编辑. |
-| Gradient Editor       | 类似于Unity内置的[Gradient Editor](https://docs.unity3d.com/Manual/EditingValueProperties.html), 但是将Alpha通道分离显示为黑白.<br/>注意, **从Gradient Editor添加Key时会受到最多8个Key的限制**, 从Curve Editor添加Key则数量**不受限制**. Key的数量超过限制不会影响预览和使用. |
-| Curve Editor          | 类似于Unity内置的Curve Editor, 默认显示XY 0-1的范围, 你可以用滚轮缩放或移动显示范围.<br/>如下图所示, 右键菜单中有大量控制曲线形态的功能, 你可以查阅[Unity文档](https://docs.unity3d.com/Manual/EditingCurves.html)以充分利用这些功能. |
-| Presets               | 你可以保存当前LWGUI Gradient为预设, 并随时调用这些预设. 这些预设在本地计算机的不同引擎版本之间通用, 但不会保存到项目中. |
-
-![image-20241126105823397](./README_CN.assets/image-20241126105823397.png)![image-20241126112320151](./README_CN.assets/image-20241126112320151.png)
-
-**已知问题:**
-
-- Unity 2022以下的预览图像在sRGB/Linear颜色空间之间没有区别
-- 在编辑器帧率较低时Ctrl + Z结果可能和预期稍有偏差
-
-
-
 #### Preset
 
 ```c#
@@ -513,19 +337,231 @@ ColorMask [_ColorMask]
 
 Result:
 
-选择的预设内的属性值将成为默认值
+选择的预设内的属性值将成为默认值:
 
-**RenderQueue**是个特殊属性, 需要手动在预设中添加
-
-![image-20221122231655378](README_CN.assets/image-20221122231655378.png)![image-20221122231816714](README_CN.assets/image-20221122231816714.png)
+![image-20221122231655378](assets/image-20221122231655378.png)![image-20221122231816714](assets/image-20221122231816714.png)
 
 ##### Create Preset File
 
-![image-20221122232307362](README_CN.assets/image-20221122232307362.png)
+![image-20221122232307362](assets/image-20221122232307362.png)
 
 ##### Edit Preset
 
-![image-20221122232354623](README_CN.assets/image-20221122232354623.png)![image-20221122232415972](README_CN.assets/image-20221122232415972.png)![image-20221122232425194](README_CN.assets/image-20221122232425194.png)
+![image-20221122232354623](assets/image-20221122232354623.png)![image-20221122232415972](assets/image-20221122232415972.png)![image-20221122232425194](assets/image-20221122232425194.png)
+
+
+
+### Texture
+
+#### Tex
+
+```c#
+/// Draw a Texture property in single line with a extra property
+/// group: father group name, support suffix keyword for conditional display (Default: none)
+/// extraPropName: extra property name  (Default: none)
+/// Target Property Type: Texture
+/// Extra Property Type: Color, Vector
+public TexDrawer() { }
+public TexDrawer(string group) : this(group, String.Empty) { }
+public TexDrawer(string group, string extraPropName)
+
+```
+
+Example:
+
+```c#
+[Main(Group3, _, on)] _group3 ("Group - Tex and Color Samples", float) = 0
+[Tex(Group3, _color)] _tex_color ("Tex with Color", 2D) = "white" { }
+[HideInInspector] _color (" ", Color) = (1, 0, 0, 1)
+[Tex(Group3, _textureChannelMask1)] _tex_channel ("Tex with Channel", 2D) = "white" { }
+[HideInInspector] _textureChannelMask1(" ", Vector) = (0,0,0,1)
+
+// Display up to 4 colors in a single line
+[Color(Group3, _mColor1, _mColor2, _mColor3)]
+_mColor ("Multi Color", Color) = (1, 1, 1, 1)
+[HideInInspector] _mColor1 (" ", Color) = (1, 0, 0, 1)
+[HideInInspector] _mColor2 (" ", Color) = (0, 1, 0, 1)
+[HideInInspector] [HDR] _mColor3 (" ", Color) = (0, 0, 1, 1)
+
+```
+
+Result:
+
+![image-20220828003507825](assets/image-20220828003507825.png)
+
+#### Ramp
+
+##### ShaderLab
+
+```c#
+/// Draw an unreal style Ramp Map Editor (Default Ramp Map Resolution: 512 * 2)
+/// NEW: The new LwguiGradient type has both the Gradient and Curve editors, and can be used in C# scripts and runtime, and is intended to replace UnityEngine.Gradient
+/// group: father group name, support suffix keyword for conditional display (Default: none)
+/// defaultFileName: default Ramp Map file name when create a new one (Default: RampMap)
+/// rootPath: the path where ramp is stored, replace '/' with '.' (for example: Assets.Art.Ramps). when selecting ramp, it will also be filtered according to the path (Default: Assets)
+/// colorSpace: switch sRGB / Linear in ramp texture import setting (Default: sRGB)
+/// defaultWidth: default Ramp Width (Default: 512)
+/// viewChannelMask: editable channels. (Default: RGBA)
+/// timeRange: the abscissa display range (1/24/2400), is used to optimize the editing experience when the abscissa is time of day. (Default: 1)
+/// Target Property Type: Texture2D
+public RampDrawer() : this(String.Empty) { }
+public RampDrawer(string group) : this(group, "RampMap") { }
+public RampDrawer(string group, string defaultFileName) : this(group, defaultFileName, DefaultRootPath, 512) { }
+public RampDrawer(string group, string defaultFileName, float defaultWidth) : this(group, defaultFileName, DefaultRootPath, defaultWidth) { }
+public RampDrawer(string group, string defaultFileName, string rootPath, float defaultWidth) : this(group, defaultFileName, rootPath, "sRGB", defaultWidth) { }
+public RampDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, "RGBA") { }
+public RampDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, string viewChannelMask) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, viewChannelMask, 1) { }
+public RampDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, string viewChannelMask, float timeRange)
+```
+
+Example:
+
+```c#
+[Ramp(_, RampMap, Assets.Art, 512)] _Ramp ("Ramp Map", 2D) = "white" { }
+```
+
+Result:
+
+![image-20230625185730363](./assets/image-20230625185730363.png)
+
+你**必须手动保存编辑结果**, 如果有未保存的修改, Save按钮将显示黄色.
+
+**在你移动或者复制RampMap的时候, 切记要连同.meta文件一起移动, 否则将无法再次编辑!**
+
+##### C#
+
+Example:
+
+```c#
+public class Test : MonoBehaviour
+{
+    public LwguiGradient lwguiGradientSrgb = new LwguiGradient();
+
+    [LwguiGradientUsage(ColorSpace.Linear, LwguiGradient.ChannelMask.RGB, LwguiGradient.GradientTimeRange.TwentyFourHundred)]
+    public LwguiGradient lwguiGradientLinear = new LwguiGradient();
+}
+```
+
+Result:
+
+![image-20240717104144821](./assets/image-20240717104144821.png)![image-20240717104206365](./assets/image-20240717104206365.png)
+
+可以使用LwguiGradientUsage() Attribute设置默认的显示设置.
+
+##### Gradient Editor
+
+新的LWGUI Gradient Editor集成了Unity内置的[Gradient Editor](https://docs.unity3d.com/Manual/EditingValueProperties.html)和[Curve Editor](https://docs.unity3d.com/Manual/EditingCurves.html), 实现了比UE的Gradient Editor更加强大的功能. 
+
+![image-20241126110012922](./assets/image-20241126110012922.png)
+
+| 编辑器                | 解释                                                         |
+| --------------------- | ------------------------------------------------------------ |
+| Time Range            | 横轴的显示范围, 可以选择0-1 / 0-24 / 0-2400, 当横轴为时间时非常有用. 注意, 只影响显示, 横轴实际存储的值始终为0-1. |
+| Channels              | 显示的通道, 可以单独只显示某些通道.                          |
+| sRGB Preview          | 当Gradient的值为颜色时应该勾选以预览正确的颜色, 否则不需要勾选. 只影响显示, Gradient和Ramp Map存储的值始终为Linear. |
+| Value / R / G / B / A | 用于编辑已选中的Key的Value, 可以同时编辑多个Key的Value.      |
+| Time                  | 用于编辑已选中的Key的Time, 可以同时编辑多个Key的Time. 如果手动输入数字, 必须要**按回车**以结束编辑. |
+| Gradient Editor       | 类似于Unity内置的[Gradient Editor](https://docs.unity3d.com/Manual/EditingValueProperties.html), 但是将Alpha通道分离显示为黑白.<br/>注意, **从Gradient Editor添加Key时会受到最多8个Key的限制**, 从Curve Editor添加Key则数量**不受限制**. Key的数量超过限制不会影响预览和使用. |
+| Curve Editor          | 类似于Unity内置的Curve Editor, 默认显示XY 0-1的范围, 你可以用滚轮缩放或移动显示范围.<br/>如下图所示, 右键菜单中有大量控制曲线形态的功能, 你可以查阅[Unity文档](https://docs.unity3d.com/Manual/EditingCurves.html)以充分利用这些功能. |
+| Presets               | 你可以保存当前LWGUI Gradient为预设, 并随时调用这些预设. 这些预设在本地计算机的不同引擎版本之间通用, 但不会保存到项目中. |
+
+![image-20241126105823397](./assets/image-20241126105823397.png)![image-20241126112320151](./assets/image-20241126112320151.png)
+
+**已知问题:**
+
+- Unity 2022以下的预览图像在sRGB/Linear颜色空间之间没有区别
+- 在编辑器帧率较低时Ctrl + Z结果可能和预期稍有偏差
+
+
+
+#### Image
+
+```c#
+/// Draw an image preview.
+/// display name: The path of the image file relative to the Unity project, such as: "Assets/test.png", "Doc/test.png", "../test.png"
+/// group: father group name, support suffix keyword for conditional display (Default: none)
+public ImageDrawer() { }
+public ImageDrawer(string group)
+```
+
+Result:
+
+![image-20240416142736663](./assets/image-20240416142736663.png)
+
+### Vector
+
+#### Color
+
+```c#
+/// Display up to 4 colors in a single line
+/// group: father group name, support suffix keyword for conditional display (Default: none)
+/// color2-4: extra color property name 
+/// Target Property Type: Color
+public ColorDrawer(string group, string color2) : this(group, color2, String.Empty, String.Empty) { }
+public ColorDrawer(string group, string color2, string color3) : this(group, color2, color3, String.Empty) { }
+public ColorDrawer(string group, string color2, string color3, string color4)
+
+```
+
+Example:
+
+```c#
+[Main(Group3, _, on)] _group3 ("Group - Tex and Color Samples", float) = 0
+[Tex(Group3, _color)] _tex_color ("Tex with Color", 2D) = "white" { }
+[HideInInspector] _color (" ", Color) = (1, 0, 0, 1)
+[Tex(Group3, _textureChannelMask1)] _tex_channel ("Tex with Channel", 2D) = "white" { }
+[HideInInspector] _textureChannelMask1(" ", Vector) = (0,0,0,1)
+
+// Display up to 4 colors in a single line
+[Color(Group3, _mColor1, _mColor2, _mColor3)]
+_mColor ("Multi Color", Color) = (1, 1, 1, 1)
+[HideInInspector] _mColor1 (" ", Color) = (1, 0, 0, 1)
+[HideInInspector] _mColor2 (" ", Color) = (0, 1, 0, 1)
+[HideInInspector] [HDR] _mColor3 (" ", Color) = (0, 0, 1, 1)
+
+```
+
+Result:
+
+![image-20220828003507825](assets/image-20220828003507825.png)
+
+
+
+#### Channel
+
+```c#
+/// Draw a R/G/B/A drop menu:
+/// 	R = (1, 0, 0, 0)
+/// 	G = (0, 1, 0, 0)
+/// 	B = (0, 0, 1, 0)
+/// 	A = (0, 0, 0, 1)
+/// 	RGB Average = (1f / 3f, 1f / 3f, 1f / 3f, 0)
+/// 	RGB Luminance = (0.2126f, 0.7152f, 0.0722f, 0)
+///		None = (0, 0, 0, 0)
+/// group: father group name, support suffix keyword for conditional display (Default: none)
+/// Target Property Type: Vector, used to dot() with Texture Sample Value 
+public ChannelDrawer() { }
+public ChannelDrawer(string group)
+```
+
+Example:
+
+```c#
+[Title(_, Channel Samples)]
+[Channel(_)]_textureChannelMask("Texture Channel Mask (Default G)", Vector) = (0,1,0,0)
+
+......
+
+float selectedChannelValue = dot(tex2D(_Tex, uv), _textureChannelMask);
+```
+
+
+
+![image-20220822010511978](assets/image-20220822010511978.png)
+
+
+
+### Other
 
 #### Button
 
@@ -559,11 +595,15 @@ Example:
 
 ```
 
-![image-20241127180711449](./README_CN.assets/image-20241127180711449.png)
+![image-20241127180711449](./assets/image-20241127180711449.png)
 
 
 
-### LWGUI Decorator
+
+
+## Extra Decorators
+
+### Appearance
 
 #### Title & SubTitle
 
@@ -633,15 +673,26 @@ _float_helpbox ("Float with Helpbox%这是中文Helpbox%これは日本語Helpbo
 
 ```
 
-![image-20221231221240686](README_CN.assets/image-20221231221240686.png)
+![image-20221231221240686](assets/image-20221231221240686.png)
 
-![image-20221231221254101](README_CN.assets/image-20221231221254101.png)
+![image-20221231221254101](assets/image-20221231221254101.png)
 
 Tips:
 
 - Tooltip可能在Editor运行时消失, 这是Unity本身的特性 (或者是bug)
 
 
+
+#### ReadOnly
+
+```c#
+/// 将属性设为只读.
+public ReadOnlyDecorator()
+```
+
+
+
+### Logic
 
 #### PassSwitch
 
@@ -656,6 +707,10 @@ public PassSwitchDecorator(string   lightModeName1, string lightModeName2, strin
 public PassSwitchDecorator(string   lightModeName1, string lightModeName2, string lightModeName3, string lightModeName4, string lightModeName5, string lightModeName6) 
 
 ```
+
+
+
+### Structure
 
 
 
@@ -689,26 +744,21 @@ Example:
 
 ```
 
-![image-20231007163044176](./README_CN.assets/image-20231007163044176.png)
+![image-20231007163044176](./assets/image-20231007163044176.png)
 
 Tips:
 
 - LWGUI使用树状数据结构存储Group和Advanced Block及其子级的关系, 理论上可以存储无限多级父子关系, 但**目前LWGUI仅手动处理3层父子关系, 也就是说你可以将Advanced Block放在Group内, 而不能将Group放在Advanced Block内.**
+
+
+
+### Condition Display
 
 #### Hidden
 
 ```c#
 /// 类似于HideInInspector(), 区别在于Hidden()可以通过Display Mode按钮取消隐藏.
 public HiddenDecorator()
-```
-
-
-
-#### ReadOnly
-
-```c#
-/// 将属性设为只读.
-public ReadOnlyDecorator()
 ```
 
 
@@ -746,35 +796,35 @@ Example:
 
 ```
 
-![image-20231023010137495](./README_CN.assets/image-20231023010137495.png)
+![image-20231023010137495](./assets/image-20231023010137495.png)
 
-![image-20231023010153213](./README_CN.assets/image-20231023010153213.png)
+![image-20231023010153213](./assets/image-20231023010153213.png)
 
-![image-20231023010204399](./README_CN.assets/image-20231023010204399.png)
+![image-20231023010204399](./assets/image-20231023010204399.png)
 
-### LWGUI Timeline Tracks
+## LWGUI Timeline Tracks
 
-#### MaterialKeywordToggleTrack
+### MaterialKeywordToggleTrack
 
 录制材质参数动画时自动捕获Keyword改动并添加该轨道到Timeline Asset, 运行时根据float值设置Keyword状态.
 
 支持带Keyword的Toggle类型的Drawer.
 
-### Unity Builtin Drawers
+## Unity Builtin Drawers
 
-#### Space
+### Space
 
 ```c#
 MaterialSpaceDecorator(float height)
 ```
 
-#### Header
+### Header
 
 ```c#
 MaterialHeaderDecorator(string header)
 ```
 
-#### Enum
+### Enum
 
 ```c#
 MaterialEnumDrawer(string n1, float v1, string n2, float v2, string n3, float v3, string n4, float v4, string n5, float v5, string n6, float v6, string n7, float v7)
@@ -782,7 +832,7 @@ MaterialEnumDrawer(string n1, float v1, string n2, float v2, string n3, float v3
 
 
 
-#### IntRange
+### IntRange
 
 ```c#
 MaterialIntRangeDrawer()
@@ -790,7 +840,7 @@ MaterialIntRangeDrawer()
 
 
 
-#### KeywordEnum
+### KeywordEnum
 
 ```c#
 MaterialKeywordEnumDrawer(string kw1, string kw2, string kw3, string kw4, string kw5, string kw6, string kw7, string kw8, string kw9)
@@ -798,7 +848,7 @@ MaterialKeywordEnumDrawer(string kw1, string kw2, string kw3, string kw4, string
 
 
 
-#### PowerSlider
+### PowerSlider
 
 ```c#
 MaterialPowerSliderDrawer(float power)
@@ -806,7 +856,7 @@ MaterialPowerSliderDrawer(float power)
 
 
 
-#### Toggle
+### Toggle
 
 ```c#
 MaterialToggleUIDrawer(string keyword)
@@ -818,7 +868,7 @@ MaterialToggleUIDrawer(string keyword)
 
 ### Custom Header and Footer
 
-![image-20230821211652918](./README_CN.assets/image-20230821211652918.png)
+![image-20230821211652918](./assets/image-20230821211652918.png)
 
 Custom Header和Footer可以让你无需修改LWGUI插件的代码即可在ShaderGUI的顶部或底部添加自定义的模块.
 

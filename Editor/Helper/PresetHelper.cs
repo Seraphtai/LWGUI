@@ -69,9 +69,9 @@ namespace LWGUI
 				var drawer = ReflectionHelper.GetPropertyDrawer(material.shader, prop, out _);
 
 				// Apply active preset
-				if (drawer != null && drawer is IBasePresetDrawer)
+				if (drawer != null && drawer is IPresetDrawer)
 				{
-					var activePreset = (drawer as IBasePresetDrawer).GetActivePreset(prop, PresetHelper.GetPresetAsset((drawer as PresetDrawer).presetFileName));
+					var activePreset = (drawer as IPresetDrawer).GetActivePreset(prop, PresetHelper.GetPresetAsset((drawer as PresetDrawer).presetFileName));
 					if (activePreset != null)
 						activePreset.ApplyToDefaultMaterial(material);
 				}
