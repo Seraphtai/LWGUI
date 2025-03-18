@@ -16,7 +16,7 @@ Having been validated through numerous large-scale commercial projects, employin
 
 | ![image-20240716183800118](./assets/image-20240716183800118.png) | ![image-20240716184045776](./assets/image-20240716184045776.png) |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| NEW: A more powerful Gradient editor than UE, with support for both Shader and C# | NEW: Insert images directly into the ShaderGUI to support the display of complex documents without having to jump to the browser |
+| A more powerful Gradient editor than UE, with support for both Shader and C# | Insert images directly into the ShaderGUI to support the display of complex documents without having to jump to the browser |
 | ![image-20250314160119094](./assets/image-20250314160119094.png) |                                                              |
 | **NEW: When recording material parameter animations in Timeline, automatically capture changes to Toggle's Keywords to enable switching material Keywords at runtime.** |                                                              |
 | ![image-20220926025611208](./assets/image-20220926025611208.png) | ![image-20230821205439889](./assets/image-20230821205439889.png) |
