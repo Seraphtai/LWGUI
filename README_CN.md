@@ -75,7 +75,10 @@
       * [Custom Header and Footer](#custom-header-and-footer)
       * [Custom Drawer](#custom-drawer)
    * [Contribution](#contribution)
-   <!--te-->
+
+
+
+<!--te-->
 
 
 ## Installation
@@ -113,7 +116,7 @@
 /// default Folding State: "on" or "off" (Default: off)
 /// default Toggle Displayed: "on" or "off" (Default: on)
 /// preset File Name: "Shader Property Preset" asset name, see Preset() for detail (Default: none)
-/// Target Property Type: Float/Integer, express Toggle value
+/// Target Property Type: Float, express Toggle value
 public MainDrawer() : this(String.Empty) { }
 public MainDrawer(string group) : this(group, String.Empty) { }
 public MainDrawer(string group, string keyword) : this(group, keyword, "off") { }
