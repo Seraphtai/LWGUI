@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Jason Ma
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEditor.VersionControl;
@@ -109,23 +108,15 @@ namespace LWGUI
 
 			bool isWriteable = true;
 			
-			if (isVCEnabled)
+			foreach (var obj in objs)
 			{
-				foreach (var obj in objs)
-				{
-					if (!AssetDatabase.Contains(obj))
-						continue;
+				if (!AssetDatabase.Contains(obj))
+					continue;
 
-					var projectRelativedPath = AssetDatabase.GetAssetPath(obj);
-					var vcAsset = Provider.GetAssetByPath(projectRelativedPath);
-					if (isWriteable &= vcAsset != null)
-					{
-						isWriteable &= Provider.IsOpenForEdit(vcAsset);
-					}
-					
-					if (!isWriteable)
-						break;
-				}
+				isWriteable &= AssetDatabase.IsOpenForEdit(obj);
+				
+				if (!isWriteable)
+					break;
 			}
 			
 			return isWriteable;
