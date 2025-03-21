@@ -8,25 +8,25 @@
 
 已经过诸多大型商业项目的验证, 使用简洁的Material Property Drawer语法实现功能强大的Shader GUI, 节省大量开发时间, 易于使用和扩展, 有效提升美术人员的使用体验.
 
-![809c4a1c-ce80-48b1-b415-7e8d4bea716e](assets/809c4a1c-ce80-48b1-b415-7e8d4bea716e-16616214059841.png)
+![809c4a1c-ce80-48b1-b415-7e8d4bea716e](assets~/809c4a1c-ce80-48b1-b415-7e8d4bea716e-16616214059841.png)
 
-![LWGUI](assets/LWGUI.png)
+![LWGUI](assets~/LWGUI.png)
 
 
 
-| ![image-20240716183800118](./assets/image-20240716183800118.png) | ![image-20240716184045776](./assets/image-20240716184045776.png) |
+| ![image-20240716183800118](./assets~/image-20240716183800118.png) | ![image-20240716184045776](./assets~/image-20240716184045776.png) |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | 比UE更加强大的Gradient编辑器, 同时支持Shader和C#             | 直接在ShaderGUI中插入图片, 无需跳转浏览器即可支持复杂文档的显示 |
-| ![image-20250314160119094](./assets/image-20250314160119094.png) |                                                              |
+| ![image-20250314160119094](./assets~/image-20250314160119094.png) |                                                              |
 | **NEW: Timeline中录制材质参数动画时, 自动捕获Toggle的Keyword更改, 以便运行时切换材质Keyword** |                                                              |
-| ![image-20220926025611208](./assets/image-20220926025611208.png) | ![image-20230821205439889](./assets/image-20230821205439889.png) |
+| ![image-20220926025611208](./assets~/image-20220926025611208.png) | ![image-20230821205439889](./assets~/image-20230821205439889.png) |
 | 搜索栏亦可筛选已修改的属性                                   | 右键以按类型粘贴属性值                                       |
 
 
 
 | With your sponsorship, I will update more actively. | 有你的赞助我会更加积极地更新                                 |
 | --------------------------------------------------- | ------------------------------------------------------------ |
-| [paypal.me/JasonMa0012](paypal.me/JasonMa0012)      | ![723ddce6-fb86-48ff-9683-a12cf6cff7a0](./assets/723ddce6-fb86-48ff-9683-a12cf6cff7a0.jpg) |
+| [paypal.me/JasonMa0012](paypal.me/JasonMa0012)      | ![723ddce6-fb86-48ff-9683-a12cf6cff7a0](./assets~/723ddce6-fb86-48ff-9683-a12cf6cff7a0.jpg) |
 
 
 <!--ts-->
@@ -181,11 +181,11 @@ _enum ("KWEnum", float) = 0
 
 Default result:
 
-![image-20220828003026556](assets/image-20220828003026556.png)
+![image-20220828003026556](assets~/image-20220828003026556.png)
 
 Then change values:
 
-![image-20220828003129588](assets/image-20220828003129588.png)
+![image-20220828003129588](assets~/image-20220828003129588.png)
 
 ## Extra Drawers
 
@@ -261,7 +261,7 @@ Example:
 
 Result:
 
-![image-20220828003810353](assets/image-20220828003810353.png)
+![image-20220828003810353](assets~/image-20220828003810353.png)
 
 
 
@@ -356,15 +356,15 @@ Result:
 
 选择的预设内的属性值将成为默认值:
 
-![image-20221122231655378](assets/image-20221122231655378.png)![image-20221122231816714](assets/image-20221122231816714.png)
+![image-20221122231655378](assets~/image-20221122231655378.png)![image-20221122231816714](assets~/image-20221122231816714.png)
 
 ##### Create Preset File
 
-![image-20221122232307362](assets/image-20221122232307362.png)
+![image-20221122232307362](assets~/image-20221122232307362.png)
 
 ##### Edit Preset
 
-![image-20221122232354623](assets/image-20221122232354623.png)![image-20221122232415972](assets/image-20221122232415972.png)![image-20221122232425194](assets/image-20221122232425194.png)
+![image-20221122232354623](assets~/image-20221122232354623.png)![image-20221122232415972](assets~/image-20221122232415972.png)![image-20221122232425194](assets~/image-20221122232425194.png)
 
 
 
@@ -386,7 +386,13 @@ public BitMaskDrawer(string group, string bitDescription7, string bitDescription
 
 ```
 
-
+Example:
+```C#
+[BitMask(Preset)] _Stencil ("Stencil", Integer) = 0  
+[BitMask(Preset, Left, Bit6, Bit5, Bit4, Description, Bit2, Bit1, Right)] _StencilWithDescription ("Stencil With Description", Integer) = 0
+```
+Result:
+![](assets~/Pasted%20image%2020250321174432.png)
 
 ### Texture
 
@@ -426,7 +432,7 @@ _mColor ("Multi Color", Color) = (1, 1, 1, 1)
 
 Result:
 
-![image-20220828003507825](assets/image-20220828003507825.png)
+![image-20220828003507825](assets~/image-20220828003507825.png)
 
 #### Ramp
 
@@ -462,7 +468,7 @@ Example:
 
 Result:
 
-![image-20230625185730363](./assets/image-20230625185730363.png)
+![image-20230625185730363](./assets~/image-20230625185730363.png)
 
 你**必须手动保存编辑结果**, 如果有未保存的修改, Save按钮将显示黄色.
 
@@ -484,7 +490,7 @@ public class Test : MonoBehaviour
 
 Result:
 
-![image-20240717104144821](./assets/image-20240717104144821.png)![image-20240717104206365](./assets/image-20240717104206365.png)
+![image-20240717104144821](./assets~/image-20240717104144821.png)![image-20240717104206365](./assets~/image-20240717104206365.png)
 
 可以使用LwguiGradientUsage() Attribute设置默认的显示设置.
 
@@ -492,7 +498,7 @@ Result:
 
 新的LWGUI Gradient Editor集成了Unity内置的[Gradient Editor](https://docs.unity3d.com/Manual/EditingValueProperties.html)和[Curve Editor](https://docs.unity3d.com/Manual/EditingCurves.html), 实现了比UE的Gradient Editor更加强大的功能. 
 
-![image-20241126110012922](./assets/image-20241126110012922.png)
+![image-20241126110012922](./assets~/image-20241126110012922.png)
 
 | 编辑器                | 解释                                                         |
 | --------------------- | ------------------------------------------------------------ |
@@ -505,7 +511,7 @@ Result:
 | Curve Editor          | 类似于Unity内置的Curve Editor, 默认显示XY 0-1的范围, 你可以用滚轮缩放或移动显示范围.<br/>如下图所示, 右键菜单中有大量控制曲线形态的功能, 你可以查阅[Unity文档](https://docs.unity3d.com/Manual/EditingCurves.html)以充分利用这些功能. |
 | Presets               | 你可以保存当前LWGUI Gradient为预设, 并随时调用这些预设. 这些预设在本地计算机的不同引擎版本之间通用, 但不会保存到项目中. |
 
-![image-20241126105823397](./assets/image-20241126105823397.png)![image-20241126112320151](./assets/image-20241126112320151.png)
+![image-20241126105823397](./assets~/image-20241126105823397.png)![image-20241126112320151](./assets~/image-20241126112320151.png)
 
 **已知问题:**
 
@@ -518,7 +524,7 @@ Result:
 
 ```c#
 /// Draw an image preview.
-/// display name: The path of the image file relative to the Unity project, such as: "Assets/test.png", "Doc/test.png", "../test.png"
+/// display name: The path of the image file relative to the Unity project, such as: "assets~/test.png", "Doc/test.png", "../test.png"
 /// 
 /// group: father group name (Default: none)
 /// Target Property Type: Any
@@ -528,7 +534,7 @@ public ImageDrawer(string group)
 
 Result:
 
-![image-20240416142736663](./assets/image-20240416142736663.png)
+![image-20240416142736663](./assets~/image-20240416142736663.png)
 
 ### Vector
 
@@ -566,7 +572,7 @@ _mColor ("Multi Color", Color) = (1, 1, 1, 1)
 
 Result:
 
-![image-20220828003507825](assets/image-20220828003507825.png)
+![image-20220828003507825](assets~/image-20220828003507825.png)
 
 
 
@@ -601,7 +607,7 @@ float selectedChannelValue = dot(tex2D(_Tex, uv), _textureChannelMask);
 
 
 
-![image-20220822010511978](assets/image-20220822010511978.png)
+![image-20220822010511978](assets~/image-20220822010511978.png)
 
 
 
@@ -640,7 +646,7 @@ Example:
 
 ```
 
-![image-20241127180711449](./assets/image-20241127180711449.png)
+![image-20241127180711449](./assets~/image-20241127180711449.png)
 
 
 
@@ -723,9 +729,9 @@ _float_helpbox ("Float with Helpbox%这是中文Helpbox%これは日本語Helpbo
 
 ```
 
-![image-20221231221240686](assets/image-20221231221240686.png)
+![image-20221231221240686](assets~/image-20221231221240686.png)
 
-![image-20221231221254101](assets/image-20221231221254101.png)
+![image-20221231221254101](assets~/image-20221231221254101.png)
 
 Tips:
 
@@ -798,7 +804,7 @@ Example:
 
 ```
 
-![image-20231007163044176](./assets/image-20231007163044176.png)
+![image-20231007163044176](./assets~/image-20231007163044176.png)
 
 Tips:
 
@@ -851,11 +857,11 @@ Example:
 
 ```
 
-![image-20231023010137495](./assets/image-20231023010137495.png)
+![image-20231023010137495](./assets~/image-20231023010137495.png)
 
-![image-20231023010153213](./assets/image-20231023010153213.png)
+![image-20231023010153213](./assets~/image-20231023010153213.png)
 
-![image-20231023010204399](./assets/image-20231023010204399.png)
+![image-20231023010204399](./assets~/image-20231023010204399.png)
 
 ## LWGUI Timeline Tracks
 
@@ -923,7 +929,7 @@ MaterialToggleUIDrawer(string keyword)
 
 ### Custom Header and Footer
 
-![image-20230821211652918](./assets/image-20230821211652918.png)
+![image-20230821211652918](./assets~/image-20230821211652918.png)
 
 Custom Header和Footer可以让你无需修改LWGUI插件的代码即可在ShaderGUI的顶部或底部添加自定义的模块.
 

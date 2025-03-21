@@ -8,18 +8,18 @@ A Lightweight, Flexible, Powerful **Unity Shader GUI** system.
 
 Having been validated through numerous large-scale commercial projects, employing a succinct Material Property Drawer syntax allows for the realization of powerful Shader GUIs, substantially reducing development time, fostering ease of use and extensibility, and elevating the user experience for artists effectively.
 
-![809c4a1c-ce80-48b1-b415-7e8d4bea716e](assets/809c4a1c-ce80-48b1-b415-7e8d4bea716e-16616214059841.png)
+![809c4a1c-ce80-48b1-b415-7e8d4bea716e](assets~/809c4a1c-ce80-48b1-b415-7e8d4bea716e-16616214059841.png)
 
-![LWGUI](assets/LWGUI.png)
+![LWGUI](assets~/LWGUI.png)
 
 
 
-| ![image-20240716183800118](./assets/image-20240716183800118.png) | ![image-20240716184045776](./assets/image-20240716184045776.png) |
+| ![image-20240716183800118](./assets~/image-20240716183800118.png) | ![image-20240716184045776](./assets~/image-20240716184045776.png) |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | A more powerful Gradient editor than UE, with support for both Shader and C# | Insert images directly into the ShaderGUI to support the display of complex documents without having to jump to the browser |
-| ![image-20250314160119094](./assets/image-20250314160119094.png) |                                                              |
+| ![image-20250314160119094](./assets~/image-20250314160119094.png) |                                                              |
 | **NEW: When recording material parameter animations in Timeline, automatically capture changes to Toggle's Keywords to enable switching material Keywords at runtime.** |                                                              |
-| ![image-20220926025611208](./assets/image-20220926025611208.png) | ![image-20230821205439889](./assets/image-20230821205439889.png) |
+| ![image-20220926025611208](./assets~/image-20220926025611208.png) | ![image-20230821205439889](./assets~/image-20230821205439889.png) |
 | The search bar can also filter for properties that have been modified | Right-click to paste the attribute value by type             |
 
 
@@ -27,7 +27,7 @@ Having been validated through numerous large-scale commercial projects, employin
 
 | With your sponsorship, I will update more actively. | 有你的赞助我会更加积极地更新                                 |
 | --------------------------------------------------- | ------------------------------------------------------------ |
-| [paypal.me/JasonMa0012](paypal.me/JasonMa0012)      | ![723ddce6-fb86-48ff-9683-a12cf6cff7a0](./assets/723ddce6-fb86-48ff-9683-a12cf6cff7a0.jpg) |
+| [paypal.me/JasonMa0012](paypal.me/JasonMa0012)      | ![723ddce6-fb86-48ff-9683-a12cf6cff7a0](./assets~/723ddce6-fb86-48ff-9683-a12cf6cff7a0.jpg) |
 
 
 <!--ts-->
@@ -184,11 +184,11 @@ _enum ("KWEnum", float) = 0
 
 Default result:
 
-![image-20220828003026556](assets/image-20220828003026556.png)
+![image-20220828003026556](assets~/image-20220828003026556.png)
 
 Then change values:
 
-![image-20220828003129588](assets/image-20220828003129588.png)
+![image-20220828003129588](assets~/image-20220828003129588.png)
 
 ## Extra Drawers
 
@@ -264,7 +264,7 @@ Example:
 
 Result:
 
-![image-20220828003810353](assets/image-20220828003810353.png)
+![image-20220828003810353](assets~/image-20220828003810353.png)
 
 
 
@@ -359,15 +359,15 @@ Result:
 
 The Property Value in the selected Preset will be the default value:
 
-![image-20221122231655378](assets/image-20221122231655378.png)![image-20221122231816714](assets/image-20221122231816714.png)
+![image-20221122231655378](assets~/image-20221122231655378.png)![image-20221122231816714](assets~/image-20221122231816714.png)
 
 ##### Create Preset File
 
-![image-20221122232307362](assets/image-20221122232307362.png)
+![image-20221122232307362](assets~/image-20221122232307362.png)
 
 ##### Edit Preset
 
-![image-20221122232354623](assets/image-20221122232354623.png)![image-20221122232415972](assets/image-20221122232415972.png)![image-20221122232425194](assets/image-20221122232425194.png)
+![image-20221122232354623](assets~/image-20221122232354623.png)![image-20221122232415972](assets~/image-20221122232415972.png)![image-20221122232425194](assets~/image-20221122232425194.png)
 
 
 
@@ -389,7 +389,13 @@ public BitMaskDrawer(string group, string bitDescription7, string bitDescription
 
 ```
 
-
+Example:
+```C#
+[BitMask(Preset)] _Stencil ("Stencil", Integer) = 0  
+[BitMask(Preset, Left, Bit6, Bit5, Bit4, Description, Bit2, Bit1, Right)] _StencilWithDescription ("Stencil With Description", Integer) = 0
+```
+Result:
+![](assets~/Pasted%20image%2020250321174432.png)
 
 ### Texture
 
@@ -429,7 +435,7 @@ _mColor ("Multi Color", Color) = (1, 1, 1, 1)
 
 Result:
 
-![image-20220828003507825](assets/image-20220828003507825.png)
+![image-20220828003507825](assets~/image-20220828003507825.png)
 
 #### Ramp
 
@@ -465,7 +471,7 @@ Example:
 
 Result:
 
-![image-20230625185730363](./assets/image-20230625185730363.png)
+![image-20230625185730363](./assets~/image-20230625185730363.png)
 
 You **must manually Save the edit results**, if there are unsaved changes, the Save button will display yellow.
 
@@ -487,7 +493,7 @@ public class Test : MonoBehaviour
 
 Result:
 
-![image-20240717104144821](./assets/image-20240717104144821.png)![image-20240717104206365](./assets/image-20240717104206365.png)
+![image-20240717104144821](./assets~/image-20240717104144821.png)![image-20240717104206365](./assets~/image-20240717104206365.png)
 
 Default display settings can be set using the LwguiGradientUsage() Attribute.
 
@@ -495,7 +501,7 @@ Default display settings can be set using the LwguiGradientUsage() Attribute.
 
 The new LWGUI Gradient Editor integrates with Unity's built-in [Gradient Editor](https://docs.unity3d.com/Manual/EditingValueProperties.html) and [Curve Editor](https://docs.unity3d.com/Manual/EditingCurves.html), enabling more powerful features than UE's Gradient Editor.
 
-![image-20241126110012922](./assets/image-20241126110012922.png)
+![image-20241126110012922](./assets~/image-20241126110012922.png)
 
 | Editor                | Description                                                  |
 | --------------------- | ------------------------------------------------------------ |
@@ -508,7 +514,7 @@ The new LWGUI Gradient Editor integrates with Unity's built-in [Gradient Editor]
 | Curve Editor          | Similar to Unity's built-in Curve Editor, it displays the XY 0-1 range by default, and you can use the scroll wheel to zoom or move the display range.<br/>As you can see in the image below, the context menu has a number of functions for controlling the shape of the curve, and you can consult the [Unity documentation](https://docs.unity3d.com/Manual/EditingCurves.html) to get the most out of these functions. |
 | Presets               | You can save the current LWGUI Gradient as a preset and apply it anytime. These presets are common between different engine versions on the local computer, but are not saved to the project. |
 
-![image-20241126105823397](./assets/image-20241126105823397.png)![image-20241126112320151](./assets/image-20241126112320151.png)
+![image-20241126105823397](./assets~/image-20241126105823397.png)![image-20241126112320151](./assets~/image-20241126112320151.png)
 
 **Known issues:**
 
@@ -521,7 +527,7 @@ The new LWGUI Gradient Editor integrates with Unity's built-in [Gradient Editor]
 
 ```c#
 /// Draw an image preview.
-/// display name: The path of the image file relative to the Unity project, such as: "Assets/test.png", "Doc/test.png", "../test.png"
+/// display name: The path of the image file relative to the Unity project, such as: "assets~/test.png", "Doc/test.png", "../test.png"
 /// 
 /// group: father group name (Default: none)
 /// Target Property Type: Any
@@ -531,7 +537,7 @@ public ImageDrawer(string group)
 
 Result:
 
-![image-20240416142736663](./assets/image-20240416142736663.png)
+![image-20240416142736663](./assets~/image-20240416142736663.png)
 
 ### Vector
 
@@ -569,7 +575,7 @@ _mColor ("Multi Color", Color) = (1, 1, 1, 1)
 
 Result:
 
-![image-20220828003507825](assets/image-20220828003507825.png)
+![image-20220828003507825](assets~/image-20220828003507825.png)
 
 
 
@@ -604,7 +610,7 @@ float selectedChannelValue = dot(tex2D(_Tex, uv), _textureChannelMask);
 
 
 
-![image-20220822010511978](assets/image-20220822010511978.png)
+![image-20220822010511978](assets~/image-20220822010511978.png)
 
 
 
@@ -643,7 +649,7 @@ Example:
 
 ```
 
-![image-20241127180711449](./assets/image-20241127180711449.png)
+![image-20241127180711449](./assets~/image-20241127180711449.png)
 
 
 
@@ -726,9 +732,9 @@ _float_helpbox ("Float with Helpbox%这是中文Helpbox%これは日本語Helpbo
 
 ```
 
-![image-20221231221240686](assets/image-20221231221240686.png)
+![image-20221231221240686](assets~/image-20221231221240686.png)
 
-![image-20221231221254101](assets/image-20221231221254101.png)
+![image-20221231221254101](assets~/image-20221231221254101.png)
 
 Tips:
 
@@ -801,7 +807,7 @@ Example:
 
 ```
 
-![image-20231007163044176](./assets/image-20231007163044176.png)
+![image-20231007163044176](./assets~/image-20231007163044176.png)
 
 Tips:
 
@@ -854,11 +860,11 @@ Example:
 
 ```
 
-![image-20231023010137495](./assets/image-20231023010137495.png)
+![image-20231023010137495](./assets~/image-20231023010137495.png)
 
-![image-20231023010153213](./assets/image-20231023010153213.png)
+![image-20231023010153213](./assets~/image-20231023010153213.png)
 
-![image-20231023010204399](./assets/image-20231023010204399.png)
+![image-20231023010204399](./assets~/image-20231023010204399.png)
 
 ## LWGUI Timeline Tracks
 
@@ -928,7 +934,7 @@ MaterialToggleUIDrawer(string keyword)
 
 ### Custom Header and Footer
 
-![image-20230821211652918](./assets/image-20230821211652918.png)
+![image-20230821211652918](./assets~/image-20230821211652918.png)
 
 1. Custom Headers and Footers enable you to integrate bespoke modules at the top or bottom of the ShaderGUI without altering LWGUI plugin code.
 

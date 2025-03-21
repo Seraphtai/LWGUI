@@ -53,7 +53,7 @@
       {
         "id": "bc6b7c9f86bd7a96",
         "type": "tabs",
-        "dimension": 45.397111913357406,
+        "dimension": 27.346570397111915,
         "children": [
           {
             "id": "cf0e306c4c9c7d11",
@@ -100,7 +100,7 @@
       {
         "id": "fb46703dff46ddd6",
         "type": "tabs",
-        "dimension": 54.602888086642594,
+        "dimension": 72.65342960288808,
         "children": [
           {
             "id": "b1edbf85e4d83fa5",
@@ -108,13 +108,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "README.md",
+                "file": "README_CN.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of README"
+              "title": "Outline of README_CN"
             }
           }
         ]
@@ -197,9 +197,29 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "d93ffc2d4e7b14bd",
+  "active": "1ab61776fdab9c7c",
   "lastOpenFiles": [
+    "README.md",
     "README_CN.md",
-    "README.md"
+    "assets~/Pasted image 20250321174432.png",
+    "assets",
+    "assets~/LWGUI.png",
+    "assets~/image-20250314160119094.png",
+    "assets~/image-20241127180711449.png",
+    "assets~/image-20241126112320151.png",
+    "assets~/image-20241126110012922.png",
+    "assets~/image-20241126105823397.png",
+    "assets~/image-20240717104206365.png",
+    "assets~/image-20240717104144821.png",
+    "assets~/image-20240716183800118.png",
+    "assets~",
+    "assets - 副本/LWGUI.png.meta",
+    "assets - 副本/image-20250314160119094.png.meta",
+    "assets - 副本/image-20241127180711449.png.meta",
+    "assets - 副本/image-20241126112320151.png.meta",
+    "assets - 副本/image-20241126110012922.png.meta",
+    "assets - 副本/image-20241126105823397.png.meta",
+    "assets - 副本/image-20240717104206365.png.meta",
+    "assets - 副本/image-20240717104144821.png.meta"
   ]
 }
