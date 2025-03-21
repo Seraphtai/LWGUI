@@ -85,7 +85,7 @@ Having been validated through numerous large-scale commercial projects, employin
       * [Custom Header and Footer](#custom-header-and-footer)
       * [Custom Drawer](#custom-drawer)
    * [Contribution](#contribution)
-<!--te-->
+   <!--te-->
 
 
 ## Installation
@@ -121,6 +121,7 @@ Having been validated through numerous large-scale commercial projects, employin
 
 ```c#
 /// Create a Folding Group
+/// 
 /// group: group name (Default: Property Name)
 /// keyword: keyword used for toggle, "_" = ignore, none or "__" = Property Name +  "_ON", always Upper (Default: none)
 /// default Folding State: "on" or "off" (Default: off)
@@ -138,7 +139,8 @@ public MainDrawer(string group, string keyword, string defaultFoldingState, stri
 
 ```c#
 /// Draw a property with default style in the folding group
-/// group: father group name, support suffix keyword for conditional display (Default: none)
+/// 
+/// group: father group name (Default: none)
 /// Target Property Type: Any
 public SubDrawer() { }
 public SubDrawer(string group)
@@ -196,7 +198,8 @@ Then change values:
 
 ```c#
 /// Similar to builtin Toggle()
-/// group: father group name, support suffix keyword for conditional display (Default: none)
+/// 
+/// group: father group name (Default: none)
 /// keyword: keyword used for toggle, "_" = ignore, none or "__" = Property Name +  "_ON", always Upper (Default: none)
 /// preset File Name: "Shader Property Preset" asset name, see Preset() for detail (Default: none)
 /// Target Property Type: Float
@@ -212,7 +215,8 @@ public SubToggleDrawer(string group, string keyWord, string presetFileName)
 
 ```c#
 /// Similar to builtin PowerSlider()
-/// group: father group name, support suffix keyword for conditional display (Default: none)
+/// 
+/// group: father group name (Default: none)
 /// power: power of slider (Default: 1)
 /// Target Property Type: Range
 public SubPowerSliderDrawer(float power) : this("_", power) { }
@@ -224,7 +228,8 @@ public SubPowerSliderDrawer(string group, float power)
 
 ```c#
 /// Similar to builtin IntRange()
-/// group: father group name, support suffix keyword for conditional display (Default: none)
+/// 
+/// group: father group name (Default: none)
 /// Target Property Type: Range
 public SubIntRangeDrawer(string group)
 
@@ -235,8 +240,9 @@ public SubIntRangeDrawer(string group)
 #### MinMaxSlider
 
 ```c#
-/// Draw a min max slider 
-/// group: father group name, support suffix keyword for conditional display (Default: none)
+/// Draw a min max slider
+/// 
+/// group: father group name (Default: none)
 /// minPropName: Output Min Property Name
 /// maxPropName: Output Max Property Name
 /// Target Property Type: Range, range limits express the MinMaxSlider value range
@@ -265,14 +271,13 @@ Result:
 #### KWEnum
 
 ```c#
-/// <summary>
 /// Similar to builtin Enum() / KeywordEnum()
-/// group: father group name, support suffix keyword for conditional display (Default: none)
+/// 
+/// group: father group name (Default: none)
 /// n(s): display name
 /// k(s): keyword
 /// v(s): value
 /// Target Property Type: Float, express current keyword index
-/// </summary>
 public KWEnumDrawer(string n1, string k1)
 public KWEnumDrawer(string n1, string k1, string n2, string k2)
 public KWEnumDrawer(string n1, string k1, string n2, string k2, string n3, string k3)
@@ -319,10 +324,12 @@ public SubKeywordEnumDrawer(string group, string kw1, string kw2, string kw3, st
 
 ```c#
 /// Popping a menu, you can select the Shader Property Preset, the Preset values will replaces the default values
-/// group: father group name, support suffix keyword for conditional display (Default: none)
+/// 
+/// group: father group name (Default: none)
 ///	presetFileName: "Shader Property Preset" asset name, you can create new Preset by
 ///		"Right Click > Create > LWGUI > Shader Property Preset" in Project window,
 ///		*any Preset in the entire project cannot have the same name*
+/// Target Property Type: Float, express current keyword index
 public PresetDrawer(string presetFileName) : this("_", presetFileName) {}
 public PresetDrawer(string group, string presetFileName)
 
@@ -364,16 +371,38 @@ The Property Value in the selected Preset will be the default value:
 
 
 
+#### BitMask
+
+```C#
+/// Draw the Int value as a Bit Mask.
+/// Note:
+///    - Currently only 8 bits are supported.
+///    - Property Type must be 'Integer', not 'Int'.
+///
+/// group: father group name (Default: none)
+/// bitDescription 7-0: Description of each Bit. (Default: none)
+/// Target Property Type: Integer
+public BitMaskDrawer() : this(string.Empty, null) { }
+public BitMaskDrawer(string group) : this(group, null) { }
+public BitMaskDrawer(string group, string bitDescription7, string bitDescription6, string bitDescription5, string bitDescription4, string bitDescription3, string bitDescription2, string bitDescription1, string bitDescription0) 
+    : this(group, new List<string>() { bitDescription0, bitDescription1, bitDescription2, bitDescription3, bitDescription4, bitDescription5, bitDescription6, bitDescription7 }) { }
+
+```
+
+
+
 ### Texture
 
 #### Tex
 
 ```c#
 /// Draw a Texture property in single line with a extra property
-/// group: father group name, support suffix keyword for conditional display (Default: none)
-/// extraPropName: extra property name  (Default: none)
+/// 
+/// group: father group name (Default: none)
+/// extraPropName: extra property name (Default: none)
 /// Target Property Type: Texture
 /// Extra Property Type: Color, Vector
+/// Target Property Type: Texture2D
 public TexDrawer() { }
 public TexDrawer(string group) : this(group, String.Empty) { }
 public TexDrawer(string group, string extraPropName)
@@ -409,7 +438,8 @@ Result:
 ```c#
 /// Draw an unreal style Ramp Map Editor (Default Ramp Map Resolution: 512 * 2)
 /// NEW: The new LwguiGradient type has both the Gradient and Curve editors, and can be used in C# scripts and runtime, and is intended to replace UnityEngine.Gradient
-/// group: father group name, support suffix keyword for conditional display (Default: none)
+///
+/// group: father group name (Default: none)
 /// defaultFileName: default Ramp Map file name when create a new one (Default: RampMap)
 /// rootPath: the path where ramp is stored, replace '/' with '.' (for example: Assets.Art.Ramps). when selecting ramp, it will also be filtered according to the path (Default: Assets)
 /// colorSpace: switch sRGB / Linear in ramp texture import setting (Default: sRGB)
@@ -492,7 +522,9 @@ The new LWGUI Gradient Editor integrates with Unity's built-in [Gradient Editor]
 ```c#
 /// Draw an image preview.
 /// display name: The path of the image file relative to the Unity project, such as: "Assets/test.png", "Doc/test.png", "../test.png"
-/// group: father group name, support suffix keyword for conditional display (Default: none)
+/// 
+/// group: father group name (Default: none)
+/// Target Property Type: Any
 public ImageDrawer() { }
 public ImageDrawer(string group)
 ```
@@ -507,8 +539,9 @@ Result:
 
 ```c#
 /// Display up to 4 colors in a single line
-/// group: father group name, support suffix keyword for conditional display (Default: none)
-/// color2-4: extra color property name 
+/// 
+/// group: father group name (Default: none)
+/// color2-4: extra color property name
 /// Target Property Type: Color
 public ColorDrawer(string group, string color2) : this(group, color2, String.Empty, String.Empty) { }
 public ColorDrawer(string group, string color2, string color3) : this(group, color2, color3, String.Empty) { }
@@ -551,8 +584,9 @@ Result:
 /// 	RGB Average = (1f / 3f, 1f / 3f, 1f / 3f, 0)
 /// 	RGB Luminance = (0.2126f, 0.7152f, 0.0722f, 0)
 ///		None = (0, 0, 0, 0)
-/// group: father group name, support suffix keyword for conditional display (Default: none)
-/// Target Property Type: Vector, used to dot() with Texture Sample Value 
+/// 
+/// group: father group name (Default: none)
+/// Target Property Type: Vector, used to dot() with Texture Sample Value
 public ChannelDrawer() { }
 public ChannelDrawer(string group)
 ```
@@ -595,7 +629,8 @@ float selectedChannelValue = dot(tex2D(_Tex, uv), _textureChannelMask);
 /// The full example:
 /// [Button(_)] _button0 ("URL Button@URL:https://github.com/JasonMa0012/LWGUI@C#:LWGUI.ButtonDrawer.TestMethod(1234, abcd)", Float) = 0
 /// 
-/// group: father group name, support suffix keyword for conditional display (Default: none)
+/// group: father group name (Default: none)
+/// Target Property Type: Any
 public ButtonDrawer() { }
 public ButtonDrawer(string group)
 ```
@@ -621,8 +656,10 @@ Example:
 #### Title & SubTitle
 
 ```c#
+/// <summary>
 /// Similar to Header()
-/// group: father group name, support suffix keyword for conditional display (Default: none)
+/// 
+/// group: father group name (Default: none)
 /// header: string to display, "SpaceLine" or "_" = none (Default: none)
 /// height: line height (Default: 22)
 public TitleDecorator(string header) : this("_", header, DefaultHeight) {}
@@ -632,7 +669,8 @@ public TitleDecorator(string group, string header, float height)
 
 
 /// Similar to Title()
-/// group: father group name, support suffix keyword for conditional display (Default: none)
+/// 
+/// group: father group name (Default: none)
 /// header: string to display, "SpaceLine" or "_" = none (Default: none)
 /// height: line height (Default: 22)
 public SubTitleDecorator(string group,  string header) : base(group, header, DefaultHeight) {}
@@ -645,6 +683,7 @@ public SubTitleDecorator(string group, string header, float height) : base(group
 ```c#
 /// Tooltip, describes the details of the property. (Default: property.name and property default value)
 /// You can also use "#Text" in DisplayName to add Tooltip that supports Multi-Language.
+/// 
 /// tooltip: a single-line string to display, support up to 4 ','. (Default: Newline)
 public TooltipDecorator() : this(string.Empty) {}
 public TooltipDecorator(string tooltip) { this._tooltip = tooltip; }
@@ -659,6 +698,7 @@ public TooltipDecorator(string s1, string s2, string s3, string s4, string s5) :
 ```c#
 /// Display a Helpbox on the property
 /// You can also use "%Text" in DisplayName to add Helpbox that supports Multi-Language.
+/// 
 /// message: a single-line string to display, support up to 4 ','. (Default: Newline)
 public HelpboxDecorator() : this(string.Empty) {}
 public HelpboxDecorator(string message) { this._message = message; }
@@ -710,7 +750,8 @@ public ReadOnlyDecorator()
 #### PassSwitch
 
 ```c#
-/// Cooperate with Toggle to switch certain Passes
+/// Cooperate with Toggle to switch certain Passes.
+/// 
 /// lightModeName(s): Light Mode in Shader Pass (https://docs.unity3d.com/2017.4/Documentation/Manual/SL-PassTags.html)
 public PassSwitchDecorator(string   lightModeName1) 
 public PassSwitchDecorator(string   lightModeName1, string lightModeName2) 
@@ -730,14 +771,17 @@ public PassSwitchDecorator(string   lightModeName1, string lightModeName2, strin
 #### Advanced & AdvancedHeaderProperty
 
 ```c#
-/// Collapse the current Property into an Advanced Block. Specify the Header String to create a new Advanced Block. All Properties using Advanced() will be collapsed into the nearest Advanced Block.
+/// Collapse the current Property into an Advanced Block.
+/// Specify the Header String to create a new Advanced Block.
+/// All Properties using Advanced() will be collapsed into the nearest Advanced Block.
+/// 
 /// headerString: The title of the Advanced Block. Default: "Advanced"
 public AdvancedDecorator() : this(string.Empty) { }
 public AdvancedDecorator(string headerString)
 ```
 
 ```c#
-/// Create an Advanced Block using the current Property as the Header
+/// Create an Advanced Block using the current Property as the Header.
 public AdvancedHeaderPropertyDecorator()
 ```
 
@@ -780,6 +824,7 @@ public HiddenDecorator()
 
 ```c#
 /// Control the show or hide of a single or a group of properties based on multiple conditions.
+///
 /// logicalOperator: And | Or (Default: And).
 /// propName: Target Property Name used for comparison.
 /// compareFunction: Less (L) | Equal (E) | LessEqual (LEqual / LE) | Greater (G) | NotEqual (NEqual / NE) | GreaterEqual (GEqual / GE).

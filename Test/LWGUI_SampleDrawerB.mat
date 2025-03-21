@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: LWGUI_SampleDrawer 1
+  m_Name: LWGUI_SampleDrawerB
   m_Shader: {fileID: 4800000, guid: 7ee048c9536c0344bb8b4860595a4d9b, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -89,12 +89,14 @@ Material:
     m_Ints: []
     m_Floats:
     - _AdvancedFloat: 0
+    - _AdvancedImage: 0
     - _AdvancedRange0: 0.252
     - _Advancedfloat0: 0.12
     - _Advancedfloat1: 0.13
     - _Advancedfloat3: 0.21
     - _Advancedfloat4: 0
     - _Advancedfloat7: 0.24
+    - _button0: 0
     - _enum: 1
     - _float: -0.46
     - _float1: -0.05
@@ -118,6 +120,7 @@ Material:
     - _minMaxSlider: 1
     - _preset: 0
     - _preset1: 0
+    - _preset_toggle: 0
     - _range: 0.42
     - _rangeEnd: 0.70471865
     - _rangeStart: 0.20471871
@@ -133,7 +136,7 @@ Material:
     - _mColor1: {r: 1, g: 0, b: 0, a: 1}
     - _mColor2: {r: 0, g: 1, b: 0, a: 1}
     - _mColor3: {r: 0, g: 0, b: 1, a: 1}
-    - _textureChannelMask: {r: 0, g: 0, b: 1, a: 0}
+    - _textureChannelMask: {r: 0, g: 1, b: 0, a: 0}
     - _textureChannelMask1: {r: 0, g: 0, b: 0, a: 1}
     - _vector1: {r: 1.32, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: LWGUI_SampleDrawer 2
+  m_Name: LWGUI_SampleDrawerB1
   m_Shader: {fileID: 4800000, guid: 7ee048c9536c0344bb8b4860595a4d9b, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords:

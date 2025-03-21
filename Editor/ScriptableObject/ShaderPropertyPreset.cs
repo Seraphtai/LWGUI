@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using LWGUI.Timeline;
 using UnityEngine;
 using UnityEditor;
 using Object = UnityEngine.Object;
@@ -19,6 +18,7 @@ namespace LWGUI
 			Float,
 			Range,
 			Texture,
+			Integer,
 		}
 
 		[Serializable]
@@ -32,6 +32,7 @@ namespace LWGUI
 			public string       propertyName;
 			public PropertyType propertyType;
 			public float        floatValue;
+			public int			intValue;
 			public Color        colorValue;
 			public Vector4      vectorValue;
 			public Texture      textureValue;
@@ -72,6 +73,9 @@ namespace LWGUI
 						case PropertyType.Range:
 							material.SetFloat(propertyNameID, floatValue);
 							break;
+						case PropertyType.Integer:
+							material.SetInteger(propertyNameID, intValue);
+							break;
 						case PropertyType.Texture:
 							material.SetTexture(propertyNameID, textureValue);
 							break;
@@ -96,6 +100,9 @@ namespace LWGUI
 						case PropertyType.Range:
 							prop.floatValue = floatValue;
 							break;
+						case PropertyType.Integer:
+							prop.intValue = intValue;
+							break;
 						case PropertyType.Texture:
 							prop.textureValue = textureValue;
 							break;
@@ -118,10 +125,13 @@ namespace LWGUI
 						propertyType = PropertyType.Vector;
 						vectorValue = prop.vectorValue;
 						break;
-					case MaterialProperty.PropType.Int:
 					case MaterialProperty.PropType.Float:
 						propertyType = PropertyType.Float;
 						floatValue = prop.floatValue;
+						break;
+					case MaterialProperty.PropType.Int:
+						propertyType = PropertyType.Integer;
+						intValue = prop.intValue;
 						break;
 					case MaterialProperty.PropType.Range:   
 						propertyType = PropertyType.Range;

@@ -48,6 +48,7 @@ namespace LWGUI
 	#region Basic Drawers
 	/// <summary>
 	/// Create a Folding Group
+	/// 
 	/// group: group name (Default: Property Name)
 	/// keyword: keyword used for toggle, "_" = ignore, none or "__" = Property Name +  "_ON", always Upper (Default: none)
 	/// default Folding State: "on" or "off" (Default: off)
@@ -145,7 +146,8 @@ namespace LWGUI
 
 	/// <summary>
 	/// Draw a property with default style in the folding group
-	/// group: father group name, support suffix keyword for conditional display (Default: none)
+	/// 
+	/// group: father group name (Default: none)
 	/// Target Property Type: Any
 	/// </summary>
 	public class SubDrawer : MaterialPropertyDrawer, IBaseDrawer
@@ -210,7 +212,8 @@ namespace LWGUI
 	#region Numeric
 	/// <summary>
 	/// Similar to builtin Toggle()
-	/// group: father group name, support suffix keyword for conditional display (Default: none)
+	/// 
+	/// group: father group name (Default: none)
 	/// keyword: keyword used for toggle, "_" = ignore, none or "__" = Property Name +  "_ON", always Upper (Default: none)
 	/// preset File Name: "Shader Property Preset" asset name, see Preset() for detail (Default: none)
 	/// Target Property Type: Float
@@ -281,7 +284,8 @@ namespace LWGUI
 
 	/// <summary>
 	/// Similar to builtin PowerSlider()
-	/// group: father group name, support suffix keyword for conditional display (Default: none)
+	/// 
+	/// group: father group name (Default: none)
 	/// power: power of slider (Default: 1)
 	/// Target Property Type: Range
 	/// </summary>
@@ -311,7 +315,8 @@ namespace LWGUI
 
 	/// <summary>
 	/// Similar to builtin IntRange()
-	/// group: father group name, support suffix keyword for conditional display (Default: none)
+	/// 
+	/// group: father group name (Default: none)
 	/// Target Property Type: Range
 	/// </summary>
 	public class SubIntRangeDrawer : SubDrawer
@@ -350,7 +355,8 @@ namespace LWGUI
 
 	/// <summary>
 	/// Draw a min max slider
-	/// group: father group name, support suffix keyword for conditional display (Default: none)
+	/// 
+	/// group: father group name (Default: none)
 	/// minPropName: Output Min Property Name
 	/// maxPropName: Output Max Property Name
 	/// Target Property Type: Range, range limits express the MinMaxSlider value range
@@ -462,7 +468,8 @@ namespace LWGUI
 
 	/// <summary>
 	/// Similar to builtin Enum() / KeywordEnum()
-	/// group: father group name, support suffix keyword for conditional display (Default: none)
+	/// 
+	/// group: father group name (Default: none)
 	/// n(s): display name
 	/// k(s): keyword
 	/// v(s): value
@@ -672,10 +679,12 @@ namespace LWGUI
 	
 	/// <summary>
 	/// Popping a menu, you can select the Shader Property Preset, the Preset values will replaces the default values
-	/// group: father group name, support suffix keyword for conditional display (Default: none)
+	/// 
+	/// group: father group name (Default: none)
 	///	presetFileName: "Shader Property Preset" asset name, you can create new Preset by
 	///		"Right Click > Create > LWGUI > Shader Property Preset" in Project window,
 	///		*any Preset in the entire project cannot have the same name*
+	/// Target Property Type: Float, express current keyword index
 	/// </summary>
 	public class PresetDrawer : SubDrawer, IPresetDrawer
 	{
@@ -792,16 +801,138 @@ namespace LWGUI
 			}
 		}
 	}
+
+	/// <summary>
+	/// Draw the Int value as a Bit Mask.
+	/// Note:
+	///		- Currently only 8 bits are supported.
+	///		- Property Type must be 'Integer', not 'Int'.
+	///
+	/// group: father group name (Default: none)
+	/// bitDescription 7-0: Description of each Bit. (Default: none)
+	/// Target Property Type: Integer
+	/// </summary>
+	public class BitMaskDrawer : SubDrawer
+	{
+		public int bitCount = 8;
+		
+		public float maxHeight = EditorGUIUtility.singleLineHeight;
+
+		public List<GUIContent> buttonLables = new ();
+		
+		public List<float> buttonWidths = new();
+		
+		public List<GUIStyle> buttonStyles = new();
+
+		public float totalButtonWidth;
+		
+		private static readonly int _hint = "BitMask".GetHashCode();
+		
+		private static readonly float _minButtonWidth = 25;
+		
+		private static readonly float _buttonPadding = 1.0f;
+		
+		public BitMaskDrawer() : this(string.Empty, null) { }
+		
+		public BitMaskDrawer(string group) : this(group, null) { }
+		
+		public BitMaskDrawer(string group, string bitDescription7, string bitDescription6, string bitDescription5, string bitDescription4, string bitDescription3, string bitDescription2, string bitDescription1, string bitDescription0) 
+			: this(group, new List<string>() { bitDescription0, bitDescription1, bitDescription2, bitDescription3, bitDescription4, bitDescription5, bitDescription6, bitDescription7 }) { }
+
+		public BitMaskDrawer(string group, List<string> bitDescriptions)
+		{
+			this.group = group;
+
+			bitCount = Mathf.Clamp(bitCount, 1, 16);
+
+			for (int i = 0; i < bitCount; i++)
+			{
+				var description = bitDescriptions != null && bitDescriptions.Count > i ? bitDescriptions[i] : string.Empty;
+				buttonLables.Add(new GUIContent(
+					string.IsNullOrEmpty(description) ? i.ToString()			: i + "\n" + description));
+				buttonWidths.Add(Mathf.Max(_minButtonWidth, EditorStyles.miniButton.CalcSize(buttonLables[i]).x));
+
+				if (!string.IsNullOrEmpty(description))
+					maxHeight = EditorGUIUtility.singleLineHeight * 2;
+			}
+
+			for (int i = 0; i < bitCount; i++)
+			{
+				if (i == 0)
+					buttonStyles.Add(new GUIStyle(EditorStyles.miniButtonRight));
+				else if (i == bitCount - 1)
+					buttonStyles.Add(new GUIStyle(EditorStyles.miniButtonLeft));
+				else
+					buttonStyles.Add(new GUIStyle(EditorStyles.miniButton));
+					
+				buttonStyles[i].fixedHeight = maxHeight;
+			}
+
+			totalButtonWidth = buttonWidths.Sum();
+		}
+		
+		protected override bool IsMatchPropType(MaterialProperty property) { return property.type == MaterialProperty.PropType.Int; }
+
+		protected override float GetVisibleHeight(MaterialProperty prop) { return maxHeight; }
+
+		public override void DrawProp(Rect position, MaterialProperty prop, GUIContent label, MaterialEditor editor)
+		{
+			label.tooltip += $"\nCurrent Value: { prop.intValue }";
+			
+			int controlId = GUIUtility.GetControlID(_hint, FocusType.Keyboard, position);
+			var fieldRect = EditorGUI.PrefixLabel(position, controlId, label);
+			
+			if (position.width < totalButtonWidth) 
+				return;
+
+			fieldRect.xMin = fieldRect.xMax;
+			
+			for (int i = 0; i < bitCount; i++)
+			{
+				fieldRect.xMin = fieldRect.xMax - buttonWidths[i];
+				var buttonLable = buttonLables[i];
+				var active = IsBitEnabled(prop.intValue, i);
+				var style = buttonStyles[i];
+				var buttonRect = fieldRect;
+				
+				if (i > 0 && i < bitCount - 1)
+				{
+					buttonRect.xMin -= _buttonPadding;
+					buttonRect.xMax += _buttonPadding * 2;
+				}
+				
+				if (style.richText = prop.hasMixedValue)
+				{
+					// https://docs.unity3d.com/2021.3/Documentation/Manual/StyledText.html
+					buttonLable = new GUIContent($"<b><i>{ buttonLable.text }</i></b>");
+				}
+
+				if (Helper.ToggleButton(buttonRect, buttonLable, active, style, _buttonPadding * 1.5f))
+				{
+					prop.intValue = SetBitEnabled(prop.intValue, i, !active);
+				}
+
+				fieldRect.xMax = fieldRect.xMin;
+			}
+		}
+
+		public static bool IsBitEnabled(int intValue, int bitIndex) => (intValue & 1U << bitIndex) > 0;
+		
+		public static int SetBitEnabled(int intValue, int bitIndex, bool enabled)
+			=> enabled ? intValue | (int)(1U << bitIndex) : intValue ^ (int)(1U << bitIndex);
+	}
 	
 	#endregion
 
 	#region Texture
 	/// <summary>
 	/// Draw a Texture property in single line with a extra property
-	/// group: father group name, support suffix keyword for conditional display (Default: none)
+	/// 
+	/// group: father group name (Default: none)
 	/// extraPropName: extra property name (Default: none)
 	/// Target Property Type: Texture
 	/// Extra Property Type: Color, Vector
+	/// Target Property Type: Texture2D
 	/// </summary>
 	public class TexDrawer : SubDrawer
 	{
@@ -880,7 +1011,8 @@ namespace LWGUI
 	/// <summary>
 	/// Draw an unreal style Ramp Map Editor (Default Ramp Map Resolution: 512 * 2)
 	/// NEW: The new LwguiGradient type has both the Gradient and Curve editors, and can be used in C# scripts and runtime, and is intended to replace UnityEngine.Gradient
-	/// group: father group name, support suffix keyword for conditional display (Default: none)
+	/// 
+	/// group: father group name (Default: none)
 	/// defaultFileName: default Ramp Map file name when create a new one (Default: RampMap)
 	/// rootPath: the path where ramp is stored, replace '/' with '.' (for example: Assets.Art.Ramps). when selecting ramp, it will also be filtered according to the path (Default: Assets)
 	/// colorSpace: switch sRGB / Linear in ramp texture import setting (Default: sRGB)
@@ -1070,7 +1202,9 @@ namespace LWGUI
 	/// <summary>
 	/// Draw an image preview.
 	/// display name: The path of the image file relative to the Unity project, such as: "Assets/test.png", "Doc/test.png", "../test.png"
-	/// group: father group name, support suffix keyword for conditional display (Default: none)
+	/// 
+	/// group: father group name (Default: none)
+	/// Target Property Type: Any
 	/// </summary>
 	public class ImageDrawer : SubDrawer
 	{
@@ -1127,7 +1261,8 @@ namespace LWGUI
 	#region Vector
 	/// <summary>
 	/// Display up to 4 colors in a single line
-	/// group: father group name, support suffix keyword for conditional display (Default: none)
+	/// 
+	/// group: father group name (Default: none)
 	/// color2-4: extra color property name
 	/// Target Property Type: Color
 	/// </summary>
@@ -1212,7 +1347,8 @@ namespace LWGUI
 	/// 	RGB Average = (1f / 3f, 1f / 3f, 1f / 3f, 0)
 	/// 	RGB Luminance = (0.2126f, 0.7152f, 0.0722f, 0)
 	///		None = (0, 0, 0, 0)
-	/// group: father group name, support suffix keyword for conditional display (Default: none)
+	/// 
+	/// group: father group name (Default: none)
 	/// Target Property Type: Vector, used to dot() with Texture Sample Value
 	/// </summary>
 	public class ChannelDrawer : SubDrawer
@@ -1309,7 +1445,8 @@ namespace LWGUI
 	/// The full example:
 	/// [Button(_)] _button0 ("URL Button@URL:https://github.com/JasonMa0012/LWGUI@C#:LWGUI.ButtonDrawer.TestMethod(1234, abcd)", Float) = 0
 	/// 
-	/// group: father group name, support suffix keyword for conditional display (Default: none)
+	/// group: father group name (Default: none)
+	/// Target Property Type: Any
 	/// </summary>
 	public class ButtonDrawer : SubDrawer
 	{
@@ -1463,7 +1600,8 @@ namespace LWGUI
 	#region Appearance
 	/// <summary>
 	/// Similar to Header()
-	/// group: father group name, support suffix keyword for conditional display (Default: none)
+	/// 
+	/// group: father group name (Default: none)
 	/// header: string to display, "SpaceLine" or "_" = none (Default: none)
 	/// height: line height (Default: 22)
 	/// </summary>
@@ -1503,7 +1641,8 @@ namespace LWGUI
 
 	/// <summary>
 	/// Similar to Title()
-	/// group: father group name, support suffix keyword for conditional display (Default: none)
+	/// 
+	/// group: father group name (Default: none)
 	/// header: string to display, "SpaceLine" or "_" = none (Default: none)
 	/// height: line height (Default: 22)
 	/// </summary>
@@ -1517,6 +1656,7 @@ namespace LWGUI
 	/// <summary>
 	/// Tooltip, describes the details of the property. (Default: property.name and property default value)
 	/// You can also use "#Text" in DisplayName to add Tooltip that supports Multi-Language.
+	/// 
 	/// tooltip: a single-line string to display, support up to 4 ','. (Default: Newline)
 	/// </summary>
 	public class TooltipDecorator : SubDrawer
@@ -1554,6 +1694,7 @@ namespace LWGUI
 	/// <summary>
 	/// Display a Helpbox on the property
 	/// You can also use "%Text" in DisplayName to add Helpbox that supports Multi-Language.
+	/// 
 	/// message: a single-line string to display, support up to 4 ','. (Default: Newline)
 	/// </summary>
 	public class HelpboxDecorator : TooltipDecorator
@@ -1602,7 +1743,8 @@ namespace LWGUI
 
 	#region Logic
 	/// <summary>
-	/// Cooperate with Toggle to switch certain Passes
+	/// Cooperate with Toggle to switch certain Passes.
+	/// 
 	/// lightModeName(s): Light Mode in Shader Pass (https://docs.unity3d.com/2017.4/Documentation/Manual/SL-PassTags.html)
 	/// </summary>
 	public class PassSwitchDecorator : SubDrawer
@@ -1665,7 +1807,10 @@ namespace LWGUI
 
 	#region Structure
 	/// <summary>
-	/// Collapse the current Property into an Advanced Block. Specify the Header String to create a new Advanced Block. All Properties using Advanced() will be collapsed into the nearest Advanced Block.
+	/// Collapse the current Property into an Advanced Block.
+	/// Specify the Header String to create a new Advanced Block.
+	/// All Properties using Advanced() will be collapsed into the nearest Advanced Block.
+	/// 
 	/// headerString: The title of the Advanced Block. Default: "Advanced"
 	/// </summary>
 	public class AdvancedDecorator : SubDrawer
@@ -1691,7 +1836,7 @@ namespace LWGUI
 	}
 
 	/// <summary>
-	/// Create an Advanced Block using the current Property as the Header
+	/// Create an Advanced Block using the current Property as the Header.
 	/// </summary>
 	public class AdvancedHeaderPropertyDecorator : SubDrawer
 	{
@@ -1726,6 +1871,7 @@ namespace LWGUI
 
 	/// <summary>
 	/// Control the show or hide of a single or a group of properties based on multiple conditions.
+	/// 
 	/// logicalOperator: And | Or (Default: And).
 	/// propName: Target Property Name used for comparison.
 	/// compareFunction: Less (L) | Equal (E) | LessEqual (LEqual / LE) | Greater (G) | NotEqual (NEqual / NE) | GreaterEqual (GEqual / GE).

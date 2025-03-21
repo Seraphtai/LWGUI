@@ -227,7 +227,7 @@ namespace LWGUI
 		#endregion
 
 
-		#region Draw GUI for Drawer
+		#region Draw GUI for Drawers
 
 		// TODO: use Reflection
 		// copy and edit of https://github.com/GucioDevs/SimpleMinMaxSlider/blob/master/Assets/SimpleMinMaxSlider/Scripts/Editor/MinMaxSliderDrawer.cs
@@ -298,10 +298,25 @@ namespace LWGUI
 			return toggleValue;
 		}
 
+		public static bool ToggleButton(Rect position, GUIContent label, bool on, GUIStyle style = null, float padding = 0)
+		{
+			var paddedRect = new Rect(position.x + padding, position.y, position.width - padding * 2, position.height);
+			style ??= EditorStyles.miniButton;
+			
+			bool flag = GUI.Button(paddedRect, label, style);
+			if (Event.current.type == EventType.Repaint)
+			{
+				bool isHover = paddedRect.Contains(Event.current.mousePosition);
+				style.Draw(position, label, isHover, false, on, false);
+			}
+
+			return flag;
+		}
+
 		#endregion
 
 
-		#region Draw GUI for Material
+		#region Draw GUI for Materials
 
 		public static void DrawSplitLine()
 		{
