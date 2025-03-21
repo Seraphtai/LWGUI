@@ -47,6 +47,7 @@ Having been validated through numerous large-scale commercial projects, employin
          * [Preset](#preset)
             * [Create Preset File](#create-preset-file)
             * [Edit Preset](#edit-preset)
+         * [BitMask](#bitmask)
       * [Texture](#texture)
          * [Tex](#tex)
          * [Ramp](#ramp)
