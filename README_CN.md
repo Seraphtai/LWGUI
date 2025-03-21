@@ -1,4 +1,4 @@
-﻿# LWGUI (Light Weight Shader GUI)
+# LWGUI (Light Weight Shader GUI)
 
 [中文](https://github.com/JasonMa0012/LWGUI/blob/dev/README_CN.md) | [English](https://github.com/JasonMa0012/LWGUI)
 
@@ -84,7 +84,7 @@
       * [Custom Header and Footer](#custom-header-and-footer)
       * [Custom Drawer](#custom-drawer)
    * [Contribution](#contribution)
-   <!--te-->
+<!--te-->
 
 
 ## Installation
