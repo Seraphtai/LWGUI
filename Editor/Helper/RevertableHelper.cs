@@ -130,6 +130,7 @@ namespace LWGUI
 			if (DrawRevertButton(rect))
 			{
 				GUI.changed = true;
+				EditorGUI.FocusTextInControl(string.Empty);
 				DoRevertProperty(prop, metaDatas);
 
 				if (isHeader)
