@@ -32,6 +32,7 @@ namespace LWGUI.LwguiGradientEditor
         
         private static LwguiGradientWindow _lwguiGradientWindow;
         public const string presetsEditorPrefID = "LwguiGradient";
+        public delegate void ChangeGradientCallback(LwguiGradient gradient);
 
         private LwguiGradientEditor _lwguiGradientEditor;
         private PresetLibraryLwguiGradientEditor _lwguiGradientLibraryEditor;
@@ -43,7 +44,7 @@ namespace LWGUI.LwguiGradientEditor
         [NonSerialized] public LwguiGradient.GradientTimeRange gradientTimeRange;
         
         private GUIView _viewToUpdate;
-        private Action<LwguiGradient> _onChange;
+        private ChangeGradientCallback _onChange;
 
         #endregion
 
@@ -60,8 +61,8 @@ namespace LWGUI.LwguiGradientEditor
         {
             get
             {
-                if (!_lwguiGradientWindow)
-                    Debug.LogError("Lwgui Gradient Window not initalized, did you call Show first?");
+                // if (!_lwguiGradientWindow)
+                //     Debug.LogError("Lwgui Gradient Window not initalized, did you call Show first?");
                 return _lwguiGradientWindow;
             }
         }
@@ -141,7 +142,7 @@ namespace LWGUI.LwguiGradientEditor
         
         private static LwguiGradientWindow GetWindow(bool focus = true) => (LwguiGradientWindow)GetWindow(typeof(LwguiGradientWindow), true, "LWGUI Gradient Editor", focus);
 
-        internal static void Show(LwguiGradient gradient, ColorSpace colorSpace = ColorSpace.Gamma, LwguiGradient.ChannelMask viewChannelMask = LwguiGradient.ChannelMask.All, LwguiGradient.GradientTimeRange timeRange = LwguiGradient.GradientTimeRange.One, GUIView viewToUpdate = null, Action<LwguiGradient> onChange = null)
+        internal static void Show(LwguiGradient gradient, ColorSpace colorSpace = ColorSpace.Gamma, LwguiGradient.ChannelMask viewChannelMask = LwguiGradient.ChannelMask.All, LwguiGradient.GradientTimeRange timeRange = LwguiGradient.GradientTimeRange.One, GUIView viewToUpdate = null, ChangeGradientCallback onChange = null)
         {
             if (_lwguiGradientWindow == null)
             {
@@ -187,8 +188,11 @@ namespace LWGUI.LwguiGradientEditor
 
         public static void RegisterSerializedObjectUndo(Object targetObject)
         {
-            Undo.RegisterCompleteObjectUndo(targetObject, "Lwgui Gradient Editor");
-            EditorUtility.SetDirty(targetObject);
+            if (targetObject)
+            {
+                Undo.RegisterCompleteObjectUndo(targetObject, "Lwgui Gradient Editor");
+                EditorUtility.SetDirty(targetObject);
+            }
         }
 
         public static void RegisterRampMapUndo(Object texture, Object assetImporter)
@@ -217,25 +221,22 @@ namespace LWGUI.LwguiGradientEditor
             {
                 LwguiGradientHelper.ClearRampPreviewCaches();
                 UpdatePresetLibraryViewSettings();
-                SendEvent(true);
+                SendChangedEvent(true);
             }
         }
 
         public const string LwguiGradientChangedCommand = "LwguiGradientChanged";
 
-        void SendEvent(bool exitGUI)
+        void SendChangedEvent(bool exitGUI)
         {
-            if (_viewToUpdate != null)
+            _onChange?.Invoke(lwguiGradient);
+            if (_viewToUpdate)
             {
                 Event e = EditorGUIUtility.CommandEvent(LwguiGradientChangedCommand);
                 Repaint();
                 _viewToUpdate.SendEvent(e);
                 if (exitGUI)
                     GUIUtility.ExitGUI();
-            }
-            if (_onChange != null)
-            {
-                _onChange(lwguiGradient);
             }
         }
 

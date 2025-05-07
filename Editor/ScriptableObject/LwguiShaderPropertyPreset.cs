@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 namespace LWGUI
 {
 	[CreateAssetMenu(fileName = "LWGUI_ShaderPropertyPreset.asset", menuName = "LWGUI/Shader Property Preset", order = 84)]
-	public class ShaderPropertyPreset : ScriptableObject
+	public class LwguiShaderPropertyPreset : ScriptableObject
 	{
 		public enum PropertyType
 		{

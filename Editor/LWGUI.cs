@@ -164,11 +164,14 @@ namespace LWGUI
 			if (propStaticData.isReadOnly) GUI.enabled = false;
 			Helper.BeginProperty(rect, prop, metaDatas);
 			Helper.DoPropertyContextMenus(rect, prop, metaDatas);
+			
 			RevertableHelper.FixGUIWidthMismatch(prop.type, materialEditor);
 			if (propStaticData.isAdvancedHeaderProperty)
 				propStaticData.isExpanding = EditorGUI.Foldout(rect, propStaticData.isExpanding, string.Empty);
+			
 			RevertableHelper.DrawRevertableProperty(revertButtonRect, prop, metaDatas, propStaticData.isMain || propStaticData.isAdvancedHeaderProperty);
 			materialEditor.ShaderProperty(rect, prop, label);
+			
 			Helper.EndProperty(metaDatas, prop);
 			GUI.enabled = enabled;
 		}

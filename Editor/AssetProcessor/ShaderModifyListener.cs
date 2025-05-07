@@ -19,6 +19,7 @@ namespace LWGUI
 				{
 					var shader = AssetDatabase.LoadAssetAtPath<Shader>(assetPath);
 					MetaDataHelper.ReleaseShaderMetadataCache(shader);
+					ReflectionHelper.InvalidatePropertyCache(shader);
 				}
 			}
 		}

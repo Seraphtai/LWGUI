@@ -35,7 +35,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Ramp2:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 7e050a45dc871a549a2530bd4acf96ba, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RampAtlas:
+        m_Texture: {fileID: 2800000, guid: 5d501ab9fed726e4baa7d838819327e9, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _normal:
@@ -46,7 +50,9 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    m_Ints: []
+    m_Ints:
+    - _Stencil: 0
+    - _StencilWithDescription: 0
     m_Floats:
     - _BlendMode: 1
     - _ColorMask: 15
@@ -54,6 +60,9 @@ Material:
     - _DstBlend: 10
     - _PresetGroup: 0
     - _Queue: 2000
+    - _RampAtlasIndex0: 0
+    - _RampAtlasIndex1: 2
+    - _RampAtlasIndexer: 0
     - _SrcBlend: 5
     - _ZTest: 4
     - _ZWrite: 0

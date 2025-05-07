@@ -21,7 +21,7 @@ namespace LWGUI.Runtime.LwguiGradient
             Num     = 4
         }
 
-        [Flags]
+        [Flags] // Flags Attribute must be used to support bit operations
         public enum ChannelMask
         {
             None    = 0,
@@ -30,7 +30,7 @@ namespace LWGUI.Runtime.LwguiGradient
             Blue    = 1 << 2,
             Alpha   = 1 << 3,
             RGB     = Red | Green | Blue,
-            All     = RGB | Alpha
+            All     = ~0
         }
         
         public enum GradientTimeRange
@@ -61,6 +61,49 @@ namespace LWGUI.Runtime.LwguiGradient
 
         // The complete data is stored by RGBA Curves and can be converted into Texture
         [SerializeField] private List<AnimationCurve> _curves;
+        
+        public List<AnimationCurve> rawCurves
+        {
+            get
+            {
+                _curves ??= new List<AnimationCurve>();
+                if (_curves.Count < (int)Channel.Num)
+                {
+                    for (int c = 0; c < (int)Channel.Num; c++)
+                    {
+                        if (c == _curves.Count)
+                            _curves.Add(defaultCurve);
+                    }
+                }
+
+                return _curves;
+            }
+            set => SetRgbaCurves(value);
+        }
+
+        public AnimationCurve redCurve
+        {
+            get => rawCurves[(int)Channel.Red] ?? defaultCurve;
+            set => SetCurve(value, ChannelMask.Red);
+        }
+
+        public AnimationCurve greenCurve
+        {
+            get => rawCurves[(int)Channel.Green] ?? defaultCurve;
+            set => SetCurve(value, ChannelMask.Green);
+        }
+
+        public AnimationCurve blueCurve
+        {
+            get => rawCurves[(int)Channel.Blue] ?? defaultCurve;
+            set => SetCurve(value, ChannelMask.Blue);
+        }
+
+        public AnimationCurve alphaCurve
+        {
+            get => rawCurves[(int)Channel.Alpha] ?? defaultCurve;
+            set => SetCurve(value, ChannelMask.Alpha);
+        }
 
         #endregion
 
@@ -248,7 +291,7 @@ namespace LWGUI.Runtime.LwguiGradient
                 if (!IsChannelIndexInMask(c, channelMask))
                     continue;
                 
-                _curves[c].AddKey(key);
+                rawCurves[c].AddKey(key);
             }
 
         }
@@ -261,60 +304,28 @@ namespace LWGUI.Runtime.LwguiGradient
             }
         }
 
-        
-        public List<AnimationCurve> rawCurves
-        {
-            get => _curves;
-            set => SetRgbaCurves(value);
-        }
-
-        public AnimationCurve redCurve
-        {
-            get => _curves[(int)Channel.Red] ?? defaultCurve;
-            set => SetCurve(value, ChannelMask.Red);
-        }
-
-        public AnimationCurve greenCurve
-        {
-            get => _curves[(int)Channel.Green] ?? defaultCurve;
-            set => SetCurve(value, ChannelMask.Green);
-        }
-
-        public AnimationCurve blueCurve
-        {
-            get => _curves[(int)Channel.Blue] ?? defaultCurve;
-            set => SetCurve(value, ChannelMask.Blue);
-        }
-
-        public AnimationCurve alphaCurve
-        {
-            get => _curves[(int)Channel.Alpha] ?? defaultCurve;
-            set => SetCurve(value, ChannelMask.Alpha);
-        }
-
-
         public Color Evaluate(float time, ChannelMask channelMask = ChannelMask.All, GradientTimeRange timeRange = GradientTimeRange.One)
         {
             time /= (int)timeRange;
             
             if (channelMask == ChannelMask.Alpha)
             {
-                var alpha = _curves[(int)Channel.Alpha].Evaluate(time);
+                var alpha = rawCurves[(int)Channel.Alpha].Evaluate(time);
                 return new Color(alpha, alpha, alpha, 1);
             }
 
             return new Color(
-                 IsChannelIndexInMask((int)Channel.Red, channelMask)     ? _curves[(int)Channel.Red].Evaluate(time)     : 0,
-                 IsChannelIndexInMask((int)Channel.Green, channelMask)   ? _curves[(int)Channel.Green].Evaluate(time)   : 0,
-                 IsChannelIndexInMask((int)Channel.Blue, channelMask)    ? _curves[(int)Channel.Blue].Evaluate(time)    : 0,
-                 IsChannelIndexInMask((int)Channel.Alpha, channelMask)   ? _curves[(int)Channel.Alpha].Evaluate(time)   : 1);
+                 IsChannelIndexInMask((int)Channel.Red, channelMask)     ? rawCurves[(int)Channel.Red].Evaluate(time)     : 0,
+                 IsChannelIndexInMask((int)Channel.Green, channelMask)   ? rawCurves[(int)Channel.Green].Evaluate(time)   : 0,
+                 IsChannelIndexInMask((int)Channel.Blue, channelMask)    ? rawCurves[(int)Channel.Blue].Evaluate(time)    : 0,
+                 IsChannelIndexInMask((int)Channel.Alpha, channelMask)   ? rawCurves[(int)Channel.Alpha].Evaluate(time)   : 1);
         }
 
         public void SetLinearTangentMode()
         {
             for (int c = 0; c < (int)Channel.Num; c++)
             {
-                _curves[c].SetLinearTangents();
+                rawCurves[c].SetLinearTangents();
             }
         }
 
@@ -334,6 +345,23 @@ namespace LWGUI.Runtime.LwguiGradient
             }
 
             return pixels;
+        }
+
+        public void GetPixels(ref Color[] outputPixels, ref int currentIndex, int width, int height, ChannelMask channelMask = ChannelMask.All)
+        {
+            if (outputPixels == null || currentIndex >= outputPixels.Length)
+                return;
+            
+            for (var x = 0; x < width; x++)
+            {
+                var u   = x / (float)width;
+                var col = Evaluate(u, channelMask);
+                for (int i = 0; i < height; i++)
+                {
+                    if (currentIndex < outputPixels.Length)
+                        outputPixels[currentIndex ++] = col;
+                }
+            }
         }
 
         public Texture2D GetPreviewRampTexture(int width = 256, int height = 1, ColorSpace colorSpace = ColorSpace.Gamma, ChannelMask channelMask = ChannelMask.All)
@@ -492,7 +520,7 @@ namespace LWGUI.Runtime.LwguiGradient
 
         public Gradient ToGradient(int maxGradientKeyCount = 8)
         {
-            return new LwguiMergedColorCurves(_curves).ToGradient(maxGradientKeyCount);
+            return new LwguiMergedColorCurves(rawCurves).ToGradient(maxGradientKeyCount);
         }
 
         #endregion

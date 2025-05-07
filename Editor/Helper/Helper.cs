@@ -16,29 +16,11 @@ namespace LWGUI
 	/// </summary>
 	public static class Helper
 	{
-		#region Math
-
-		public const double Float_Epsilon = 1e-10;
-
-		public static bool Approximately(float a, float b) => Mathf.Abs(a - b) < Float_Epsilon;
 		
-		public static bool PropertyValueEquals(MaterialProperty prop1, MaterialProperty prop2)
-		{
-			if (prop1.textureValue == prop2.textureValue
-			 && prop1.vectorValue == prop2.vectorValue
-			 && prop1.colorValue == prop2.colorValue
-			 && Approximately(prop1.floatValue, prop2.floatValue)
-			 && prop1.intValue == prop2.intValue
-			   )
-				return true;
-			else
-				return false;
-		}
-		
-		#endregion
-
 		#region Engine Misc
 		
+		public static readonly string ProjectPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6);
+
 		public static bool IsPropertyHideInInspector(MaterialProperty prop)
 		{
 			return (prop.flags & MaterialProperty.PropFlags.HideInInspector) != 0;
@@ -164,6 +146,23 @@ namespace LWGUI
 
 
 		#region Math
+
+		public const double Float_Epsilon = 1e-10;
+
+		public static bool Approximately(float a, float b) => Mathf.Abs(a - b) < Float_Epsilon;
+		
+		public static bool PropertyValueEquals(MaterialProperty prop1, MaterialProperty prop2)
+		{
+			if (prop1.textureValue == prop2.textureValue
+			    && prop1.vectorValue == prop2.vectorValue
+			    && prop1.colorValue == prop2.colorValue
+			    && Approximately(prop1.floatValue, prop2.floatValue)
+			    && prop1.intValue == prop2.intValue
+			   )
+				return true;
+			else
+				return false;
+		}
 
 		public static float PowPreserveSign(float f, float p)
 		{
@@ -311,6 +310,15 @@ namespace LWGUI
 			}
 
 			return flag;
+		}
+
+		public static void DrawShaderPropertyWithErrorLabel(Rect position, MaterialProperty prop, GUIContent label, MaterialEditor editor, string message)
+		{
+			var c = GUI.color;
+			GUI.color = Color.red;
+			var newLabel = $"{ label.text } ({ message })";
+			editor.DefaultShaderProperty(position, prop, newLabel);
+			GUI.color = c;
 		}
 
 		#endregion
@@ -599,10 +607,10 @@ namespace LWGUI
 				// Build Display Mode Menu Items
 				var displayModeMenus = new[]
 				{
-					"Show All Advanced Properties			(" + displayModeData.advancedCount	+ " of " + perShaderData.propStaticDatas.Count + ")",
-					"Show All Hidden Properties				(" + displayModeData.hiddenCount	+ " of " + perShaderData.propStaticDatas.Count + ")",
-					"Show Only Modified Properties			(" + perMaterialData.modifiedCount	+ " of " + perShaderData.propStaticDatas.Count + ")",
-					"Show Only Modified Properties by Group	(" + perMaterialData.modifiedCount	+ " of " + perShaderData.propStaticDatas.Count + ")",
+					$"Show All Advanced Properties				({ displayModeData.advancedCount } - { perShaderData.propStaticDatas.Count })",
+					$"Show All Hidden Properties				({ displayModeData.hiddenCount } - { perShaderData.propStaticDatas.Count })",
+					$"Show Only Modified Properties				({ perMaterialData.modifiedCount } - { perShaderData.propStaticDatas.Count })",
+					$"Show Only Modified Properties by Group	({ perMaterialData.modifiedCount } - { perShaderData.propStaticDatas.Count })",
 				};
 				var enabled = new[] { true, true, true, true };
 				var separator = new bool[4];
@@ -759,7 +767,7 @@ namespace LWGUI
 
 		#region Context Menu
 
-		private static void EditPresetEvent(string mode, ShaderPropertyPreset presetAsset, List<ShaderPropertyPreset.Preset> targetPresets, MaterialProperty prop, LWGUIMetaDatas metaDatas)
+		private static void EditPresetEvent(string mode, LwguiShaderPropertyPreset presetAsset, List<LwguiShaderPropertyPreset.Preset> targetPresets, MaterialProperty prop, LWGUIMetaDatas metaDatas)
 		{
 			if (!VersionControlHelper.Checkout(presetAsset))
 			{
@@ -791,15 +799,15 @@ namespace LWGUI
 
 			var (perShaderData, perMaterialData, perInspectorData) = metaDatas.GetDatas();
 			var (propStaticData, propDynamicData) = metaDatas.GetPropDatas(prop);
-			var menus = new GenericMenu();
+			var menu = new GenericMenu();
 
 			// 2022+ Material Varant Menus
 #if UNITY_2022_1_OR_NEWER
-			ReflectionHelper.HandleApplyRevert(menus, prop);
+			ReflectionHelper.HandleApplyRevert(menu, prop);
 #endif
 
 			// Copy
-			menus.AddItem(new GUIContent("Copy"), false, () =>
+			menu.AddItem(new GUIContent("Copy"), false, () =>
 			{
 				_copiedMaterial = UnityEngine.Object.Instantiate(metaDatas.GetMaterial());
 				_copiedProps.Clear();
@@ -878,20 +886,20 @@ namespace LWGUI
 			};
 
 			if (_copiedMaterial != null && _copiedProps.Count > 0 && GUI.enabled)
-				menus.AddItem(new GUIContent("Paste"), false, pasteAction);
+				menu.AddItem(new GUIContent("Paste"), false, pasteAction);
 			else
-				menus.AddDisabledItem(new GUIContent("Paste"));
+				menu.AddDisabledItem(new GUIContent("Paste"));
 
-			menus.AddSeparator("");
+			menu.AddSeparator("");
 
 			// Copy Display Name
-			menus.AddItem(new GUIContent("Copy Display Name"), false, () =>
+			menu.AddItem(new GUIContent("Copy Display Name"), false, () =>
 			{
 				EditorGUIUtility.systemCopyBuffer = propStaticData.displayName;
 			});
 
 			// Copy Property Names
-			menus.AddItem(new GUIContent("Copy Property Names"), false, () =>
+			menu.AddItem(new GUIContent("Copy Property Names"), false, () =>
 			{
 				EditorGUIUtility.systemCopyBuffer = prop.name;
 				foreach (var extraPropName in propStaticData.extraPropNames)
@@ -915,7 +923,7 @@ namespace LWGUI
 			// Preset
 			if (GUI.enabled)
 			{
-				menus.AddSeparator("");
+				menu.AddSeparator("");
 				foreach (var activePresetData in perMaterialData.activePresetDatas)
 				{
 					// Cull self
@@ -931,20 +939,29 @@ namespace LWGUI
 
 					if (activePreset.GetPropertyValue(prop.name) != null)
 					{
-						menus.AddItem(new GUIContent("Update to Preset/" + presetPropDisplayName + "/" + "All"), false, () => EditPresetEvent("Update", presetAsset, presetAsset.GetPresets(), prop, metaDatas));
-						menus.AddItem(new GUIContent("Update to Preset/" + presetPropDisplayName + "/" + activePreset.presetName), false, () => EditPresetEvent("Update", presetAsset, new List<ShaderPropertyPreset.Preset>(){activePreset}, prop, metaDatas));
-						menus.AddItem(new GUIContent("Remove from Preset/" + presetPropDisplayName + "/" + "All"), false, () => EditPresetEvent("Remove", presetAsset, presetAsset.GetPresets(), prop, metaDatas));
-						menus.AddItem(new GUIContent("Remove from Preset/" + presetPropDisplayName + "/" + activePreset.presetName), false, () => EditPresetEvent("Remove", presetAsset, new List<ShaderPropertyPreset.Preset>(){activePreset}, prop, metaDatas));
+						menu.AddItem(new GUIContent("Update to Preset/" + presetPropDisplayName + "/" + "All"), false, () => EditPresetEvent("Update", presetAsset, presetAsset.GetPresets(), prop, metaDatas));
+						menu.AddItem(new GUIContent("Update to Preset/" + presetPropDisplayName + "/" + activePreset.presetName), false, () => EditPresetEvent("Update", presetAsset, new List<LwguiShaderPropertyPreset.Preset>(){activePreset}, prop, metaDatas));
+						menu.AddItem(new GUIContent("Remove from Preset/" + presetPropDisplayName + "/" + "All"), false, () => EditPresetEvent("Remove", presetAsset, presetAsset.GetPresets(), prop, metaDatas));
+						menu.AddItem(new GUIContent("Remove from Preset/" + presetPropDisplayName + "/" + activePreset.presetName), false, () => EditPresetEvent("Remove", presetAsset, new List<LwguiShaderPropertyPreset.Preset>(){activePreset}, prop, metaDatas));
 					}
 					else
 					{
-						menus.AddItem(new GUIContent("Add to Preset/" + presetPropDisplayName + "/" + "All"), false, () => EditPresetEvent("Add", presetAsset, presetAsset.GetPresets(), prop, metaDatas));
-						menus.AddItem(new GUIContent("Add to Preset/" + presetPropDisplayName + "/" + activePreset.presetName), false, () => EditPresetEvent("Add", presetAsset, new List<ShaderPropertyPreset.Preset>(){activePreset}, prop, metaDatas));
+						menu.AddItem(new GUIContent("Add to Preset/" + presetPropDisplayName + "/" + "All"), false, () => EditPresetEvent("Add", presetAsset, presetAsset.GetPresets(), prop, metaDatas));
+						menu.AddItem(new GUIContent("Add to Preset/" + presetPropDisplayName + "/" + activePreset.presetName), false, () => EditPresetEvent("Add", presetAsset, new List<LwguiShaderPropertyPreset.Preset>(){activePreset}, prop, metaDatas));
 					}
 				}
 			}
+			
+			// Custom
+			if (propStaticData.baseDrawers != null)
+			{
+				foreach (var baseDrawer in propStaticData.baseDrawers)
+				{
+					baseDrawer.GetCustomContextMenus(menu, rect, prop, metaDatas);
+				}
+			}
 
-			menus.ShowAsContext();
+			menu.ShowAsContext();
 		}
 
 		#endregion

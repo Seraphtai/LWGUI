@@ -7,7 +7,7 @@ namespace LWGUI
 {
 	public class PresetHelper
 	{
-		private static Dictionary<string /*FileName*/, ShaderPropertyPreset> _loadedPresets = new Dictionary<string, ShaderPropertyPreset>();
+		private static Dictionary<string /*FileName*/, LwguiShaderPropertyPreset> _loadedPresets = new Dictionary<string, LwguiShaderPropertyPreset>();
 
 		private static bool _isInitComplete;
 
@@ -25,16 +25,16 @@ namespace LWGUI
 		{
 			_loadedPresets.Clear();
 			_isInitComplete = false;
-			var GUIDs = AssetDatabase.FindAssets("t:" + typeof(ShaderPropertyPreset));
+			var GUIDs = AssetDatabase.FindAssets("t:" + typeof(LwguiShaderPropertyPreset));
 			foreach (var GUID in GUIDs)
 			{
-				var preset = AssetDatabase.LoadAssetAtPath<ShaderPropertyPreset>(AssetDatabase.GUIDToAssetPath(GUID));
+				var preset = AssetDatabase.LoadAssetAtPath<LwguiShaderPropertyPreset>(AssetDatabase.GUIDToAssetPath(GUID));
 				AddPreset(preset);
 			}
 			_isInitComplete = true;
 		}
 
-		public static void AddPreset(ShaderPropertyPreset preset)
+		public static void AddPreset(LwguiShaderPropertyPreset preset)
 		{
 			if (!preset) return;
 			if (!_loadedPresets.ContainsKey(preset.name))
@@ -43,7 +43,7 @@ namespace LWGUI
 			}
 		}
 
-		public static ShaderPropertyPreset GetPresetAsset(string presetFileName)
+		public static LwguiShaderPropertyPreset GetPresetAsset(string presetFileName)
 		{
 			if (string.IsNullOrEmpty(presetFileName))
 				return null;

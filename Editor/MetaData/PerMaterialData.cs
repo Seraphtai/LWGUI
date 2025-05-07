@@ -10,10 +10,10 @@ namespace LWGUI
 {
 	public class PersetDynamicData
 	{
-		public ShaderPropertyPreset.Preset preset;
+		public LwguiShaderPropertyPreset.Preset preset;
 		public MaterialProperty            property;
 
-		public PersetDynamicData(ShaderPropertyPreset.Preset preset, MaterialProperty property)
+		public PersetDynamicData(LwguiShaderPropertyPreset.Preset preset, MaterialProperty property)
 		{
 			this.preset = preset;
 			this.property = property;
@@ -38,13 +38,15 @@ namespace LWGUI
 	/// </summary>
 	public class PerMaterialData
 	{
-		public Dictionary<string, PropertyDynamicData> propDynamicDatas         = new Dictionary<string, PropertyDynamicData>();
-		public MaterialProperty[]                      props                    = null;
-		public Material                                material                 = null;
-		public List<PersetDynamicData>                 activePresetDatas        = new List<PersetDynamicData>();
-		public int                                     modifiedCount            = 0;
-		public Dictionary<string, bool>                cachedModifiedProperties = null;
-		public bool                                    forceInit                = true;
+		public Dictionary<string, PropertyDynamicData> propDynamicDatas         			= new Dictionary<string, PropertyDynamicData>();
+		public MaterialProperty[]                      props                    			= null;
+		public Material                                material                 			= null;
+		public Material                                defaultMaterialWithPresetOverride	= null;
+		public MaterialProperty[]                      defaultPropertiesWithPresetOverride  = null;
+		public List<PersetDynamicData>                 activePresetDatas        			= new List<PersetDynamicData>();
+		public int                                     modifiedCount            			= 0;
+		public Dictionary<string, bool>                cachedModifiedProperties 			= null;
+		public bool                                    forceInit                			= true;
 
 		public PerMaterialData(Shader shader, Material material, MaterialEditor editor, MaterialProperty[] props, PerShaderData perShaderData)
 		{
@@ -78,7 +80,7 @@ namespace LWGUI
 
 			{
 				// Apply presets to default material
-				var defaultMaterial = UnityEngine.Object.Instantiate(
+				defaultMaterialWithPresetOverride = UnityEngine.Object.Instantiate(
 #if UNITY_2022_1_OR_NEWER
 																	 material.parent
 																		 ? material.parent
@@ -88,20 +90,20 @@ namespace LWGUI
 																	);
 
 				foreach (var activePresetData in activePresetDatas)
-					activePresetData.preset.ApplyToDefaultMaterial(defaultMaterial);
+					activePresetData.preset.ApplyToDefaultMaterial(defaultMaterialWithPresetOverride);
 
-				var defaultProperties = MaterialEditor.GetMaterialProperties(new[] { defaultMaterial });
-				Debug.Assert(defaultProperties.Length == props.Length);
+				defaultPropertiesWithPresetOverride = MaterialEditor.GetMaterialProperties(new[] { defaultMaterialWithPresetOverride });
+				Debug.Assert(defaultPropertiesWithPresetOverride.Length == props.Length);
 
 				// Init propDynamicDatas
 				for (int i = 0; i < props.Length; i++)
 				{
-					var hasModified = !Helper.PropertyValueEquals(props[i], defaultProperties[i]);
+					var hasModified = !Helper.PropertyValueEquals(props[i], defaultPropertiesWithPresetOverride[i]);
 					if (hasModified) modifiedCount++;
 					propDynamicDatas.Add(props[i].name, new PropertyDynamicData()
 					{
 						property = props[i],
-						defualtProperty = defaultProperties[i],
+						defualtProperty = defaultPropertiesWithPresetOverride[i],
 						hasModified = hasModified
 					});
 				}

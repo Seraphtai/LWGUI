@@ -12,6 +12,7 @@
 		[Title(Title)]
 		[Tex(_, _mColor2)] _tex ("tex color", 2D) = "white" { }
 		
+		
 		[Title(Title on Group)]
 		// Create a folding group with name "g1"
 		[Main(g1)] _group ("Group", float) = 0
@@ -34,13 +35,20 @@
 		[HideInInspector] _mColor2 (" ", Color) = (0, 1, 0, 1)
 		[HideInInspector] [HDR] _mColor3 (" ", Color) = (0, 0, 1, 1)
 
+		
 		// Create a drop-down menu that opens by default, without toggle
 		[Main(g2, _KEYWORD, on, off)] _group2 ("group2 without toggle", float) = 1
-		[Sub(g2)] _float2 ("float2", float) = 2
-		[Ramp(g2)] _Ramp2 ("Ramp2", 2D) = "white" { }
 		[Tooltip(Test Tooltip)]
 		[Helpbox(Test Helpbox)]
 		[Sub(g2)] _float_tooltip_helpbox ("float tooltip helpbox#这是中文Tooltip%これは日本語Helpboxです", float) = 0
+		[Sub(g2)] _float2 ("float2", float) = 2
+		[Title(Ramp Sample)]
+		[Ramp(g2)] _Ramp2 ("Ramp2", 2D) = "white" { }
+		[Title(Ramp Atlas Sample)]
+		[RampAtlas(g2)] _RampAtlas ("Ramp Atlas", 2D) = "white" { }
+		[RampAtlasIndexer(g2, _RampAtlas)] _RampAtlasIndex0 ("Ramp Atlas Indexer", float) = 0
+		[RampAtlasIndexer(g2, _RampAtlas)] _RampAtlasIndex1 ("Ramp Atlas Indexer", float) = 2
+		[RampAtlasIndexer(g2, _RampAtlas, Ramp_Green, Linear, GA, 24)] _RampAtlasIndex2 ("Ramp Atlas Indexer Linear/Green/24", float) = 4
 
 		
 		[Main(Preset, _, on, off)] _PresetGroup ("Preset Samples", float) = 0
@@ -78,6 +86,10 @@
 			#pragma fragment frag
 
 			#include "UnityCG.cginc"
+			
+			sampler2D _RampAtlas;
+			float4 _RampAtlas_TexelSize;
+			int _RampAtlasIndex0;
 
 			struct appdata
 			{
@@ -103,8 +115,8 @@
 
 			fixed4 frag(v2f i) : SV_Target
 			{
-				// sample the texture
-				fixed4 col = _Color;
+				float2 rampUV = float2(i.uv.x, _RampAtlas_TexelSize.y * (_RampAtlasIndex0 + 0.5f));
+				fixed4 col = tex2D(_RampAtlas, saturate(rampUV));
 				return col;
 			}
 			ENDCG

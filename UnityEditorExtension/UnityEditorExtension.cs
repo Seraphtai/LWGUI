@@ -53,5 +53,39 @@ namespace LWGUI
 
 		#endregion
 
+		#region MaterialProperty
+
+		public static float GetNumericValue(this MaterialProperty prop)
+		{
+			switch (prop.type)
+			{
+				case MaterialProperty.PropType.Float or MaterialProperty.PropType.Range:
+					return prop.floatValue;
+				case MaterialProperty.PropType.Int:
+					return prop.intValue;
+				default:
+					Debug.LogError($"LWGUI: Material Property { prop.name } is NOT numeric type.");
+					return 0;
+			}
+		}
+
+		public static void SetNumericValue(this MaterialProperty prop, float value)
+		{
+			switch (prop.type)
+			{
+				case MaterialProperty.PropType.Float or MaterialProperty.PropType.Range:
+					prop.floatValue = value;
+					break;
+				case MaterialProperty.PropType.Int:
+					prop.intValue = (int)value;
+					break;
+				default:
+					Debug.LogError($"LWGUI: Material Property { prop.name } is NOT numeric type.");
+					break;
+			}
+		}
+
+		#endregion
+
 	}
 }

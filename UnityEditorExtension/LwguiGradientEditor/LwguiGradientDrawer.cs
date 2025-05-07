@@ -48,10 +48,13 @@ namespace LWGUI.LwguiGradientEditor
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginChangeCheck();
-            var gradient = (LwguiGradient)fieldInfo.GetValue(property.serializedObject.targetObject);
-            LwguiGradientEditorHelper.GradientField(position, label, property, gradient, colorSpace, viewChannelMask, timeRange);
+            // var lwguiGradient = property.GetLwguiGradientValue();
+            LwguiGradientEditorHelper.GradientField(position, label, property, colorSpace, viewChannelMask, timeRange);
             if (EditorGUI.EndChangeCheck())
             {
+                // property.SetLwguiGradientValue(LwguiGradientWindow.instance.lwguiGradient);
+                // property.serializedObject.ApplyModifiedProperties();
+                // EditorUtility.SetDirty(property.serializedObject.targetObject);
             }
         }
     }

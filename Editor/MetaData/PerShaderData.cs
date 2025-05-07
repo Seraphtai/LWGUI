@@ -65,7 +65,7 @@ namespace LWGUI
 		public List<string>         extraPropNames      = new List<string>(); // Other Props that have been associated
 		public string               helpboxMessages     = string.Empty;
 		public string               tooltipMessages     = string.Empty;
-		public ShaderPropertyPreset propertyPresetAsset = null; // The Referenced Preset Asset
+		public LwguiShaderPropertyPreset propertyPresetAsset = null; // The Referenced Preset Asset
 
 		public void AddExtraProperty(string propName)
 		{
