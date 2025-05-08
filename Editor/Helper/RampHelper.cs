@@ -222,10 +222,12 @@ namespace LWGUI
 			textureImporter.mipmapEnabled = false;
 			textureImporter.sRGBTexture = !isLinear;
 
-			var platformTextureSettings = textureImporter.GetDefaultPlatformTextureSettings();
-			platformTextureSettings.format = TextureImporterFormat.RGBA32;
-			platformTextureSettings.textureCompression = TextureImporterCompression.Uncompressed;
-			textureImporter.SetPlatformTextureSettings(platformTextureSettings);
+			foreach (var platformName in Helper.platformNamesForTextureSettings)
+			{
+				var platformTextureSettings = textureImporter.GetPlatformTextureSettings(platformName);
+				platformTextureSettings.format = TextureImporterFormat.RGBA32;
+				textureImporter.SetPlatformTextureSettings(platformTextureSettings);
+			}
 
 			if (userData != null)
 				textureImporter.userData = userData;
@@ -269,7 +271,7 @@ namespace LWGUI
 			if (e.type == UnityEngine.EventType.MouseDown && rect.Contains(e.mousePosition))
 			{
 				e.Use();
-				RampSelectorWindow.ShowWindow(prop, rampAtlas.GetTexture2Ds(), switchRampMapEvent);
+				RampSelectorWindow.ShowWindow(prop, rampAtlas.GetTexture2Ds(LwguiGradient.ChannelMask.RGB), switchRampMapEvent);
 			}
 		}
 		#endregion
@@ -311,7 +313,8 @@ namespace LWGUI
 					var buttonWidth = Mathf.Min(300f, Mathf.Max(GUI.skin.button.CalcSize(guiContent).x, rect.width * 0.35f));
 					var buttonRect = new Rect(rect.x + rect.width - buttonWidth, rect.y, buttonWidth, rect.height);
 					var previewRect = new Rect(rect.x, rect.y, rect.width - buttonWidth - 3.0f, rect.height);
-					if (GUI.Button(buttonRect, guiContent) && _switchRampMapEvent != null)
+					
+					if (GUI.Button(buttonRect, guiContent, Helper.guiStyle_RampSelectButton) && _switchRampMapEvent != null)
 					{
 						_switchRampMapEvent(_prop, rampMap, i);
 						LwguiGradientWindow.CloseWindow();

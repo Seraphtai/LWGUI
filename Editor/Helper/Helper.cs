@@ -17,7 +17,7 @@ namespace LWGUI
 	public static class Helper
 	{
 		
-		#region Engine Misc
+		#region Misc
 		
 		public static readonly string ProjectPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6);
 
@@ -194,6 +194,9 @@ namespace LWGUI
 
 		private static GUIStyle _guiStyle_Helpbox;
 		public static GUIStyle guiStyle_Helpbox => _guiStyle_Helpbox ?? new GUIStyle(EditorStyles.helpBox) { fontSize = 12 };
+		
+		private static GUIStyle _guiStyle_RampSelectButton;
+		public static GUIStyle guiStyle_RampSelectButton => _guiStyle_RampSelectButton ?? new GUIStyle(EditorStyles.miniButton) { alignment = TextAnchor.MiddleLeft };
 
 		private static GUIStyle _guiStyles_ToolbarSearchTextFieldPopup;
 		public static GUIStyle guiStyles_ToolbarSearchTextFieldPopup
@@ -963,6 +966,13 @@ namespace LWGUI
 
 			menu.ShowAsContext();
 		}
+
+		#endregion
+
+		#region Importer
+
+		// https://docs.unity3d.com/ScriptReference/TextureImporter.GetPlatformTextureSettings.html
+		public static string[] platformNamesForTextureSettings => new[] { "DefaultTexturePlatform", "Standalone", "Web", "iPhone", "Android", "WebGL", "Windows Store Apps", "PS4", "XboxOne", "Nintendo Switch", "tvOS" };
 
 		#endregion
 	}

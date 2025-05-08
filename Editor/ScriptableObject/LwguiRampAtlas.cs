@@ -1,4 +1,4 @@
-﻿// Copyright (c) Jason Ma
+// Copyright (c) Jason Ma
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,7 +18,7 @@ namespace LWGUI
 		[Serializable]
 		public class Ramp
 		{
-			public string name = "Ramp";
+			public string name = "New Ramp";
 			public LwguiGradient gradient = LwguiGradient.white;
 			public ColorSpace colorSpace = ColorSpace.Gamma;
 			public LwguiGradient.ChannelMask channelMask = LwguiGradient.ChannelMask.All;
@@ -29,7 +29,7 @@ namespace LWGUI
 		public const string RampAtlasTextureExtensionName = "tga";
 		
 		public int rampAtlasWidth = 256;
-		public int rampAtlasHeight = 8;
+		public int rampAtlasHeight = 4;
 		public bool rampAtlasSRGB = true;
 		
 		[NonSerialized] public Texture2D rampAtlasTexture = null;
@@ -41,7 +41,8 @@ namespace LWGUI
 
 			set => _ramps = value ?? new List<Ramp>();
 		}
-		
+
+		[SerializeField] private bool _saveTextureToggle;
 		private string _rampAtlasSOPath = string.Empty;
 		private string _rampAtlasTexturePath = string.Empty;
 
@@ -90,13 +91,13 @@ namespace LWGUI
 			return pixels;
 		}
 
-		public Texture2D[] GetTexture2Ds()
+		public Texture2D[] GetTexture2Ds(LwguiGradient.ChannelMask channelMask = LwguiGradient.ChannelMask.All)
 		{
 			Texture2D[] textures = new Texture2D[ramps.Count];
 			for (int i = 0; i < ramps.Count; i++)
 			{
 				var ramp = ramps[i];
-				textures[i] = ramp.gradient?.GetPreviewRampTexture(rampAtlasWidth, 1, ramp.colorSpace, ramp.channelMask);
+				textures[i] = Instantiate(ramp.gradient?.GetPreviewRampTexture(rampAtlasWidth, 1, ramp.colorSpace, ramp.channelMask & channelMask));
 				textures[i].name = ramp.name;
 			}
 
@@ -212,7 +213,9 @@ namespace LWGUI
 		private void OnValidate()
 		{
 			// Skip at the end of compilation
-			if (Event.current == null)
+			if (Event.current == null
+			// Skip when editing Text Field
+			    || EditorGUIUtility.editingTextField)
 				return;
 			
 			InitData();
@@ -246,13 +249,12 @@ namespace LWGUI
 			return AssetDatabase.LoadAssetAtPath<LwguiRampAtlas>(soPath);
 		}
 		
-		public static LwguiRampAtlas CreateRampAtlasSO(MaterialProperty rampAtlasProp, MaterialEditor editor, LWGUIMetaDatas metaDatas)
-			=> CreateRampAtlasSO(rampAtlasProp, (editor.target as Material).shader, metaDatas);
-		
-		public static LwguiRampAtlas CreateRampAtlasSO(MaterialProperty rampAtlasProp, Shader shader, LWGUIMetaDatas metaDatas)
+		public static LwguiRampAtlas CreateRampAtlasSO(MaterialProperty rampAtlasProp, LWGUIMetaDatas metaDatas)
 		{
-			if (rampAtlasProp == null || shader == null || metaDatas == null)
+			if (rampAtlasProp == null || metaDatas == null)
 				return null;
+
+			var shader = metaDatas.GetShader();
 			
 			// Get default ramps
 			RampAtlasDrawer targetRampAtlasDrawer = null;

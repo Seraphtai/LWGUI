@@ -1047,7 +1047,7 @@ namespace LWGUI
 			else
 			{
 				var rampAtlasProp = metaDatas.GetProperty(rampAtlasPropName);
-				var newRampAtlasSO = LwguiRampAtlas.CreateRampAtlasSO(rampAtlasProp, editor, metaDatas);
+				var newRampAtlasSO = LwguiRampAtlas.CreateRampAtlasSO(rampAtlasProp, metaDatas);
 				if (newRampAtlasSO)
 				{
 					rampAtlasSO = newRampAtlasSO;
@@ -1291,6 +1291,9 @@ namespace LWGUI
 					if (viewChannelMask.Contains(LwguiGradient.channelNames[c]))
 						this.viewChannelMask |= LwguiGradient.ChannelIndexToMask(c);
 				}
+
+				if (this.viewChannelMask == (LwguiGradient.ChannelMask.RGB | LwguiGradient.ChannelMask.Alpha))
+					this.viewChannelMask = LwguiGradient.ChannelMask.All;
 			}
 			this.timeRange = LwguiGradient.GradientTimeRange.One;
 			{
@@ -1514,7 +1517,7 @@ namespace LWGUI
 		public string rootPath = "Assets";
 		public string defaultFileName = "LWGUI_RampAtlas";
 		public int defaultAtlasWidth = 256;
-		public int defaultAtlasHeight = 8;
+		public int defaultAtlasHeight = 2;
 		public bool defaultAtlasSRGB = true;
 		
 		protected LwguiRampAtlas _rampAtlasSO;
@@ -1529,7 +1532,7 @@ namespace LWGUI
 		
 		public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace) : this(group, defaultFileName, rootPath, colorSpace, 256) { }
 		
-		public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, 8) { }
+		public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, 4) { }
 		
 		public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight)
 		{
@@ -1557,7 +1560,7 @@ namespace LWGUI
 			menu.AddSeparator("");
 			menu.AddItem(new GUIContent("Create Ramp Atlas"), false, () =>
 			{
-				_rampAtlasSO = LwguiRampAtlas.CreateRampAtlasSO(prop, metaDatas.GetShader(), metaDatas);
+				_rampAtlasSO = LwguiRampAtlas.CreateRampAtlasSO(prop, metaDatas);
 				if (_rampAtlasSO)
 				{
 					prop.textureValue = _rampAtlasSO.rampAtlasTexture;
