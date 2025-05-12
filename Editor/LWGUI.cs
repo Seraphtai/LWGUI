@@ -10,7 +10,8 @@ namespace LWGUI
 
 	public class LWGUI : ShaderGUI
 	{
-		public LWGUIMetaDatas     metaDatas;
+		public LWGUIMetaDatas metaDatas;
+		public bool hasChange;
 
 		public static LWGUICustomGUIEvent onDrawCustomHeader;
 		public static LWGUICustomGUIEvent onDrawCustomFooter;
@@ -29,6 +30,11 @@ namespace LWGUI
 			// Init Datas
 			var material = editor.target as Material;
 			var shader = material.shader;
+			if (hasChange)
+			{
+				OnValidate(editor.targets);
+				hasChange = false;
+			}
 			this.metaDatas = MetaDataHelper.BuildMetaDatas(shader, material, editor, this, props);
 
 
@@ -207,10 +213,7 @@ namespace LWGUI
 			// Debug.Log($"ValidateMaterial {material.name}, {metaDatas}, {Event.current?.type}");
 
 			// Validate a Faked Material when select/edit a Material
-			if ((metaDatas == null && (Event.current == null || Event.current.type == EventType.Layout))
-			    // Edit a Material or Press a Button
-			    || (Event.current != null && Event.current.type == EventType.Used)
-			    )
+			if (metaDatas == null && (Event.current == null || Event.current.type == EventType.Layout))
 			{
 				// Skip to avoid lag when editing large amounts of materials
 			}
@@ -220,10 +223,10 @@ namespace LWGUI
 			{
 				MetaDataHelper.ForceUpdateMaterialMetadataCache(material);
 			}
-			// Other
+			// Edit
 			else
 			{
-				OnValidate(metaDatas);
+				if (!hasChange) hasChange = true;
 			}
 		}
 	}
