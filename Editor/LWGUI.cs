@@ -202,19 +202,25 @@ namespace LWGUI
 			OnValidate(metaDatas?.GetMaterialEditor()?.targets);
 		}
 		
-		// Called after Edit/Undo/MaterialEditor.GetMaterialProperties()
 		public override void ValidateMaterial(Material material)
 		{
-			base.ValidateMaterial(material);
+			// Debug.Log($"ValidateMaterial {material.name}, {metaDatas}, {Event.current?.type}");
 
-			// Undo/Edit in Timeline
-			// Note: When modifying the material in Timeline in Unity 2022, this function cannot correctly obtain the modified value.
-			if (metaDatas == null)
+			// Validate a Faked Material when select/edit a Material
+			if ((metaDatas == null && (Event.current == null || Event.current.type == EventType.Layout))
+			    // Edit a Material or Press a Button
+			    || (Event.current != null && Event.current.type == EventType.Used)
+			    )
 			{
-				// OnValidate(new Object[] { material });
+				// Skip to avoid lag when editing large amounts of materials
+			}
+			// Undo/Edit in Timeline (EventType.Repaint)
+			// Note: When modifying the material in Timeline in Unity 2022, this function cannot correctly obtain the modified value.
+			else if (metaDatas == null)
+			{
 				MetaDataHelper.ForceUpdateMaterialMetadataCache(material);
 			}
-			// Edit
+			// Other
 			else
 			{
 				OnValidate(metaDatas);

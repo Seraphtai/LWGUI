@@ -847,3 +847,4 @@ MonoBehaviour:
     colorSpace: 1
     channelMask: 10
     timeRange: 24
+  _saveTextureToggle: 0
