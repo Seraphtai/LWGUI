@@ -1113,9 +1113,9 @@ namespace LWGUI
 			label.tooltip += $"\nCurrent Value: {currentIndex}";
 			if (rampAtlasSO)
 			{
-				label.text += $" ({ currentIndex } - { rampAtlasSO.ramps.Count })";
-				if (currentIndex >= rampAtlasSO.ramps.Count)
-					label.text += " OUT OF RANGE";
+				var isOutOfRange = currentIndex >= rampAtlasSO.ramps.Count;
+				var info = isOutOfRange ? "OUT OF RANGE!" : rampAtlasSO.ramps[currentIndex].name;
+				label.text += $" ({ currentIndex }: { info } - { rampAtlasSO.ramps.Count })";
 			}
 			else
 				label.text += $" ({ currentIndex } - NULL)";
