@@ -140,7 +140,7 @@ namespace LWGUI
 				var existRampTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(targetRelativePath);
 				if (!VersionControlHelper.IsWriteable(existRampTexture))
 				{
-					if (VersionControlHelper.IsWriteable(this) || checkoutAndForceWrite)
+					if (checkoutAndForceWrite)
 					{
 						if (!VersionControlHelper.Checkout(targetRelativePath))
 						{
@@ -154,11 +154,18 @@ namespace LWGUI
 					}
 				}
 			}
-			
-			File.WriteAllBytes(absPath, rampAtlasTexture.EncodeToTGA());
-			SaveTextureUserData(targetRelativePath);
-			
-			Debug.Log($"LWGUI: Saved the Ramp Atlas Texture at path: { absPath }");
+
+			try
+			{
+				File.WriteAllBytes(absPath, rampAtlasTexture.EncodeToTGA());
+				SaveTextureUserData(targetRelativePath);
+				
+				Debug.Log($"LWGUI: Saved the Ramp Atlas Texture at path: { absPath }");
+			}
+			catch (Exception e)
+			{
+				Debug.LogError(e);
+			}
 		}
 
 		public void SaveTextureUserData(string targetRelativePath = null)
