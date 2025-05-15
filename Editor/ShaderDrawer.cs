@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using LWGUI.LwguiGradientEditor;
+using LWGUI.Runtime;
 using LWGUI.Runtime.LwguiGradient;
 using LWGUI.Timeline;
 using UnityEditor;
@@ -888,7 +889,7 @@ namespace LWGUI
 			{
 				fieldRect.xMin = fieldRect.xMax - buttonWidths[i];
 				var buttonLable = buttonLables[i];
-				var active = IsBitEnabled(prop.intValue, i);
+				var active = RuntimeHelper.IsBitEnabled(prop.intValue, i);
 				var style = buttonStyles[i];
 				var buttonRect = fieldRect;
 				
@@ -906,17 +907,12 @@ namespace LWGUI
 
 				if (Helper.ToggleButton(buttonRect, buttonLable, active, style, _buttonPadding * 1.5f))
 				{
-					prop.intValue = SetBitEnabled(prop.intValue, i, !active);
+					prop.intValue = RuntimeHelper.SetBitEnabled(prop.intValue, i, !active);
 				}
 
 				fieldRect.xMax = fieldRect.xMin;
 			}
 		}
-
-		public static bool IsBitEnabled(int intValue, int bitIndex) => (intValue & 1U << bitIndex) > 0;
-		
-		public static int SetBitEnabled(int intValue, int bitIndex, bool enabled)
-			=> enabled ? intValue | (int)(1U << bitIndex) : intValue ^ (int)(1U << bitIndex);
 	}
 	
 	public class RampAtlasIndexerDrawer : RampDrawer
