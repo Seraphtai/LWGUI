@@ -533,7 +533,7 @@ The new LWGUI Gradient Editor integrates with Unity's built-in [Gradient Editor]
 
 ![image-20241126105823397](./assets~/image-20241126105823397.png)![image-20241126112320151](./assets~/image-20241126112320151.png)
 
-> [!INFO]
+> [!NOTE] 
 > **Known issues:**
 > - Preview images below Unity 2022 have no difference between sRGB/Linear color spaces
 > - Ctrl + Z results may be slightly different from expected when the editor frame rate is too low
