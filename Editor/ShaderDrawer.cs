@@ -806,6 +806,15 @@ namespace LWGUI
 	///		- Currently only 8 bits are supported.
 	///		- Property Type must be 'Integer', not 'Int'.
 	///
+	/// Warning: If used to set Stencil, it will conflict with SRP Batcher!  
+	///		(Reproduced in Unity 2022)  
+	///		SRP Batcher does not correctly handle multiple materials with different Stencil Ref values,  
+	///		mistakenly merging them into a single Batch and randomly selecting one material's Stencil Ref value for the entire Batch.  
+	///		In theory, if different materials have different Stencil Ref values, they should not be merged into a single Batch due to differing Render States.  
+	/// Solution:  
+	///		- Force disable SRP Batcher by setting the Material Property Block  
+	///		- Place materials with the same Stencil Ref value in a separate Render Queue to ensure the Batch's Render State is correct
+	///  
 	/// group: parent group name (Default: none)
 	/// bitDescription 7-0: Description of each Bit. (Default: none)
 	/// Target Property Type: Integer

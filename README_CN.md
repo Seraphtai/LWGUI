@@ -390,7 +390,17 @@ Example:
 Result:
 ![](assets~/Pasted%20image%2020250321174432.png)
 
-
+> [!CAUTION]
+> 警告: 如果用于设置Stencil, 则会与SRP Batcher冲突!  
+> (在Unity 2022中复现)  
+>   
+> SRP Batcher没有正确处理含有不同Stencil Ref的多个材质,  
+> 错误地将它们合并为一个Batch, 并随机选择一个材质中的Stencil Ref值作为整个Batch的值.  
+> 理论上如果不同材质有不同的Stencil Ref值, 由于Render State不同不应该被合并为一个Batch.   
+>    
+> 解决方法: 
+>    - 通过设置Material Property Block强制禁用SRP Batcher  
+>    - 使有相同Stencil Ref的材质在一个单独的Render Queue中, 以确保Batch的Render State是正确的
 #### RampAtlasIndexer
 ```c#
 /// 视觉上类似Ramp(), 但RampAtlasIndexer()必须和RampAtlas()一起使用.  
