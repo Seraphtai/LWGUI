@@ -46,9 +46,10 @@
 		[Ramp(g2)] _Ramp2 ("Ramp2", 2D) = "white" { }
 		[Title(Ramp Atlas Sample)]
 		[RampAtlas(g2)] _RampAtlas ("Ramp Atlas", 2D) = "white" { }
-		[RampAtlasIndexer(g2, _RampAtlas)] _RampAtlasIndex0 ("Ramp Atlas Indexer", float) = 0
-		[RampAtlasIndexer(g2, _RampAtlas)] _RampAtlasIndex1 ("Ramp Atlas Indexer", float) = 2
-		[RampAtlasIndexer(g2, _RampAtlas, Ramp_Green, Linear, GA, 24)] _RampAtlasIndex2 ("Ramp Atlas Indexer Linear/Green/24", float) = 4
+		[Space]
+		[RampAtlasIndexer(g2, _RampAtlas, Default Ramp)] _RampAtlasIndex0 ("Indexer", float) = 0
+		[RampAtlasIndexer(g2, _RampAtlas, Default Ramp)] _RampAtlasIndex1 ("Indexer", float) = 1
+		[RampAtlasIndexer(g2, _RampAtlas, Green, Linear, GA, 24)] _RampAtlasIndex2 ("Indexer Linear/Green/24", float) = 3
 
 		
 		[Main(Preset, _, on, off)] _PresetGroup ("Preset Samples", float) = 0

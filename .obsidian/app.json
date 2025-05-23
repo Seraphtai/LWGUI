@@ -2,5 +2,6 @@
   "useMarkdownLinks": true,
   "newLinkFormat": "relative",
   "showUnsupportedFiles": false,
-  "attachmentFolderPath": "./assets~"
+  "attachmentFolderPath": "./assets~",
+  "promptDelete": false
 }

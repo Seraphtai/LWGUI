@@ -1,4 +1,4 @@
-﻿# LWGUI (Light Weight Shader GUI)
+# LWGUI (Light Weight Shader GUI)
 
 [中文](https://github.com/JasonMa0012/LWGUI/blob/dev/README_CN.md) | [English](https://github.com/JasonMa0012/LWGUI)
 
@@ -12,18 +12,11 @@ Having been validated through numerous large-scale commercial projects, employin
 
 ![LWGUI](assets~/LWGUI.png)
 
-
-
-| ![image-20240716183800118](./assets~/image-20240716183800118.png) | ![image-20240716184045776](./assets~/image-20240716184045776.png) |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| A more powerful Gradient editor than UE, with support for both Shader and C# | Insert images directly into the ShaderGUI to support the display of complex documents without having to jump to the browser |
-| ![image-20250314160119094](./assets~/image-20250314160119094.png) |                                                              |
-| **NEW: When recording material parameter animations in Timeline, automatically capture changes to Toggle's Keywords to enable switching material Keywords at runtime.** |                                                              |
-| ![image-20220926025611208](./assets~/image-20220926025611208.png) | ![image-20230821205439889](./assets~/image-20230821205439889.png) |
-| The search bar can also filter for properties that have been modified | Right-click to paste the attribute value by type             |
-
-
-
+| ![image-20240716183800118](./assets~/image-20240716183800118.png)                                                                                                       | ![](assets~/Pasted%20image%2020250522183200.png)                  |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| A more powerful Gradient editor than UE, with support for both Shader and C#                                                                                            | **NEW: Use Ramp Atlas to include multiple Ramps in one Texture**  |
+| ![image-20250314160119094](./assets~/image-20250314160119094.png)                                                                                                       | ![image-20220926025611208](./assets~/image-20220926025611208.png) |
+| **NEW: When recording material parameter animations in Timeline, automatically capture changes to Toggle's Keywords to enable switching material Keywords at runtime.** | Feature-rich toolbar                                              |
 
 | With your sponsorship, I will update more actively. | 有你的赞助我会更加积极地更新                                 |
 | --------------------------------------------------- | ------------------------------------------------------------ |
@@ -140,7 +133,7 @@ public MainDrawer(string group, string keyword, string defaultFoldingState, stri
 ```c#
 /// Draw a property with default style in the folding group
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// Target Property Type: Any
 public SubDrawer() { }
 public SubDrawer(string group)
@@ -199,7 +192,7 @@ Then change values:
 ```c#
 /// Similar to builtin Toggle()
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// keyword: keyword used for toggle, "_" = ignore, none or "__" = Property Name +  "_ON", always Upper (Default: none)
 /// preset File Name: "Shader Property Preset" asset name, see Preset() for detail (Default: none)
 /// Target Property Type: Float
@@ -216,7 +209,7 @@ public SubToggleDrawer(string group, string keyWord, string presetFileName)
 ```c#
 /// Similar to builtin PowerSlider()
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// power: power of slider (Default: 1)
 /// Target Property Type: Range
 public SubPowerSliderDrawer(float power) : this("_", power) { }
@@ -229,7 +222,7 @@ public SubPowerSliderDrawer(string group, float power)
 ```c#
 /// Similar to builtin IntRange()
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// Target Property Type: Range
 public SubIntRangeDrawer(string group)
 
@@ -242,7 +235,7 @@ public SubIntRangeDrawer(string group)
 ```c#
 /// Draw a min max slider
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// minPropName: Output Min Property Name
 /// maxPropName: Output Max Property Name
 /// Target Property Type: Range, range limits express the MinMaxSlider value range
@@ -273,7 +266,7 @@ Result:
 ```c#
 /// Similar to builtin Enum() / KeywordEnum()
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// n(s): display name
 /// k(s): keyword
 /// v(s): value
@@ -325,7 +318,7 @@ public SubKeywordEnumDrawer(string group, string kw1, string kw2, string kw3, st
 ```c#
 /// Popping a menu, you can select the Shader Property Preset, the Preset values will replaces the default values
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 ///	presetFileName: "Shader Property Preset" asset name, you can create new Preset by
 ///		"Right Click > Create > LWGUI > Shader Property Preset" in Project window,
 ///		*any Preset in the entire project cannot have the same name*
@@ -379,7 +372,7 @@ The Property Value in the selected Preset will be the default value:
 ///    - Currently only 8 bits are supported.
 ///    - Property Type must be 'Integer', not 'Int'.
 ///
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// bitDescription 7-0: Description of each Bit. (Default: none)
 /// Target Property Type: Integer
 public BitMaskDrawer() : this(string.Empty, null) { }
@@ -397,6 +390,27 @@ Example:
 Result:
 ![](assets~/Pasted%20image%2020250321174432.png)
 
+
+#### RampAtlasIndexer
+```c#
+/// Visually similar to Ramp(), but RampAtlasIndexer() must be used together with RampAtlas().  
+/// The actual stored value is the index of the current Ramp in the Ramp Atlas SO, used for sampling the Ramp Atlas Texture in the Shader.
+///  
+/// group: parent group name.  
+/// rampAtlasPropName: RampAtlas() property name.  
+/// defaultRampName: default ramp name. (Default: Ramp)  
+/// colorSpace: default ramp color space. (sRGB/Linear) (Default: sRGB)  
+/// viewChannelMask: editable channels. (Default: RGBA)  
+/// timeRange: the abscissa display range (1/24/2400), is used to optimize the editing experience when the abscissa is time of day. (Default: 1)  
+/// Target Property Type: Float
+public RampAtlasIndexerDrawer(string group, string rampAtlasPropName) : this(group, rampAtlasPropName, "Ramp") {}  
+public RampAtlasIndexerDrawer(string group, string rampAtlasPropName, string defaultRampName) : this(group, rampAtlasPropName, defaultRampName, "sRGB") {}  
+public RampAtlasIndexerDrawer(string group, string rampAtlasPropName, string defaultRampName, string colorSpace) : this(group, rampAtlasPropName, defaultRampName, colorSpace, "RGBA") {}  
+public RampAtlasIndexerDrawer(string group, string rampAtlasPropName, string defaultRampName, string colorSpace, string viewChannelMask) : this(group, rampAtlasPropName, defaultRampName, colorSpace, viewChannelMask, 1) {}  
+public RampAtlasIndexerDrawer(string group, string rampAtlasPropName, string defaultRampName, string colorSpace, string viewChannelMask, float timeRange)  
+```
+
+See details for usage: RampAtlas()
 ### Texture
 
 #### Tex
@@ -404,7 +418,7 @@ Result:
 ```c#
 /// Draw a Texture property in single line with a extra property
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// extraPropName: extra property name (Default: none)
 /// Target Property Type: Texture
 /// Extra Property Type: Color, Vector
@@ -445,17 +459,17 @@ Result:
 /// Draw an unreal style Ramp Map Editor (Default Ramp Map Resolution: 512 * 2)
 /// NEW: The new LwguiGradient type has both the Gradient and Curve editors, and can be used in C# scripts and runtime, and is intended to replace UnityEngine.Gradient
 ///
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// defaultFileName: default Ramp Map file name when create a new one (Default: RampMap)
 /// rootPath: the path where ramp is stored, replace '/' with '.' (for example: Assets.Art.Ramps). when selecting ramp, it will also be filtered according to the path (Default: Assets)
 /// colorSpace: switch sRGB / Linear in ramp texture import setting (Default: sRGB)
-/// defaultWidth: default Ramp Width (Default: 512)
+/// defaultWidth: default Ramp Width (Default: 256)
 /// viewChannelMask: editable channels. (Default: RGBA)
 /// timeRange: the abscissa display range (1/24/2400), is used to optimize the editing experience when the abscissa is time of day. (Default: 1)
 /// Target Property Type: Texture2D
 public RampDrawer() : this(String.Empty) { }
 public RampDrawer(string group) : this(group, "RampMap") { }
-public RampDrawer(string group, string defaultFileName) : this(group, defaultFileName, DefaultRootPath, 512) { }
+public RampDrawer(string group, string defaultFileName) : this(group, defaultFileName, DefaultRootPath, 256) { }
 public RampDrawer(string group, string defaultFileName, float defaultWidth) : this(group, defaultFileName, DefaultRootPath, defaultWidth) { }
 public RampDrawer(string group, string defaultFileName, string rootPath, float defaultWidth) : this(group, defaultFileName, rootPath, "sRGB", defaultWidth) { }
 public RampDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, "RGBA") { }
@@ -516,12 +530,76 @@ The new LWGUI Gradient Editor integrates with Unity's built-in [Gradient Editor]
 
 ![image-20241126105823397](./assets~/image-20241126105823397.png)![image-20241126112320151](./assets~/image-20241126112320151.png)
 
-**Known issues:**
+> [!INFO]
+> **Known issues:**
+> - Preview images below Unity 2022 have no difference between sRGB/Linear color spaces
+> - Ctrl + Z results may be slightly different from expected when the editor frame rate is too low
 
-- Preview images below Unity 2022 have no difference between sRGB/Linear color spaces
-- Ctrl + Z results may be slightly different from expected when the editor frame rate is too low
+#### RampAtlas
+```c#
+/// Draw a "Ramp Atlas Scriptable Object" selector and texture preview.  
+/// The Ramp Atlas SO is responsible for storing multiple ramps and generating the corresponding Ramp Atlas Texture.  
+/// Use it together with RampAtlasIndexer() to sample specific ramps in Shader using Index, similar to UE's Curve Atlas.  
+/// Note: Currently, the material only saves Texture reference and Int value,  
+///      if you manually modify the Ramp Atlas, the references will not update automatically!
+///  
+/// group: parent group name (Default: none)  
+/// defaultFileName: the default file name when creating a Ramp Atlas SO (Default: RampAtlas)  
+/// rootPath: the default directory when creating a Ramp Atlas SO, replace '/' with '.' (for example: Assets.Art.RampAtlas). (Default: Assets)  
+/// colorSpace: the Color Space of Ramp Atlas Texture. (sRGB/Linear) (Default: sRGB)  
+/// defaultWidth: default Ramp Atlas Texture width (Default: 256)  
+/// Target Property Type: Texture2D
+public RampAtlasDrawer() : this(string.Empty) { }  
+public RampAtlasDrawer(string group) : this(group, "RampAtlas") { }  
+public RampAtlasDrawer(string group, string defaultFileName) : this(group, defaultFileName, "Assets") { }  
+public RampAtlasDrawer(string group, string defaultFileName, string rootPath) : this(group, defaultFileName, rootPath, "sRGB") { }  
+public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace) : this(group, defaultFileName, rootPath, colorSpace, 256) { } 
+public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, 4) { }  
+public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight)
+```
+Example:
+```c#
+[RampAtlas(g2)] _RampAtlas ("Ramp Atlas", 2D) = "white" { }  
+[Space]  
+[RampAtlasIndexer(g2, _RampAtlas, Default Ramp)] _RampAtlasIndex0 ("Indexer", float) = 0  
+[RampAtlasIndexer(g2, _RampAtlas, Default Ramp)] _RampAtlasIndex1 ("Indexer", float) = 1  
+[RampAtlasIndexer(g2, _RampAtlas, Green, Linear, GA, 24)] _RampAtlasIndex2 ("Indexer Linear/Green/24", float) = 3
+```
 
+Result:
+![](assets~/Pasted%20image%2020250522183200.png)
 
+Shaderlab:
+```c#
+sampler2D _RampAtlas;  
+float4 _RampAtlas_TexelSize;  
+int _RampAtlasIndex0;
+
+......
+
+float2 rampUV = float2(i.uv.x, _RampAtlas_TexelSize.y * (_RampAtlasIndex0 + 0.5f));  
+fixed4 color = tex2D(_RampAtlas, saturate(rampUV));
+```
+##### Ramp Atlas Scriptable Object
+Ramp Atlas SO is responsible for storing and generating Ramp Atlas Texture:
+![](assets~/Pasted%20image%2020250523120309.png)
+When loading an SO or modifying a Ramp on a material, a Ramp Atlas Texture will be automatically created at the same path as the SO, with the file extension `.tga`.  
+After manually modifying the SO, you need to click `Save Texture Toggle` to generate the Texture.  
+ 
+You can create an SO in the following ways:  
+- Right-click in the Project panel: `Create > LWGUI > Ramp Atlas`  
+- Right-click on a material property using RampAtlas(): `Create Ramp Atlas` or `Clone Ramp Atlas`  
+  - An SO created this way will include default values for all Ramps in the current material.  
+ 
+You can click the add button of RampAtlasIndexer() to add a new Ramp to the SO.
+
+> [!CAUTION] 
+>Currently, the material only saves Texture references and Int values. If you manually modify the number and order of Ramps in the Ramp Atlas SO, the selected Ramps in the material may be disrupted!  
+>
+>Suggestions:  
+> - Limit the usage scope of a single Ramp Atlas  
+> - Only add Ramps  
+> - Do not modify the Ramp order
 
 #### Image
 
@@ -529,7 +607,7 @@ The new LWGUI Gradient Editor integrates with Unity's built-in [Gradient Editor]
 /// Draw an image preview.
 /// display name: The path of the image file relative to the Unity project, such as: "assets~/test.png", "Doc/test.png", "../test.png"
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// Target Property Type: Any
 public ImageDrawer() { }
 public ImageDrawer(string group)
@@ -546,7 +624,7 @@ Result:
 ```c#
 /// Display up to 4 colors in a single line
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// color2-4: extra color property name
 /// Target Property Type: Color
 public ColorDrawer(string group, string color2) : this(group, color2, String.Empty, String.Empty) { }
@@ -591,7 +669,7 @@ Result:
 /// 	RGB Luminance = (0.2126f, 0.7152f, 0.0722f, 0)
 ///		None = (0, 0, 0, 0)
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// Target Property Type: Vector, used to dot() with Texture Sample Value
 public ChannelDrawer() { }
 public ChannelDrawer(string group)
@@ -635,7 +713,7 @@ float selectedChannelValue = dot(tex2D(_Tex, uv), _textureChannelMask);
 /// The full example:
 /// [Button(_)] _button0 ("URL Button@URL:https://github.com/JasonMa0012/LWGUI@C#:LWGUI.ButtonDrawer.TestMethod(1234, abcd)", Float) = 0
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// Target Property Type: Any
 public ButtonDrawer() { }
 public ButtonDrawer(string group)
@@ -665,7 +743,7 @@ Example:
 /// <summary>
 /// Similar to Header()
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// header: string to display, "SpaceLine" or "_" = none (Default: none)
 /// height: line height (Default: 22)
 public TitleDecorator(string header) : this("_", header, DefaultHeight) {}
@@ -676,7 +754,7 @@ public TitleDecorator(string group, string header, float height)
 
 /// Similar to Title()
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// header: string to display, "SpaceLine" or "_" = none (Default: none)
 /// height: line height (Default: 22)
 public SubTitleDecorator(string group,  string header) : base(group, header, DefaultHeight) {}

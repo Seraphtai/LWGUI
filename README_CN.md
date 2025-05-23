@@ -1,4 +1,4 @@
-﻿# LWGUI (Light Weight Shader GUI)
+# LWGUI (Light Weight Shader GUI)
 
 [中文](https://github.com/JasonMa0012/LWGUI/blob/dev/README_CN.md) | [English](https://github.com/JasonMa0012/LWGUI)
 
@@ -12,20 +12,14 @@
 
 ![LWGUI](assets~/LWGUI.png)
 
+| ![image-20240716183800118](./assets~/image-20240716183800118.png)   | ![](assets~/Pasted%20image%2020250522183200.png)                  |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| 比UE更加强大的Gradient编辑器, 同时支持Shader和C#                                  | **NEW: 使用Ramp Atlas在一个Texture中包含多个Ramp**                          |
+| ![image-20250314160119094](./assets~/image-20250314160119094.png)   | ![image-20220926025611208](./assets~/image-20220926025611208.png) |
+| **NEW: Timeline中录制材质参数动画时, 自动捕获Toggle的Keyword更改, 以便运行时切换材质Keyword** | 功能丰富的工具栏                                                          |
 
-
-| ![image-20240716183800118](./assets~/image-20240716183800118.png) | ![image-20240716184045776](./assets~/image-20240716184045776.png) |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| 比UE更加强大的Gradient编辑器, 同时支持Shader和C#             | 直接在ShaderGUI中插入图片, 无需跳转浏览器即可支持复杂文档的显示 |
-| ![image-20250314160119094](./assets~/image-20250314160119094.png) |                                                              |
-| **NEW: Timeline中录制材质参数动画时, 自动捕获Toggle的Keyword更改, 以便运行时切换材质Keyword** |                                                              |
-| ![image-20220926025611208](./assets~/image-20220926025611208.png) | ![image-20230821205439889](./assets~/image-20230821205439889.png) |
-| 搜索栏亦可筛选已修改的属性                                   | 右键以按类型粘贴属性值                                       |
-
-
-
-| With your sponsorship, I will update more actively. | 有你的赞助我会更加积极地更新                                 |
-| --------------------------------------------------- | ------------------------------------------------------------ |
+| With your sponsorship, I will update more actively. | 有你的赞助我会更加积极地更新                                                                              |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | [paypal.me/JasonMa0012](paypal.me/JasonMa0012)      | ![723ddce6-fb86-48ff-9683-a12cf6cff7a0](./assets~/723ddce6-fb86-48ff-9683-a12cf6cff7a0.jpg) |
 
 
@@ -87,7 +81,6 @@
    * [Contribution](#contribution)
 <!--te-->
 
-
 ## Installation
 
 1. 确保你的Unity版本兼容LWGUI
@@ -137,7 +130,7 @@ public MainDrawer(string group, string keyword, string defaultFoldingState, stri
 ```c#
 /// Draw a property with default style in the folding group
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// Target Property Type: Any
 public SubDrawer() { }
 public SubDrawer(string group)
@@ -196,7 +189,7 @@ Then change values:
 ```c#
 /// Similar to builtin Toggle()
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// keyword: keyword used for toggle, "_" = ignore, none or "__" = Property Name +  "_ON", always Upper (Default: none)
 /// preset File Name: "Shader Property Preset" asset name, see Preset() for detail (Default: none)
 /// Target Property Type: Float
@@ -213,7 +206,7 @@ public SubToggleDrawer(string group, string keyWord, string presetFileName)
 ```c#
 /// Similar to builtin PowerSlider()
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// power: power of slider (Default: 1)
 /// Target Property Type: Range
 public SubPowerSliderDrawer(float power) : this("_", power) { }
@@ -226,7 +219,7 @@ public SubPowerSliderDrawer(string group, float power)
 ```c#
 /// Similar to builtin IntRange()
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// Target Property Type: Range
 public SubIntRangeDrawer(string group)
 
@@ -239,7 +232,7 @@ public SubIntRangeDrawer(string group)
 ```c#
 /// Draw a min max slider
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// minPropName: Output Min Property Name
 /// maxPropName: Output Max Property Name
 /// Target Property Type: Range, range limits express the MinMaxSlider value range
@@ -270,7 +263,7 @@ Result:
 ```c#
 /// Similar to builtin Enum() / KeywordEnum()
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// n(s): display name
 /// k(s): keyword
 /// v(s): value
@@ -322,7 +315,7 @@ public SubKeywordEnumDrawer(string group, string kw1, string kw2, string kw3, st
 ```c#
 /// Popping a menu, you can select the Shader Property Preset, the Preset values will replaces the default values
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 ///	presetFileName: "Shader Property Preset" asset name, you can create new Preset by
 ///		"Right Click > Create > LWGUI > Shader Property Preset" in Project window,
 ///		*any Preset in the entire project cannot have the same name*
@@ -376,7 +369,7 @@ Result:
 ///    - Currently only 8 bits are supported.
 ///    - Property Type must be 'Integer', not 'Int'.
 ///
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// bitDescription 7-0: Description of each Bit. (Default: none)
 /// Target Property Type: Integer
 public BitMaskDrawer() : this(string.Empty, null) { }
@@ -394,6 +387,27 @@ Example:
 Result:
 ![](assets~/Pasted%20image%2020250321174432.png)
 
+
+#### RampAtlasIndexer
+```c#
+/// 视觉上类似Ramp(), 但RampAtlasIndexer()必须和RampAtlas()一起使用.  
+/// 实际保存的值为当前Ramp在Ramp Atlas SO中的Index, 用于在Shader中采样Ramp Atlas Texture.  
+///  
+/// group: parent group name.  
+/// rampAtlasPropName: RampAtlas() property name.  
+/// defaultRampName: default ramp name. (Default: Ramp)  
+/// colorSpace: default ramp color space. (sRGB/Linear) (Default: sRGB)  
+/// viewChannelMask: editable channels. (Default: RGBA)  
+/// timeRange: the abscissa display range (1/24/2400), is used to optimize the editing experience when the abscissa is time of day. (Default: 1)  
+/// Target Property Type: Float
+public RampAtlasIndexerDrawer(string group, string rampAtlasPropName) : this(group, rampAtlasPropName, "Ramp") {}  
+public RampAtlasIndexerDrawer(string group, string rampAtlasPropName, string defaultRampName) : this(group, rampAtlasPropName, defaultRampName, "sRGB") {}  
+public RampAtlasIndexerDrawer(string group, string rampAtlasPropName, string defaultRampName, string colorSpace) : this(group, rampAtlasPropName, defaultRampName, colorSpace, "RGBA") {}  
+public RampAtlasIndexerDrawer(string group, string rampAtlasPropName, string defaultRampName, string colorSpace, string viewChannelMask) : this(group, rampAtlasPropName, defaultRampName, colorSpace, viewChannelMask, 1) {}  
+public RampAtlasIndexerDrawer(string group, string rampAtlasPropName, string defaultRampName, string colorSpace, string viewChannelMask, float timeRange)  
+```
+
+用法详见: RampAtlas()
 ### Texture
 
 #### Tex
@@ -401,7 +415,7 @@ Result:
 ```c#
 /// Draw a Texture property in single line with a extra property
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// extraPropName: extra property name (Default: none)
 /// Target Property Type: Texture
 /// Extra Property Type: Color, Vector
@@ -439,20 +453,20 @@ Result:
 ##### ShaderLab
 
 ```c#
-/// Draw an unreal style Ramp Map Editor (Default Ramp Map Resolution: 512 * 2)
+/// Draw an unreal style Ramp Map Editor (Default Ramp Map Resolution: 256 * 2)
 /// NEW: The new LwguiGradient type has both the Gradient and Curve editors, and can be used in C# scripts and runtime, and is intended to replace UnityEngine.Gradient
 ///
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// defaultFileName: default Ramp Map file name when create a new one (Default: RampMap)
 /// rootPath: the path where ramp is stored, replace '/' with '.' (for example: Assets.Art.Ramps). when selecting ramp, it will also be filtered according to the path (Default: Assets)
 /// colorSpace: switch sRGB / Linear in ramp texture import setting (Default: sRGB)
-/// defaultWidth: default Ramp Width (Default: 512)
+/// defaultWidth: default Ramp Width (Default: 256)
 /// viewChannelMask: editable channels. (Default: RGBA)
 /// timeRange: the abscissa display range (1/24/2400), is used to optimize the editing experience when the abscissa is time of day. (Default: 1)
 /// Target Property Type: Texture2D
 public RampDrawer() : this(String.Empty) { }
 public RampDrawer(string group) : this(group, "RampMap") { }
-public RampDrawer(string group, string defaultFileName) : this(group, defaultFileName, DefaultRootPath, 512) { }
+public RampDrawer(string group, string defaultFileName) : this(group, defaultFileName, DefaultRootPath, 256) { }
 public RampDrawer(string group, string defaultFileName, float defaultWidth) : this(group, defaultFileName, DefaultRootPath, defaultWidth) { }
 public RampDrawer(string group, string defaultFileName, string rootPath, float defaultWidth) : this(group, defaultFileName, rootPath, "sRGB", defaultWidth) { }
 public RampDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, "RGBA") { }
@@ -513,12 +527,75 @@ Result:
 
 ![image-20241126105823397](./assets~/image-20241126105823397.png)![image-20241126112320151](./assets~/image-20241126112320151.png)
 
-**已知问题:**
+> [!INFO]
+> **已知问题:**
+> - Unity 2022以下的预览图像在sRGB/Linear颜色空间之间没有区别
+> - 在编辑器帧率较低时Ctrl + Z结果可能和预期稍有偏差
 
-- Unity 2022以下的预览图像在sRGB/Linear颜色空间之间没有区别
-- 在编辑器帧率较低时Ctrl + Z结果可能和预期稍有偏差
+#### RampAtlas
+```c#
+/// 绘制一个"Ramp Atlas Scriptable Object"选择器和贴图预览.  
+/// Ramp Atlas SO负责存储多个Ramp并生成对应的Ramp Atlas Texture.  
+/// 与RampAtlasIndexer()一起使用, 以在Shader中使用Index采样特定Ramp, 类似于UE的Curve Atlas.  
+/// 注意: 目前材质球仅保存Texture引用和Int值, 如果你手动修改了Ramp Atlas则不会自动更新引用!  
+///  
+/// group: parent group name (Default: none)  
+/// defaultFileName: the default file name when creating a Ramp Atlas SO (Default: RampAtlas)  
+/// rootPath: the default directory when creating a Ramp Atlas SO, replace '/' with '.' (for example: Assets.Art.RampAtlas). (Default: Assets)  
+/// colorSpace: the Color Space of Ramp Atlas Texture. (sRGB/Linear) (Default: sRGB)  
+/// defaultWidth: default Ramp Atlas Texture width (Default: 256)  
+/// Target Property Type: Texture2D
+public RampAtlasDrawer() : this(string.Empty) { }  
+public RampAtlasDrawer(string group) : this(group, "RampAtlas") { }  
+public RampAtlasDrawer(string group, string defaultFileName) : this(group, defaultFileName, "Assets") { }  
+public RampAtlasDrawer(string group, string defaultFileName, string rootPath) : this(group, defaultFileName, rootPath, "sRGB") { }  
+public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace) : this(group, defaultFileName, rootPath, colorSpace, 256) { } 
+public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, 4) { }  
+public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight)
+```
+Example:
+```c#
+[RampAtlas(g2)] _RampAtlas ("Ramp Atlas", 2D) = "white" { }  
+[Space]  
+[RampAtlasIndexer(g2, _RampAtlas, Default Ramp)] _RampAtlasIndex0 ("Indexer", float) = 0  
+[RampAtlasIndexer(g2, _RampAtlas, Default Ramp)] _RampAtlasIndex1 ("Indexer", float) = 1  
+[RampAtlasIndexer(g2, _RampAtlas, Green, Linear, GA, 24)] _RampAtlasIndex2 ("Indexer Linear/Green/24", float) = 3
+```
 
+Result:
+![](assets~/Pasted%20image%2020250522183200.png)
 
+Shaderlab:
+```c#
+sampler2D _RampAtlas;  
+float4 _RampAtlas_TexelSize;  
+int _RampAtlasIndex0;
+
+......
+
+float2 rampUV = float2(i.uv.x, _RampAtlas_TexelSize.y * (_RampAtlasIndex0 + 0.5f));  
+fixed4 color = tex2D(_RampAtlas, saturate(rampUV));
+```
+##### Ramp Atlas Scriptable Object
+Ramp Atlas SO负责存储并生成Ramp Atlas Texture:
+![](assets~/Pasted%20image%2020250523120309.png)
+在加载SO或在材质上修改Ramp时, 会自动在与SO相同路径处创建Ramp Atlas Texture, 后缀名为`.tga`.
+在手动修改SO后需要点击`Save Texture Toggle`生成Texture.
+
+你可以用以下方式创建SO:
+- 在Project面板中右键: `Create > LWGUI > Ramp Atlas`
+- 在使用RampAtlas()的材质属性上右键: `Create Ramp Atlas`或`Clone Ramp Atlas`
+	- 用这种方式创建的SO会包含当前材质中所有Ramp的默认值
+
+你可以点击RampAtlasIndexer()的添加按钮向SO添加新的Ramp.
+
+> [!CAUTION]
+> 目前材质仅保存Texture引用和Int值, 如果你手动修改了Ramp Atlas SO中的Ramp数量和顺序, 那么材质中已选择的Ramp可能被打乱!
+> 
+> 建议:
+> - 缩小单个Ramp Atlas的使用范围
+> - 只添加Ramp
+> - 不要修改Ramp排序
 
 #### Image
 
@@ -526,7 +603,7 @@ Result:
 /// Draw an image preview.
 /// display name: The path of the image file relative to the Unity project, such as: "assets~/test.png", "Doc/test.png", "../test.png"
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// Target Property Type: Any
 public ImageDrawer() { }
 public ImageDrawer(string group)
@@ -543,7 +620,7 @@ Result:
 ```c#
 /// Display up to 4 colors in a single line
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// color2-4: extra color property name
 /// Target Property Type: Color
 public ColorDrawer(string group, string color2) : this(group, color2, String.Empty, String.Empty) { }
@@ -588,7 +665,7 @@ Result:
 /// 	RGB Luminance = (0.2126f, 0.7152f, 0.0722f, 0)
 ///		None = (0, 0, 0, 0)
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// Target Property Type: Vector, used to dot() with Texture Sample Value
 public ChannelDrawer() { }
 public ChannelDrawer(string group)
@@ -632,7 +709,7 @@ float selectedChannelValue = dot(tex2D(_Tex, uv), _textureChannelMask);
 /// The full example:
 /// [Button(_)] _button0 ("URL Button@URL:https://github.com/JasonMa0012/LWGUI@C#:LWGUI.ButtonDrawer.TestMethod(1234, abcd)", Float) = 0
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// Target Property Type: Any
 public ButtonDrawer() { }
 public ButtonDrawer(string group)
@@ -662,7 +739,7 @@ Example:
 /// <summary>
 /// Similar to Header()
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// header: string to display, "SpaceLine" or "_" = none (Default: none)
 /// height: line height (Default: 22)
 public TitleDecorator(string header) : this("_", header, DefaultHeight) {}
@@ -673,7 +750,7 @@ public TitleDecorator(string group, string header, float height)
 
 /// Similar to Title()
 /// 
-/// group: father group name (Default: none)
+/// group: parent group name (Default: none)
 /// header: string to display, "SpaceLine" or "_" = none (Default: none)
 /// height: line height (Default: 22)
 public SubTitleDecorator(string group,  string header) : base(group, header, DefaultHeight) {}

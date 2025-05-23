@@ -110,6 +110,9 @@ namespace LWGUI
 			
 			foreach (var obj in objs)
 			{
+                if (!obj)
+                    continue;
+                    
 				if (!AssetDatabase.Contains(obj))
 					continue;
 

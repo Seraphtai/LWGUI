@@ -20,6 +20,20 @@
               "icon": "lucide-file",
               "title": "README_CN"
             }
+          },
+          {
+            "id": "9cf7a17009ed6e2f",
+            "type": "leaf",
+            "state": {
+              "type": "diff-view",
+              "state": {
+                "aFile": "README_CN.md",
+                "bFile": "README_CN.md",
+                "aRef": ""
+              },
+              "icon": "git-pull-request",
+              "title": "Diff: README_CN"
+            }
           }
         ]
       },
@@ -108,13 +122,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "README_CN.md",
+                "file": "README.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of README_CN"
+              "title": "Outline of README"
             }
           }
         ]
@@ -178,9 +192,19 @@
               "icon": "lucide-tags",
               "title": "Tags"
             }
+          },
+          {
+            "id": "154198fbc61739d7",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
+            }
           }
         ],
-        "currentTab": 2
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -194,14 +218,21 @@
       "canvas:Create new canvas": false,
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
-      "command-palette:Open command palette": false
+      "command-palette:Open command palette": false,
+      "obsidian-git:Open Git source control": false
     }
   },
-  "active": "1ab61776fdab9c7c",
+  "active": "d93ffc2d4e7b14bd",
   "lastOpenFiles": [
-    "package.json~",
-    "README.md",
     "README_CN.md",
+    "README.md",
+    "assets~/Pasted image 20250523120309.png",
+    "assets~/Pasted image 20250522183200.png",
+    "Test/LWGUI_RampAtlas.tga.meta",
+    "Test/LWGUI_RampAtlas.tga",
+    "Test/LWGUI_RampAtlas.asset.meta",
+    "Test/LWGUI_RampAtlas.asset",
+    "package.json~",
     "assets~/Pasted image 20250321174432.png",
     "assets",
     "assets~/LWGUI.png",
@@ -211,16 +242,9 @@
     "assets~/image-20241126110012922.png",
     "assets~/image-20241126105823397.png",
     "assets~/image-20240717104206365.png",
-    "assets~/image-20240717104144821.png",
-    "assets~/image-20240716183800118.png",
     "assets~",
     "assets - 副本/LWGUI.png.meta",
     "assets - 副本/image-20250314160119094.png.meta",
-    "assets - 副本/image-20241127180711449.png.meta",
-    "assets - 副本/image-20241126112320151.png.meta",
-    "assets - 副本/image-20241126110012922.png.meta",
-    "assets - 副本/image-20241126105823397.png.meta",
-    "assets - 副本/image-20240717104206365.png.meta",
-    "assets - 副本/image-20240717104144821.png.meta"
+    "assets - 副本/image-20241127180711449.png.meta"
   ]
 }

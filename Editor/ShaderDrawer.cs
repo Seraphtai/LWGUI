@@ -151,7 +151,7 @@ namespace LWGUI
 	/// <summary>
 	/// Draw a property with default style in the folding group
 	/// 
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	/// Target Property Type: Any
 	/// </summary>
 	public class SubDrawer : MaterialPropertyDrawer, IBaseDrawer
@@ -219,7 +219,7 @@ namespace LWGUI
 	/// <summary>
 	/// Similar to builtin Toggle()
 	/// 
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	/// keyword: keyword used for toggle, "_" = ignore, none or "__" = Property Name +  "_ON", always Upper (Default: none)
 	/// preset File Name: "Shader Property Preset" asset name, see Preset() for detail (Default: none)
 	/// Target Property Type: Float
@@ -291,7 +291,7 @@ namespace LWGUI
 	/// <summary>
 	/// Similar to builtin PowerSlider()
 	/// 
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	/// power: power of slider (Default: 1)
 	/// Target Property Type: Range
 	/// </summary>
@@ -322,7 +322,7 @@ namespace LWGUI
 	/// <summary>
 	/// Similar to builtin IntRange()
 	/// 
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	/// Target Property Type: Range
 	/// </summary>
 	public class SubIntRangeDrawer : SubDrawer
@@ -362,7 +362,7 @@ namespace LWGUI
 	/// <summary>
 	/// Draw a min max slider
 	/// 
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	/// minPropName: Output Min Property Name
 	/// maxPropName: Output Max Property Name
 	/// Target Property Type: Range, range limits express the MinMaxSlider value range
@@ -475,7 +475,7 @@ namespace LWGUI
 	/// <summary>
 	/// Similar to builtin Enum() / KeywordEnum()
 	/// 
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	/// n(s): display name
 	/// k(s): keyword
 	/// v(s): value
@@ -686,7 +686,7 @@ namespace LWGUI
 	/// <summary>
 	/// Popping a menu, you can select the Shader Property Preset, the Preset values will replaces the default values
 	/// 
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	///	presetFileName: "Shader Property Preset" asset name, you can create new Preset by
 	///		"Right Click > Create > LWGUI > Shader Property Preset" in Project window,
 	///		*any Preset in the entire project cannot have the same name*
@@ -806,7 +806,7 @@ namespace LWGUI
 	///		- Currently only 8 bits are supported.
 	///		- Property Type must be 'Integer', not 'Int'.
 	///
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	/// bitDescription 7-0: Description of each Bit. (Default: none)
 	/// Target Property Type: Integer
 	/// </summary>
@@ -915,6 +915,18 @@ namespace LWGUI
 		}
 	}
 	
+	/// <summary>
+	/// Visually similar to Ramp(), but RampAtlasIndexer() must be used together with RampAtlas().
+	/// The actual stored value is the index of the current Ramp in the Ramp Atlas SO, used for sampling the Ramp Atlas Texture in the Shader.
+	///
+	/// group: parent group name.
+	/// rampAtlasPropName: RampAtlas() property name.
+	/// defaultRampName: default ramp name. (Default: Ramp)
+	/// colorSpace: default ramp color space. (sRGB/Linear) (Default: sRGB)
+	/// viewChannelMask: editable channels. (Default: RGBA)
+	/// timeRange: the abscissa display range (1/24/2400), is used to optimize the editing experience when the abscissa is time of day. (Default: 1)
+	/// Target Property Type: Float
+	/// </summary>
 	public class RampAtlasIndexerDrawer : RampDrawer
 	{
 		public string rampAtlasPropName = string.Empty;
@@ -1138,7 +1150,7 @@ namespace LWGUI
 	/// <summary>
 	/// Draw a Texture property in single line with a extra property
 	/// 
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	/// extraPropName: extra property name (Default: none)
 	/// Target Property Type: Texture
 	/// Extra Property Type: Color, Vector
@@ -1219,14 +1231,14 @@ namespace LWGUI
 	}
 
 	/// <summary>
-	/// Draw an unreal style Ramp Map Editor (Default Ramp Map Resolution: 512 * 2)
+	/// Draw an unreal style Ramp Map Editor (Default Ramp Map Resolution: 256 * 2)
 	/// NEW: The new LwguiGradient type has both the Gradient and Curve editors, and can be used in C# scripts and runtime, and is intended to replace UnityEngine.Gradient
 	/// 
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	/// defaultFileName: default Ramp Map file name when create a new one (Default: RampMap)
 	/// rootPath: the path where ramp is stored, replace '/' with '.' (for example: Assets.Art.Ramps). when selecting ramp, it will also be filtered according to the path (Default: Assets)
 	/// colorSpace: switch sRGB / Linear in ramp texture import setting (Default: sRGB)
-	/// defaultWidth: default Ramp Width (Default: 512)
+	/// defaultWidth: default Ramp Width. (Default: 256)
 	/// viewChannelMask: editable channels. (Default: RGBA)
 	/// timeRange: the abscissa display range (1/24/2400), is used to optimize the editing experience when the abscissa is time of day. (Default: 1)
 	/// Target Property Type: Texture2D
@@ -1257,7 +1269,7 @@ namespace LWGUI
 
 		public RampDrawer(string group) : this(group, "RampMap") { }
 
-		public RampDrawer(string group, string defaultFileName) : this(group, defaultFileName, DefaultRootPath, 512) { }
+		public RampDrawer(string group, string defaultFileName) : this(group, defaultFileName, DefaultRootPath, 256) { }
 
 		public RampDrawer(string group, string defaultFileName, float defaultWidth) : this(group, defaultFileName, DefaultRootPath, defaultWidth) { }
 
@@ -1508,10 +1520,24 @@ namespace LWGUI
 		}
 	}
 
+	/// <summary>
+	/// Draw a "Ramp Atlas Scriptable Object" selector and texture preview.
+	/// The Ramp Atlas SO is responsible for storing multiple ramps and generating the corresponding Ramp Atlas Texture.
+	/// Use it together with RampAtlasIndexer() to sample specific ramps in Shader using Index, similar to UE's Curve Atlas.
+	/// Note: Currently, the material only saves Texture reference and Int value,
+	///		  if you manually modify the Ramp Atlas, the references will not update automatically!
+	/// 
+	/// group: parent group name (Default: none)
+	/// defaultFileName: the default file name when creating a Ramp Atlas SO (Default: RampAtlas)
+	/// rootPath: the default directory when creating a Ramp Atlas SO, replace '/' with '.' (for example: Assets.Art.RampAtlas). (Default: Assets)
+	/// colorSpace: the Color Space of Ramp Atlas Texture. (sRGB/Linear) (Default: sRGB)
+	/// defaultWidth: default Ramp Atlas Texture width (Default: 256)
+	/// Target Property Type: Texture2D
+	/// </summary>
 	public class RampAtlasDrawer : SubDrawer
 	{
 		public string rootPath = "Assets";
-		public string defaultFileName = "LWGUI_RampAtlas";
+		public string defaultFileName = "RampAtlas";
 		public int defaultAtlasWidth = 256;
 		public int defaultAtlasHeight = 2;
 		public bool defaultAtlasSRGB = true;
@@ -1520,7 +1546,7 @@ namespace LWGUI
 		
 		public RampAtlasDrawer() : this(string.Empty) { }
 		
-		public RampAtlasDrawer(string group) : this(group, "LWGUI_RampAtlas") { }
+		public RampAtlasDrawer(string group) : this(group, "RampAtlas") { }
 		
 		public RampAtlasDrawer(string group, string defaultFileName) : this(group, defaultFileName, "Assets") { }
 		
@@ -1628,7 +1654,7 @@ namespace LWGUI
 	/// Draw an image preview.
 	/// display name: The path of the image file relative to the Unity project, such as: "Assets/test.png", "Doc/test.png", "../test.png"
 	/// 
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	/// Target Property Type: Any
 	/// </summary>
 	public class ImageDrawer : SubDrawer
@@ -1687,7 +1713,7 @@ namespace LWGUI
 	/// <summary>
 	/// Display up to 4 colors in a single line
 	/// 
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	/// color2-4: extra color property name
 	/// Target Property Type: Color
 	/// </summary>
@@ -1773,7 +1799,7 @@ namespace LWGUI
 	/// 	RGB Luminance = (0.2126f, 0.7152f, 0.0722f, 0)
 	///		None = (0, 0, 0, 0)
 	/// 
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	/// Target Property Type: Vector, used to dot() with Texture Sample Value
 	/// </summary>
 	public class ChannelDrawer : SubDrawer
@@ -1870,7 +1896,7 @@ namespace LWGUI
 	/// The full example:
 	/// [Button(_)] _button0 ("URL Button@URL:https://github.com/JasonMa0012/LWGUI@C#:LWGUI.ButtonDrawer.TestMethod(1234, abcd)", Float) = 0
 	/// 
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	/// Target Property Type: Any
 	/// </summary>
 	public class ButtonDrawer : SubDrawer
@@ -2026,7 +2052,7 @@ namespace LWGUI
 	/// <summary>
 	/// Similar to Header()
 	/// 
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	/// header: string to display, "SpaceLine" or "_" = none (Default: none)
 	/// height: line height (Default: 22)
 	/// </summary>
@@ -2067,7 +2093,7 @@ namespace LWGUI
 	/// <summary>
 	/// Similar to Title()
 	/// 
-	/// group: father group name (Default: none)
+	/// group: parent group name (Default: none)
 	/// header: string to display, "SpaceLine" or "_" = none (Default: none)
 	/// height: line height (Default: 22)
 	/// </summary>
