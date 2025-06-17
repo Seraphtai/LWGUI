@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEditor;
 using Object = UnityEngine.Object;
 
@@ -115,29 +116,29 @@ namespace LWGUI
 			public void CopyFromMaterialProperty(MaterialProperty prop)
 			{
 				propertyName = prop.name;
-				switch (prop.type)
+				switch (prop.GetPropertyType())
 				{
-					case MaterialProperty.PropType.Color:
+					case ShaderPropertyType.Color:
 						propertyType = PropertyType.Color;
 						colorValue = prop.colorValue;
 						break;
-					case MaterialProperty.PropType.Vector:
+					case ShaderPropertyType.Vector:
 						propertyType = PropertyType.Vector;
 						vectorValue = prop.vectorValue;
 						break;
-					case MaterialProperty.PropType.Float:
+					case ShaderPropertyType.Float:
 						propertyType = PropertyType.Float;
 						floatValue = prop.floatValue;
 						break;
-					case MaterialProperty.PropType.Int:
+					case ShaderPropertyType.Int:
 						propertyType = PropertyType.Integer;
 						intValue = prop.intValue;
 						break;
-					case MaterialProperty.PropType.Range:   
+					case ShaderPropertyType.Range:   
 						propertyType = PropertyType.Range;
 						floatValue = prop.floatValue;
 						break;
-					case MaterialProperty.PropType.Texture: 
+					case ShaderPropertyType.Texture: 
 						propertyType = PropertyType.Texture;
 						textureValue = prop.textureValue;
 						break;

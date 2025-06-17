@@ -2,6 +2,7 @@
 
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
 namespace LWGUI
@@ -55,13 +56,27 @@ namespace LWGUI
 
 		#region MaterialProperty
 
+		public static ShaderPropertyType GetPropertyType(this MaterialProperty prop) 
+#if UNITY_6000_1_OR_NEWER
+			=> prop.propertyType;
+#else
+			=> (ShaderPropertyType)prop.type;
+#endif
+
+		public static ShaderPropertyFlags GetPropertyFlags(this MaterialProperty prop) 
+#if UNITY_6000_1_OR_NEWER
+			=> prop.propertyFlags;
+#else
+			=> (ShaderPropertyFlags)prop.flags;
+#endif
+
 		public static float GetNumericValue(this MaterialProperty prop)
 		{
-			switch (prop.type)
+			switch (prop.GetPropertyType())
 			{
-				case MaterialProperty.PropType.Float or MaterialProperty.PropType.Range:
+				case ShaderPropertyType.Float or ShaderPropertyType.Range:
 					return prop.floatValue;
-				case MaterialProperty.PropType.Int:
+				case ShaderPropertyType.Int:
 					return prop.intValue;
 				default:
 					Debug.LogError($"LWGUI: Material Property { prop.name } is NOT numeric type.");
@@ -71,12 +86,12 @@ namespace LWGUI
 
 		public static void SetNumericValue(this MaterialProperty prop, float value)
 		{
-			switch (prop.type)
+			switch (prop.GetPropertyType())
 			{
-				case MaterialProperty.PropType.Float or MaterialProperty.PropType.Range:
+				case ShaderPropertyType.Float or ShaderPropertyType.Range:
 					prop.floatValue = value;
 					break;
-				case MaterialProperty.PropType.Int:
+				case ShaderPropertyType.Int:
 					prop.intValue = (int)value;
 					break;
 				default:

@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using LWGUI.Timeline;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
 namespace LWGUI
@@ -23,7 +24,7 @@ namespace LWGUI
 
 		public static bool IsPropertyHideInInspector(MaterialProperty prop)
 		{
-			return (prop.flags & MaterialProperty.PropFlags.HideInInspector) != 0;
+			return (prop.GetPropertyFlags() & ShaderPropertyFlags.HideInInspector) != 0;
 		}
 
 		public static string GetKeywordName(string keyword, string propName)
@@ -461,10 +462,10 @@ namespace LWGUI
 			Undo.RecordObjects(targetMaterials, "LWGUI: Paste Material Properties");
 			foreach (Material material in targetMaterials)
 			{
-				for (int i = 0; i < ShaderUtil.GetPropertyCount(_copiedMaterial.shader); i++)
+				for (int i = 0; i < _copiedMaterial.shader.GetPropertyCount(); i++)
 				{
-					var name = ShaderUtil.GetPropertyName(_copiedMaterial.shader, i);
-					var type = ShaderUtil.GetPropertyType(_copiedMaterial.shader, i);
+					var name = _copiedMaterial.shader.GetPropertyName(i);
+					var type = _copiedMaterial.shader.GetPropertyType(i);
 					PastePropertyValueToMaterial(material, name, name, type, valueMask);
 				}
 				if ((valueMask & (uint)CopyMaterialValueMask.Keyword) != 0)
@@ -476,31 +477,31 @@ namespace LWGUI
 
 		private static void PastePropertyValueToMaterial(Material material, string srcName, string dstName)
 		{
-			for (int i = 0; i < ShaderUtil.GetPropertyCount(_copiedMaterial.shader); i++)
+			for (int i = 0; i < _copiedMaterial.shader.GetPropertyCount(); i++)
 			{
-				var name = ShaderUtil.GetPropertyName(_copiedMaterial.shader, i);
+				var name = _copiedMaterial.shader.GetPropertyName(i);
 				if (name == srcName)
 				{
-					var type = ShaderUtil.GetPropertyType(_copiedMaterial.shader, i);
+					var type = _copiedMaterial.shader.GetPropertyType(i);
 					PastePropertyValueToMaterial(material, srcName, dstName, type);
 					return;
 				}
 			}
 		}
 
-		private static void PastePropertyValueToMaterial(Material material, string srcName, string dstName, ShaderUtil.ShaderPropertyType type, uint valueMask = (uint)CopyMaterialValueMask.All)
+		private static void PastePropertyValueToMaterial(Material material, string srcName, string dstName, ShaderPropertyType type, uint valueMask = (uint)CopyMaterialValueMask.All)
 		{
 			switch (type)
 			{
-				case ShaderUtil.ShaderPropertyType.Color:
+				case ShaderPropertyType.Color:
 					if ((valueMask & (uint)CopyMaterialValueMask.Vector) != 0)
 						material.SetColor(dstName, _copiedMaterial.GetColor(srcName));
 					break;
-				case ShaderUtil.ShaderPropertyType.Vector:
+				case ShaderPropertyType.Vector:
 					if ((valueMask & (uint)CopyMaterialValueMask.Vector) != 0)
 						material.SetVector(dstName, _copiedMaterial.GetVector(srcName));
 					break;
-				case ShaderUtil.ShaderPropertyType.TexEnv:
+				case ShaderPropertyType.Texture:
 					if ((valueMask & (uint)CopyMaterialValueMask.Texture) != 0)
 						material.SetTexture(dstName, _copiedMaterial.GetTexture(srcName));
 					break;
