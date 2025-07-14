@@ -87,8 +87,8 @@ namespace LWGUI
 		{
 			this._group = group;
 			this._keyword = keyword;
-			this._defaultFoldingState = defaultFoldingState.ToLower() == "on";
-			this._defaultToggleDisplayed = defaultToggleDisplayed.ToLower() == "on";
+			this._defaultFoldingState = Helper.StringToBool(defaultFoldingState);
+			this._defaultToggleDisplayed = Helper.StringToBool(defaultToggleDisplayed);
 			this._presetFileName = presetFileName;
 		}
 
@@ -1541,15 +1541,17 @@ namespace LWGUI
 	/// rootPath: the default directory when creating a Ramp Atlas SO, replace '/' with '.' (for example: Assets.Art.RampAtlas). (Default: Assets)
 	/// colorSpace: the Color Space of Ramp Atlas Texture. (sRGB/Linear) (Default: sRGB)
 	/// defaultWidth: default Ramp Atlas Texture width (Default: 256)
+	/// showAtlasPreview: Draw the preview of Ramp Atlas below (True/False) (Default: True)
 	/// Target Property Type: Texture2D
 	/// </summary>
 	public class RampAtlasDrawer : SubDrawer
 	{
 		public string rootPath = "Assets";
 		public string defaultFileName = "RampAtlas";
+		public bool defaultAtlasSRGB = true;
 		public int defaultAtlasWidth = 256;
 		public int defaultAtlasHeight = 2;
-		public bool defaultAtlasSRGB = true;
+		public bool showAtlasPreview = true;
 		
 		protected LwguiRampAtlas _rampAtlasSO;
 		
@@ -1565,7 +1567,9 @@ namespace LWGUI
 		
 		public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, 4) { }
 		
-		public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight)
+		public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, defaultHeight, "true") { }
+		
+		public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight, string showAtlasPreview)
 		{
 			if (!rootPath.StartsWith(this.rootPath))
 			{
@@ -1578,6 +1582,7 @@ namespace LWGUI
 			this.defaultAtlasSRGB = colorSpace.ToLower() == "srgb";
 			this.defaultAtlasWidth = (int)Mathf.Max(2, defaultWidth);
 			this.defaultAtlasHeight = (int)Mathf.Max(2, defaultHeight);
+			this.showAtlasPreview = Helper.StringToBool(showAtlasPreview);
 		}
 
 		protected override bool IsMatchPropType(MaterialProperty property) => property.GetPropertyType() == ShaderPropertyType.Texture;
@@ -1649,7 +1654,7 @@ namespace LWGUI
 				}
 			}
 
-			if (prop.textureValue && !prop.hasMixedValue)
+			if (showAtlasPreview && prop.textureValue && !prop.hasMixedValue)
 			{
 				var filter = prop.textureValue.filterMode;
 				prop.textureValue.filterMode = FilterMode.Point;

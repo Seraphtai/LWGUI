@@ -20,20 +20,6 @@
               "icon": "lucide-file",
               "title": "README_CN"
             }
-          },
-          {
-            "id": "9cf7a17009ed6e2f",
-            "type": "leaf",
-            "state": {
-              "type": "diff-view",
-              "state": {
-                "aFile": "README_CN.md",
-                "bFile": "README_CN.md",
-                "aRef": ""
-              },
-              "icon": "git-pull-request",
-              "title": "Diff: README_CN"
-            }
           }
         ]
       },
@@ -122,13 +108,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "README.md",
+                "file": "README_CN.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of README"
+              "title": "Outline of README_CN"
             }
           }
         ]
@@ -222,10 +208,10 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "d93ffc2d4e7b14bd",
+  "active": "1ab61776fdab9c7c",
   "lastOpenFiles": [
-    "README_CN.md",
     "README.md",
+    "README_CN.md",
     "assets~/Pasted image 20250523120309.png",
     "assets~/Pasted image 20250522183200.png",
     "Test/LWGUI_RampAtlas.tga.meta",

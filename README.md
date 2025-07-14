@@ -562,6 +562,7 @@ The new LWGUI Gradient Editor integrates with Unity's built-in [Gradient Editor]
 /// rootPath: the default directory when creating a Ramp Atlas SO, replace '/' with '.' (for example: Assets.Art.RampAtlas). (Default: Assets)  
 /// colorSpace: the Color Space of Ramp Atlas Texture. (sRGB/Linear) (Default: sRGB)  
 /// defaultWidth: default Ramp Atlas Texture width (Default: 256)  
+/// showAtlasPreview: Draw the preview of Ramp Atlas below (True/False) (Default: True)
 /// Target Property Type: Texture2D
 public RampAtlasDrawer() : this(string.Empty) { }  
 public RampAtlasDrawer(string group) : this(group, "RampAtlas") { }  
@@ -570,6 +571,7 @@ public RampAtlasDrawer(string group, string defaultFileName, string rootPath) : 
 public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace) : this(group, defaultFileName, rootPath, colorSpace, 256) { } 
 public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, 4) { }  
 public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight)
+public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight, string showAtlasPreview)
 ```
 Example:
 ```c#

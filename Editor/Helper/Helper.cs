@@ -27,6 +27,8 @@ namespace LWGUI
 			return (prop.GetPropertyFlags() & ShaderPropertyFlags.HideInInspector) != 0;
 		}
 
+		public static bool StringToBool(string str) => str?.ToLower() is "on" or "true";
+		
 		public static string GetKeywordName(string keyword, string propName)
 		{
 			string k;
