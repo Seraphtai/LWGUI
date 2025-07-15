@@ -1588,8 +1588,8 @@ namespace LWGUI
 		protected override bool IsMatchPropType(MaterialProperty property) => property.GetPropertyType() == ShaderPropertyType.Texture;
 
 		protected override float GetVisibleHeight(MaterialProperty prop) => 
-			EditorGUIUtility.singleLineHeight + 2.0f + 
-			(prop.textureValue ? MaterialEditor.GetDefaultPropertyHeight(prop) : 0);
+			EditorGUIUtility.singleLineHeight + 
+			(prop.textureValue && showAtlasPreview ? MaterialEditor.GetDefaultPropertyHeight(prop) + 2.0f : 0);
 
 		public override void GetCustomContextMenus(GenericMenu menu, Rect rect, MaterialProperty prop, LWGUIMetaDatas metaDatas)
 		{
