@@ -804,7 +804,6 @@ namespace LWGUI
 	/// Draw the Int value as a Bit Mask.
 	/// Note:
 	///		- Currently only 8 bits are supported.
-	///		- Property Type must be 'Integer', not 'Int'.
 	///
 	/// Warning: If used to set Stencil, it will conflict with SRP Batcher!  
 	///		(Reproduced in Unity 2022)  
@@ -817,7 +816,7 @@ namespace LWGUI
 	///  
 	/// group: parent group name (Default: none)
 	/// bitDescription 7-0: Description of each Bit. (Default: none)
-	/// Target Property Type: Integer
+	/// Target Property Type: Int
 	/// </summary>
 	public class BitMaskDrawer : SubDrawer
 	{
@@ -878,13 +877,14 @@ namespace LWGUI
 			totalButtonWidth = buttonWidths.Sum();
 		}
 		
-		protected override bool IsMatchPropType(MaterialProperty property) { return property.GetPropertyType() == ShaderPropertyType.Int; }
+		protected override bool IsMatchPropType(MaterialProperty property) 
+			=> property.GetPropertyType() is ShaderPropertyType.Float or ShaderPropertyType.Int;
 
 		protected override float GetVisibleHeight(MaterialProperty prop) { return maxHeight; }
 
 		public override void DrawProp(Rect position, MaterialProperty prop, GUIContent label, MaterialEditor editor)
 		{
-			label.tooltip += $"\nCurrent Value: { prop.intValue }";
+			label.tooltip += $"\nCurrent Value: { prop.GetNumericValue() }";
 			
 			int controlId = GUIUtility.GetControlID(_hint, FocusType.Keyboard, position);
 			var fieldRect = EditorGUI.PrefixLabel(position, controlId, label);
@@ -898,7 +898,7 @@ namespace LWGUI
 			{
 				fieldRect.xMin = fieldRect.xMax - buttonWidths[i];
 				var buttonLable = buttonLables[i];
-				var active = RuntimeHelper.IsBitEnabled(prop.intValue, i);
+				var active = RuntimeHelper.IsBitEnabled((int)prop.GetNumericValue(), i);
 				var style = buttonStyles[i];
 				var buttonRect = fieldRect;
 				
@@ -916,7 +916,7 @@ namespace LWGUI
 
 				if (Helper.ToggleButton(buttonRect, buttonLable, active, style, _buttonPadding * 1.5f))
 				{
-					prop.intValue = RuntimeHelper.SetBitEnabled(prop.intValue, i, !active);
+					prop.SetNumericValue(RuntimeHelper.SetBitEnabled((int)prop.GetNumericValue(), i, !active));
 				}
 
 				fieldRect.xMax = fieldRect.xMin;

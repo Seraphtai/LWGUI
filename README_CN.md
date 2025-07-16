@@ -370,11 +370,10 @@ Result:
 /// Draw the Int value as a Bit Mask.
 /// Note:
 ///    - Currently only 8 bits are supported.
-///    - Property Type must be 'Integer', not 'Int'.
 ///
 /// group: parent group name (Default: none)
 /// bitDescription 7-0: Description of each Bit. (Default: none)
-/// Target Property Type: Integer
+/// Target Property Type: Int
 public BitMaskDrawer() : this(string.Empty, null) { }
 public BitMaskDrawer(string group) : this(group, null) { }
 public BitMaskDrawer(string group, string bitDescription7, string bitDescription6, string bitDescription5, string bitDescription4, string bitDescription3, string bitDescription2, string bitDescription1, string bitDescription0) 
