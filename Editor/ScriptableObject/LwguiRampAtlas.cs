@@ -211,6 +211,38 @@ namespace LWGUI
 			EditorUtility.ClearDirty(this);
 		}
 
+		public void ConvertColorSpace(ColorSpace targetColorSpace)
+		{
+			foreach (var ramp in ramps)
+			{
+				if (ramp.colorSpace != targetColorSpace)
+				{
+					ramp.colorSpace = targetColorSpace;
+					ramp.gradient.ConvertColorSpaceWithoutCopy(
+						targetColorSpace != ColorSpace.Gamma
+						? ColorSpace.Linear
+						: ColorSpace.Gamma);
+				}
+			}
+			
+			rampAtlasSRGB = targetColorSpace == ColorSpace.Gamma;
+			RampHelper.SetRampTextureImporter(_rampAtlasTexturePath, true, !rampAtlasSRGB, EditorJsonUtility.ToJson(this));
+			UpdateTexturePixels();
+			SaveTexture();
+		}
+		
+		[ContextMenu("Convert Gamma To Linear")]
+		public void ConvertGammaToLinear()
+		{
+			ConvertColorSpace(ColorSpace.Linear);
+		}
+
+		[ContextMenu("Convert Linear To Gamma")]
+		public void ConvertLinearToGamma()
+		{
+			ConvertColorSpace(ColorSpace.Gamma);
+		}
+
 		private void OnEnable()
 		{
 			InitData();
@@ -382,6 +414,5 @@ namespace LWGUI
 			
 			return null;
 		}
-
 	}
 }

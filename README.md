@@ -374,6 +374,20 @@ The Property Value in the selected Preset will be the default value:
 /// Note:
 ///    - Currently only 8 bits are supported.
 ///
+/// Warning 1: If used to set Stencil, it will conflict with SRP Batcher!  
+///		(Reproduced in Unity 2022)  
+///		SRP Batcher does not correctly handle multiple materials with different Stencil Ref values,  
+///		mistakenly merging them into a single Batch and randomly selecting one material's Stencil Ref value for the entire Batch.  
+///		In theory, if different materials have different Stencil Ref values, they should not be merged into a single Batch due to differing Render States.  
+/// Solution:  
+///		- Force disable SRP Batcher by setting the Material Property Block  
+///		- Place materials with the same Stencil Ref value in a separate Render Queue to ensure the Batch's Render State is correct
+///
+/// Warning 2: Once in use, do not change the Target Property Type!
+///		The underlying type of Int Property is Float Property, and in Materials, Int and Integer are stored separately.  
+///		Once a Material is saved, the Property Type is determined.  
+///		If you change the Property Type at this point (such as switching between Int/Integer), some strange bugs may occur.  
+///		If you must change the Property Type, it is recommended to modify the Property Name as well or delete the saved Property in the material.
 /// group: parent group name (Default: none)
 /// bitDescription 7-0: Description of each Bit. (Default: none)
 /// Target Property Type: Int
@@ -606,7 +620,9 @@ You can create an SO in the following ways:
 - Right-click on a material property using RampAtlas(): `Create Ramp Atlas` or `Clone Ramp Atlas`  
   - An SO created this way will include default values for all Ramps in the current material.  
  
-You can click the add button of RampAtlasIndexer() to add a new Ramp to the SO.
+You can click the add button of RampAtlasIndexer() to add a new Ramp to the SO. 
+
+The context menu in the upper right corner has a one-click color space conversion feature.
 
 > [!CAUTION] 
 >Currently, the material only saves Texture references and Int values. If you manually modify the number and order of Ramps in the Ramp Atlas SO, the selected Ramps in the material may be disrupted!  

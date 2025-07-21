@@ -371,6 +371,20 @@ Result:
 /// Note:
 ///    - Currently only 8 bits are supported.
 ///
+/// Warning 1: If used to set Stencil, it will conflict with SRP Batcher!  
+///		(Reproduced in Unity 2022)  
+///		SRP Batcher does not correctly handle multiple materials with different Stencil Ref values,  
+///		mistakenly merging them into a single Batch and randomly selecting one material's Stencil Ref value for the entire Batch.  
+///		In theory, if different materials have different Stencil Ref values, they should not be merged into a single Batch due to differing Render States.  
+/// Solution:  
+///		- Force disable SRP Batcher by setting the Material Property Block  
+///		- Place materials with the same Stencil Ref value in a separate Render Queue to ensure the Batch's Render State is correct
+///
+/// Warning 2: Once in use, do not change the Target Property Type!
+///		The underlying type of Int Property is Float Property, and in Materials, Int and Integer are stored separately.  
+///		Once a Material is saved, the Property Type is determined.  
+///		If you change the Property Type at this point (such as switching between Int/Integer), some strange bugs may occur.  
+///		If you must change the Property Type, it is recommended to modify the Property Name as well or delete the saved Property in the material.
 /// group: parent group name (Default: none)
 /// bitDescription 7-0: Description of each Bit. (Default: none)
 /// Target Property Type: Int
@@ -601,7 +615,9 @@ Ramp Atlas SO负责存储并生成Ramp Atlas Texture:
 - 在使用RampAtlas()的材质属性上右键: `Create Ramp Atlas`或`Clone Ramp Atlas`
 	- 用这种方式创建的SO会包含当前材质中所有Ramp的默认值
 
-你可以点击RampAtlasIndexer()的添加按钮向SO添加新的Ramp.
+你可以点击RampAtlasIndexer()的添加按钮向SO添加新的Ramp.  
+
+右上角的上下文菜单中有一键转换颜色空间功能.
 
 > [!CAUTION]
 > 目前材质仅保存Texture引用和Int值, 如果你手动修改了Ramp Atlas SO中的Ramp数量和顺序, 那么材质中已选择的Ramp可能被打乱!

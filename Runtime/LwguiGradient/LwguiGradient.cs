@@ -524,5 +524,35 @@ namespace LWGUI.Runtime.LwguiGradient
         }
 
         #endregion
+
+        #region Gamma <=> Linear
+
+        public LwguiGradient ConvertColorSpaceWithoutCopy(ColorSpace targetColorSpace)
+        {
+            for (int c = 0; c < (int)Channel.Num; c++)
+            {
+                if (c != (int)Channel.Alpha)
+                {
+                    var keys = rawCurves[c].keys;
+                    for (int i = 0; i < keys.Length; i++)
+                    {
+                        if (targetColorSpace == ColorSpace.Gamma)
+                            keys[i].value = Mathf.LinearToGammaSpace(keys[i].value);
+                        else
+                            keys[i].value = Mathf.GammaToLinearSpace(keys[i].value);
+                    }
+
+                    rawCurves[c].keys = keys;
+                }
+            }
+
+            return this;
+        }
+
+        public LwguiGradient gamma => new LwguiGradient(this).ConvertColorSpaceWithoutCopy(ColorSpace.Gamma);
+        
+        public LwguiGradient linear => new LwguiGradient(this).ConvertColorSpaceWithoutCopy(ColorSpace.Linear);
+
+        #endregion
     }
 }

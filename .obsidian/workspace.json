@@ -108,13 +108,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "README.md",
+                "file": "README_CN.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of README"
+              "title": "Outline of README_CN"
             }
           }
         ]
@@ -208,8 +208,10 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "d93ffc2d4e7b14bd",
+  "active": "1ab61776fdab9c7c",
   "lastOpenFiles": [
+    "package.json~",
+    "README.md",
     "README_CN.md",
     "Editor/ScriptableObject.meta",
     "Editor/ScriptableObject/LwguiShaderPropertyPreset.cs.meta",
@@ -221,7 +223,6 @@
     "Editor/ScriptableObject",
     "Editor/ScriptableObject/LWGUIShaderPropertyPreset.cs",
     "Editor/ScriptableObject/LWGUIRampAtlas.cs.meta",
-    "README.md",
     "assets~/Pasted image 20250523120309.png",
     "assets~/Pasted image 20250522183200.png",
     "assets~/Pasted image 20250321174432.png",

@@ -805,7 +805,7 @@ namespace LWGUI
 	/// Note:
 	///		- Currently only 8 bits are supported.
 	///
-	/// Warning: If used to set Stencil, it will conflict with SRP Batcher!  
+	/// Warning 1: If used to set Stencil, it will conflict with SRP Batcher!  
 	///		(Reproduced in Unity 2022)  
 	///		SRP Batcher does not correctly handle multiple materials with different Stencil Ref values,  
 	///		mistakenly merging them into a single Batch and randomly selecting one material's Stencil Ref value for the entire Batch.  
@@ -813,10 +813,16 @@ namespace LWGUI
 	/// Solution:  
 	///		- Force disable SRP Batcher by setting the Material Property Block  
 	///		- Place materials with the same Stencil Ref value in a separate Render Queue to ensure the Batch's Render State is correct
-	///  
+	///
+	/// Warning 2: Once in use, do not change the Target Property Type!
+	///		The underlying type of Int Property is Float Property, and in Materials, Int and Integer are stored separately.  
+	///		Once a Material is saved, the Property Type is determined.  
+	///		If you change the Property Type at this point (such as switching between Int/Integer), some strange bugs may occur.  
+	///		If you must change the Property Type, it is recommended to modify the Property Name as well or delete the saved Property in the material.
+	/// 
 	/// group: parent group name (Default: none)
 	/// bitDescription 7-0: Description of each Bit. (Default: none)
-	/// Target Property Type: Int
+	/// Target Property Type: Int/Integer
 	/// </summary>
 	public class BitMaskDrawer : SubDrawer
 	{
