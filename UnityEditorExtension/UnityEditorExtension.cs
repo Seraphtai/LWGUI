@@ -19,7 +19,8 @@ namespace LWGUI
 			ApplyMaterialPropertyAndDecoratorDrawers(objs);
 		}
 
-		// Called after edit or undo
+		// Called after edit, sets its attached value for each Drawer (usually Keywords, no modification of other properties is involved)
+		// If you find that the default value of the newly created material does not meet expectations, please call PresetHelper.ApplyPresetsInMaterial()
 		public static void ApplyMaterialPropertyAndDecoratorDrawers(Object[] targets)
 		{
 			if (!EditorMaterialUtility.disableApplyMaterialPropertyDrawers)

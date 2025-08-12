@@ -60,7 +60,10 @@ namespace LWGUI
 			return _loadedPresets[presetFileName];
 		}
 
-		// For Developers: Call this after a material has modified in code
+		// For Developers: Call this function after creating a material,
+		// This applies all active presets and may modify some other properties.
+		// Usually called after the material is created, otherwise the material default value will not contain the results of Preset Drawers.
+		// If you only want to apply Keywords without modifying other properties, call UnityEditorExtension.ApplyMaterialPropertyAndDecoratorDrawers()
 		public static void ApplyPresetsInMaterial(Material material)
 		{
 			var props = MaterialEditor.GetMaterialProperties(new UnityEngine.Object[] { material });
