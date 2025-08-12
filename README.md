@@ -1,4 +1,4 @@
-﻿# LWGUI (Light Weight Shader GUI)
+# LWGUI (Light Weight Shader GUI)
 
 [中文](https://github.com/JasonMa0012/LWGUI/blob/dev/README_CN.md) | [English](https://github.com/JasonMa0012/LWGUI)
 
@@ -1038,6 +1038,18 @@ MaterialToggleUIDrawer(string keyword)
 ```
 
 
+
+## FAQs
+
+### Problems Occurred After Modifying the Material in the Code
+
+After modifying material properties in the code, the Drawer logic ***does not*** run, potentially losing some data (e.g., Keywords).   
+You need to manually call `LWGUI.UnityEditorExtension.ApplyMaterialPropertyAndDecoratorDrawers()` to set up this part of the data (it will actually call `MaterialPropertyDrawer.Apply()`).
+
+### Problems Occurred After Creating the Material in the Code
+
+When creating materials in code, some Drawer logic may ***not*** run, and default values might not meet expectations.   
+You need to manually call `LWGUI.PresetHelper.ApplyPresetsInMaterial()` to ensure default values are correct.
 
 ## Custom Shader GUI
 
