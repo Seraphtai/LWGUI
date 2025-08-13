@@ -28,6 +28,8 @@ namespace LWGUI
 
 	public interface IPresetDrawer
 	{
+		public string GetPresetFileName();
+		
 		public LwguiShaderPropertyPreset.Preset GetActivePreset(MaterialProperty inProp, LwguiShaderPropertyPreset lwguiShaderPropertyPreset);
 	}
 	#endregion
@@ -105,6 +107,8 @@ namespace LWGUI
 		{
 			inoutPerMaterialData.propDynamicDatas[inProp.name].defaultValueDescription = inDefaultProp.floatValue > 0 ? "On" : "Off";
 		}
+
+		public string GetPresetFileName() => _presetFileName;
 
 		public LwguiShaderPropertyPreset.Preset GetActivePreset(MaterialProperty inProp, LwguiShaderPropertyPreset lwguiShaderPropertyPreset) =>
 			PresetDrawer.GetActivePresetFromFloatProperty(inProp, lwguiShaderPropertyPreset);
@@ -257,6 +261,8 @@ namespace LWGUI
 		{
 			inoutPerMaterialData.propDynamicDatas[inProp.name].defaultValueDescription = inDefaultProp.floatValue > 0 ? "On" : "Off";
 		}
+		
+		public string GetPresetFileName() => _presetFileName;
 		
 		public LwguiShaderPropertyPreset.Preset GetActivePreset(MaterialProperty inProp, LwguiShaderPropertyPreset lwguiShaderPropertyPreset) =>
 			PresetDrawer.GetActivePresetFromFloatProperty(inProp, lwguiShaderPropertyPreset);
@@ -748,6 +754,8 @@ namespace LWGUI
 			if (propertyPreset && index < propertyPreset.GetPresetCount() && index >= 0)
 				inoutPerMaterialData.propDynamicDatas[inProp.name].defaultValueDescription = propertyPreset.GetPreset(index).presetName;
 		}
+
+		public string GetPresetFileName() => presetFileName;
 
 		public LwguiShaderPropertyPreset.Preset GetActivePreset(MaterialProperty inProp, LwguiShaderPropertyPreset lwguiShaderPropertyPreset) =>
 			GetActivePresetFromFloatProperty(inProp, lwguiShaderPropertyPreset);

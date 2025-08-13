@@ -72,11 +72,10 @@ namespace LWGUI
 				var drawer = ReflectionHelper.GetPropertyDrawer(material.shader, prop, out _);
 
 				// Apply active preset
-				if (drawer != null && drawer is IPresetDrawer)
+				if (drawer is IPresetDrawer presetDrawer)
 				{
-					var activePreset = (drawer as IPresetDrawer).GetActivePreset(prop, PresetHelper.GetPresetAsset((drawer as PresetDrawer).presetFileName));
-					if (activePreset != null)
-						activePreset.ApplyToDefaultMaterial(material);
+					var activePreset = presetDrawer.GetActivePreset(prop, GetPresetAsset(presetDrawer.GetPresetFileName()));
+					activePreset?.ApplyToDefaultMaterial(material);
 				}
 			}
 			UnityEditorExtension.ApplyMaterialPropertyAndDecoratorDrawers(material);
