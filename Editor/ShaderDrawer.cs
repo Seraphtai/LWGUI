@@ -140,14 +140,16 @@ namespace LWGUI
 			return _height;
 		}
 
-		// Call when create/edit/undo materials, used to set keywords and presets
+		// Call when create/edit/undo materials.
+		// Used to set material settings such as Keywords that need to be kept synchronized with the value forever.
+		// DO NOT modify other properties here!!! Otherwise, manually modified values will be overwritten.
 		public override void Apply(MaterialProperty prop)
 		{
 			base.Apply(prop);
 			if (!prop.hasMixedValue && VersionControlHelper.IsWriteable(prop.targets))
 			{
 				Helper.SetShaderKeywordEnabled(prop.targets, Helper.GetKeywordName(_keyword, prop.name), prop.floatValue > 0f);
-				PresetDrawer.ApplyPreset(_presetFileName, prop);
+				PresetDrawer.ApplyPresetWithoutPropertyChanges(_presetFileName, prop);
 			}
 		}
 	}
@@ -289,7 +291,7 @@ namespace LWGUI
 			if (!prop.hasMixedValue && VersionControlHelper.IsWriteable(prop.targets))
 			{
 				Helper.SetShaderKeywordEnabled(prop.targets, Helper.GetKeywordName(_keyWord, prop.name), prop.floatValue > 0f);
-				PresetDrawer.ApplyPreset(_presetFileName, prop);
+				PresetDrawer.ApplyPresetWithoutPropertyChanges(_presetFileName, prop);
 			}
 		}
 	}
@@ -726,7 +728,9 @@ namespace LWGUI
 			return preset;
 		}
 
-		public static void ApplyPreset(string presetFileName, MaterialProperty prop)
+		// Apply Keywords and Passes in presets without modifying other property values
+		// Used to call in MaterialPropertyDrawer.Apply()
+		public static void ApplyPresetWithoutPropertyChanges(string presetFileName, MaterialProperty prop)
 		{
 			var presetFile = PresetHelper.GetPresetAsset(presetFileName);
 			if (presetFile != null
@@ -803,7 +807,7 @@ namespace LWGUI
 			base.Apply(prop);
 			if (!prop.hasMixedValue && VersionControlHelper.IsWriteable(prop.targets))
 			{
-				ApplyPreset(presetFileName, prop);
+				ApplyPresetWithoutPropertyChanges(presetFileName, prop);
 			}
 		}
 	}

@@ -39,7 +39,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RampAtlas:
-        m_Texture: {fileID: 2800000, guid: a515311e7e4a4694191895bf48c01468, type: 3}
+        m_Texture: {fileID: 2800000, guid: cfbe5a628e96c0d4bae3645ad922a368, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _normal:
@@ -61,7 +61,7 @@ Material:
     - _PresetGroup: 0
     - _Queue: 2000
     - _RampAtlasIndex0: 0
-    - _RampAtlasIndex1: 2
+    - _RampAtlasIndex1: 1
     - _RampAtlasIndex2: 3
     - _RampAtlasIndexer: 0
     - _SrcBlend: 5
