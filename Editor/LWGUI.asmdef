@@ -4,7 +4,8 @@
     "references": [
         "LWGUI.Runtime",
         "LWGUI.Timeline",
-        "Unity.InternalAPIEditorBridge.020"
+        "Unity.InternalAPIEditorBridge.020",
+        "LWGUI.Runtime.Timeline"
     ],
     "includePlatforms": [
         "Editor"

@@ -37,7 +37,7 @@
 		[Advanced][Tex(Group2, _AdvancedColor0)] _AdvancedTex1 ("Advanced Tex 1", 2D) = "white" { }
 		[Advanced][HideInInspector] _AdvancedColor0 ("Advanced Color 0", Color) = (1, 1, 1, 1)
 		[AdvancedHeaderProperty][Sub(Group2)] _AdvancedFloat ("Advanced Image", float) = 0
-		[Advanced][Image(Group2)] _AdvancedImage ("../image-20220828003810353.png", float) = 0
+		[Advanced][Image(Group2)] _AdvancedImage ("../assets~/809c4a1c-ce80-48b1-b415-7e8d4bea716e-16616214059841.png", float) = 0
 
 		[Title(Channel Samples)]
 		[Channel] _textureChannelMask ("Texture Channel Mask (Default G)", Vector) = (0, 1, 0, 0)

@@ -6,7 +6,9 @@
         "LWGUI.Timeline",
         "LWGUI.Runtime.Timeline",
         "Unity.Timeline",
-        "Unity.Timeline.Editor"
+        "Unity.Timeline.Editor",
+        "LWGUI.Runtime",
+        "Unity.InternalAPIEditorBridge.020"
     ],
     "includePlatforms": [
         "Editor"

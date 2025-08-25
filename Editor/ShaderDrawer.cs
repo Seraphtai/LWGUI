@@ -1702,25 +1702,71 @@ namespace LWGUI
 
 		public override void BuildStaticMetaData(Shader inShader, MaterialProperty inProp, MaterialProperty[] inProps, PropertyStaticData inoutPropertyStaticData)
 		{
-			var imagePath = Application.dataPath.Substring(0, Application.dataPath.Length - 6) + inProp.displayName;
-			if (File.Exists(imagePath))
-			{
-				var fileData = File.ReadAllBytes(imagePath);
-				Texture2D texture = new Texture2D(2, 2);
+			var inputPath = (inProp.displayName ?? string.Empty).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
+			var projectRoot = Helper.ProjectPath;
+			string imagePath = null;
 
-				// LoadImage will auto-resize the texture dimensions
-				if (texture.LoadImage(fileData))
+			try
+			{
+				// If the display path already starts with Assets (project-relative), resolve from project root
+				if (inputPath.StartsWith("Assets"))
 				{
-					inoutPropertyStaticData.image = texture;
+					imagePath = Path.Combine(projectRoot, inputPath);
+				}
+				// If it's an absolute path, use it directly
+				else if (Path.IsPathRooted(inputPath))
+				{
+					imagePath = inputPath;
 				}
 				else
 				{
-					Debug.LogError($"LWGUI: Failed to load image data into texture: { imagePath }");
+					// Try resolving relative to the shader file location
+					var shaderAssetPath = AssetDatabase.GetAssetPath(inShader);
+					if (!string.IsNullOrEmpty(shaderAssetPath))
+					{
+						var shaderFullPath = Path.Combine(projectRoot, shaderAssetPath);
+						var shaderDir = Path.GetDirectoryName(shaderFullPath);
+						if (!string.IsNullOrEmpty(shaderDir))
+						{
+							// Combine and normalize to resolve ../ segments
+							var candidate = Path.GetFullPath(Path.Combine(shaderDir, inputPath));
+							if (File.Exists(candidate))
+							{
+								imagePath = candidate;
+							}
+						}
+					}
+					// Fallback: try project-root relative resolution
+					if (imagePath == null)
+					{
+						var candidate2 = Path.Combine(projectRoot, inputPath);
+						if (File.Exists(candidate2)) imagePath = candidate2;
+					}
+				}
+
+				if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
+				{
+					var fileData = File.ReadAllBytes(imagePath);
+					Texture2D texture = new Texture2D(2, 2);
+
+					// LoadImage will auto-resize the texture dimensions
+					if (texture.LoadImage(fileData))
+					{
+						inoutPropertyStaticData.image = texture;
+					}
+					else
+					{
+						Debug.LogError($"LWGUI: Failed to load image data into texture: { imagePath }");
+					}
+				}
+				else
+				{
+					Debug.LogError($"LWGUI: Image path not found: { inputPath }");
 				}
 			}
-			else
+			catch (Exception ex)
 			{
-				Debug.LogError($"LWGUI: Image path not found: { imagePath }");
+				Debug.LogError($"LWGUI: Exception while resolving image path '{inputPath}': {ex.Message}");
 			}
 		}
 
