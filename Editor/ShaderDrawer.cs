@@ -412,9 +412,9 @@ namespace LWGUI
 			}
 
 			inoutPerMaterialData.propDynamicDatas[inProp.name].defaultValueDescription =
-				inoutPerMaterialData.propDynamicDatas[_minPropName].defualtProperty.floatValue
+				inoutPerMaterialData.propDynamicDatas[_minPropName].defaultProperty.floatValue
 			  + " - "
-			  + inoutPerMaterialData.propDynamicDatas[_maxPropName].defualtProperty.floatValue;
+			  + inoutPerMaterialData.propDynamicDatas[_maxPropName].defaultProperty.floatValue;
 		}
 
 		public override void DrawProp(Rect position, MaterialProperty prop, GUIContent label, MaterialEditor editor)
@@ -1210,7 +1210,7 @@ namespace LWGUI
 
 		public override void GetDefaultValueDescription(Shader inShader, MaterialProperty inProp, MaterialProperty inDefaultProp, PerShaderData inPerShaderData, PerMaterialData inoutPerMaterialData)
 		{
-			var defaultExtraProp = inoutPerMaterialData.GetPropDynamicData(_extraPropName)?.defualtProperty;
+			var defaultExtraProp = inoutPerMaterialData.GetPropDynamicData(_extraPropName)?.defaultProperty;
 			if (defaultExtraProp != null)
 			{
 				var text = string.Empty;
@@ -1373,21 +1373,21 @@ namespace LWGUI
 			string createdFileRelativePath = string.Empty;
 			while (true)
 			{
-				if (!Directory.Exists(Helper.ProjectPath + rootPath))
-					Directory.CreateDirectory(Helper.ProjectPath + rootPath);
+				if (!Directory.Exists(IOHelper.ProjectPath + rootPath))
+					Directory.CreateDirectory(IOHelper.ProjectPath + rootPath);
 
 				// TODO: Warning:
 				// PropertiesGUI() is being called recursively. If you want to render the default gui for shader properties then call PropertiesDefaultGUI() instead
 				var absPath = EditorUtility.SaveFilePanel(saveFilePanelTitle, rootPath, defaultFileName, fileExtension);
 					
-				if (absPath.StartsWith(Helper.ProjectPath + rootPath))
+				if (absPath.StartsWith(IOHelper.ProjectPath + rootPath))
 				{
-					createdFileRelativePath = absPath.Replace(Helper.ProjectPath, string.Empty);
+					createdFileRelativePath = absPath.Replace(IOHelper.ProjectPath, string.Empty);
 					break;
 				}
 				else if (absPath != string.Empty)
 				{
-					var retry = EditorUtility.DisplayDialog("Invalid Path", "Please select the subdirectory of '" + Helper.ProjectPath + rootPath + "'", "Retry", "Cancel");
+					var retry = EditorUtility.DisplayDialog("Invalid Path", "Please select the subdirectory of '" + IOHelper.ProjectPath + rootPath + "'", "Retry", "Cancel");
 					if (!retry) break;
 				}
 				else
@@ -1703,7 +1703,7 @@ namespace LWGUI
 		public override void BuildStaticMetaData(Shader inShader, MaterialProperty inProp, MaterialProperty[] inProps, PropertyStaticData inoutPropertyStaticData)
 		{
 			var inputPath = (inProp.displayName ?? string.Empty).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
-			var projectRoot = Helper.ProjectPath;
+			var projectRoot = IOHelper.ProjectPath;
 			string imagePath = null;
 
 			try

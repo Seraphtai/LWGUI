@@ -134,7 +134,7 @@ namespace LWGUI
 			if (!rampAtlasTexture || string.IsNullOrEmpty(targetRelativePath))
 				return;
 			
-			var absPath = Helper.ProjectPath + targetRelativePath;
+			var absPath = IOHelper.ProjectPath + targetRelativePath;
 			if (File.Exists(absPath))
 			{
 				var existRampTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(targetRelativePath);
@@ -388,14 +388,14 @@ namespace LWGUI
 				// PropertiesGUI() is being called recursively. If you want to render the default gui for shader properties then call PropertiesDefaultGUI() instead
 				var absPath = EditorUtility.SaveFilePanel("Create a Ramp Atlas SO", rootPath, defaultFileName, "asset");
 					
-				if (absPath.StartsWith(Helper.ProjectPath))
+				if (absPath.StartsWith(IOHelper.ProjectPath))
 				{
-					createdFileRelativePath = absPath.Replace(Helper.ProjectPath, string.Empty);
+					createdFileRelativePath = absPath.Replace(IOHelper.ProjectPath, string.Empty);
 					break;
 				}
 				else if (absPath != string.Empty)
 				{
-					var retry = EditorUtility.DisplayDialog("Invalid Path", "Please select the subdirectory of '" + Helper.ProjectPath + "'", "Retry", "Cancel");
+					var retry = EditorUtility.DisplayDialog("Invalid Path", "Please select the subdirectory of '" + IOHelper.ProjectPath + "'", "Retry", "Cancel");
 					if (!retry) break;
 				}
 				else

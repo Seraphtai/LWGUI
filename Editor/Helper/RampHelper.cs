@@ -143,7 +143,7 @@ namespace LWGUI
 			// Save texture to disk
 			if (doSaveToDisk)
 			{
-				var systemPath = Helper.ProjectPath + path;
+				var systemPath = IOHelper.ProjectPath + path;
 				VersionControlHelper.Checkout(path);
 				File.WriteAllBytes(systemPath, texture2D.EncodeToPNG());
 				assetImporter.SaveAndReimport();
@@ -197,7 +197,7 @@ namespace LWGUI
 			var ramp = gradient.GetPreviewRampTexture(width, height, ColorSpace.Linear);
 			var png = ramp.EncodeToPNG();
 
-			var systemPath = Helper.ProjectPath + unityPath;
+			var systemPath = IOHelper.ProjectPath + unityPath;
 			File.WriteAllBytes(systemPath, png);
 
 			AssetDatabase.ImportAsset(unityPath);

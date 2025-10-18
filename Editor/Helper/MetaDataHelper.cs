@@ -27,7 +27,7 @@ namespace LWGUI
 
 		public MaterialProperty GetProperty(string propName) => GetPropDynamicData(propName)?.property;
 
-		public MaterialProperty GetDefaultProperty(string propName) => GetPropDynamicData(propName)?.defualtProperty;
+		public MaterialProperty GetDefaultProperty(string propName) => GetPropDynamicData(propName)?.defaultProperty;
 		
 		#endregion
 
