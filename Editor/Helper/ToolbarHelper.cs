@@ -80,7 +80,7 @@ namespace LWGUI
 			var buttonRectOffset = toolBarRect.height + 2;
 			var buttonRect = new Rect(toolBarRect.x, toolBarRect.y, toolBarRect.height, toolBarRect.height);
 			toolBarRect.xMin += buttonRectOffset;
-			if (GUI.Button(buttonRect, _guiContentCopy, Helper.guiStyles_IconButton))
+			if (GUI.Button(buttonRect, _guiContentCopy, GUIStyles.iconButton))
 			{
 				ContextMenuHelper.CopyMaterial(metaDatas.GetMaterial());
 			}
@@ -101,7 +101,7 @@ namespace LWGUI
 				Event.current.Use();
 			}
 			// Left Click
-			if (GUI.Button(buttonRect, _guiContentPaste, Helper.guiStyles_IconButton))
+			if (GUI.Button(buttonRect, _guiContentPaste, GUIStyles.iconButton))
 			{
 				ContextMenuHelper.DoPasteMaterialProperties(metaDatas, (uint)CopyMaterialValueMask.All);
 			}
@@ -109,7 +109,7 @@ namespace LWGUI
 			// Select Material Asset, jump from a Runtime Material Instance to a Material Asset
 			buttonRect.x += buttonRectOffset;
 			toolBarRect.xMin += buttonRectOffset;
-			if (GUI.Button(buttonRect, _guiContentSelect, Helper.guiStyles_IconButton))
+			if (GUI.Button(buttonRect, _guiContentSelect, GUIStyles.iconButton))
 			{
 				var material = metaDatas.GetMaterial();
 
@@ -129,7 +129,7 @@ namespace LWGUI
 			// Checkout
 			buttonRect.x += buttonRectOffset;
 			toolBarRect.xMin += buttonRectOffset;
-			if (GUI.Button(buttonRect, _guiContentChechout, Helper.guiStyles_IconButton))
+			if (GUI.Button(buttonRect, _guiContentChechout, GUIStyles.iconButton))
 			{
 				VersionControlHelper.Checkout(metaDatas.GetMaterialEditor().targets);
 			}
@@ -137,7 +137,7 @@ namespace LWGUI
 			// Expand
 			buttonRect.x += buttonRectOffset;
 			toolBarRect.xMin += buttonRectOffset;
-			if (GUI.Button(buttonRect, _guiContentExpand, Helper.guiStyles_IconButton))
+			if (GUI.Button(buttonRect, _guiContentExpand, GUIStyles.iconButton))
 			{
 				foreach (var propStaticDataKVPair in perShaderData.propStaticDatas)
 				{
@@ -149,7 +149,7 @@ namespace LWGUI
 			// Collapse
 			buttonRect.x += buttonRectOffset;
 			toolBarRect.xMin += buttonRectOffset;
-			if (GUI.Button(buttonRect, _guiContentCollapse, Helper.guiStyles_IconButton))
+			if (GUI.Button(buttonRect, _guiContentCollapse, GUIStyles.iconButton))
 			{
 				foreach (var propStaticDataKVPair in perShaderData.propStaticDatas)
 				{
@@ -165,7 +165,7 @@ namespace LWGUI
 			var displayModeData = perShaderData.displayModeData;
 			if (!displayModeData.IsDefaultDisplayMode())
 				GUI.color = Color.yellow;
-			if (GUI.Button(buttonRect, _guiContentVisibility, Helper.guiStyles_IconButton))
+			if (GUI.Button(buttonRect, _guiContentVisibility, GUIStyles.iconButton))
 			{
 				// Build Display Mode Menu Items
 				var displayModeMenus = new[]
@@ -287,7 +287,7 @@ namespace LWGUI
 				Event.current.Use();
 			}
 
-			perShaderData.searchString = EditorGUI.TextField(rect, String.Empty, perShaderData.searchString, Helper.guiStyles_ToolbarSearchTextFieldPopup);
+			perShaderData.searchString = EditorGUI.TextField(rect, String.Empty, perShaderData.searchString, GUIStyles.toolbarSearchTextFieldPopup);
 
 			if (EditorGUI.EndChangeCheck())
 				hasChanged = true;
@@ -309,12 +309,12 @@ namespace LWGUI
 				using (new EditorGUI.DisabledScope(true))
 				{
 					var disableTextRect = new Rect(rect.x, rect.y, rect.width,
-												   Helper.guiStyles_ToolbarSearchTextFieldPopup.fixedHeight > 0.0
-													   ? Helper.guiStyles_ToolbarSearchTextFieldPopup.fixedHeight
+												   GUIStyles.toolbarSearchTextFieldPopup.fixedHeight > 0.0
+													   ? GUIStyles.toolbarSearchTextFieldPopup.fixedHeight
 													   : rect.height);
-					disableTextRect = Helper.guiStyles_ToolbarSearchTextFieldPopup.padding.Remove(disableTextRect);
+					disableTextRect = GUIStyles.toolbarSearchTextFieldPopup.padding.Remove(disableTextRect);
 					int fontSize = EditorStyles.label.fontSize;
-					EditorStyles.label.fontSize = Helper.guiStyles_ToolbarSearchTextFieldPopup.fontSize;
+					EditorStyles.label.fontSize = GUIStyles.toolbarSearchTextFieldPopup.fontSize;
 					EditorStyles.label.Draw(disableTextRect, new GUIContent(perShaderData.searchMode.ToString()), false, false, false, false);
 					EditorStyles.label.fontSize = fontSize;
 				}

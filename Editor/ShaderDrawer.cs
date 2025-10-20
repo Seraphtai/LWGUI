@@ -925,9 +925,10 @@ namespace LWGUI
 					buttonRect.xMin -= _buttonPadding;
 					buttonRect.xMax += _buttonPadding * 2;
 				}
-				
-				if (style.richText = prop.hasMixedValue)
+
+				if (prop.hasMixedValue)
 				{
+					style.richText = true;
 					// https://docs.unity3d.com/2021.3/Documentation/Manual/StyledText.html
 					buttonLable = new GUIContent($"<b><i>{ buttonLable.text }</i></b>");
 				}
@@ -2161,10 +2162,7 @@ namespace LWGUI
 		public override void DrawProp(Rect position, MaterialProperty prop, GUIContent label, MaterialEditor editor)
 		{
 			position = EditorGUI.IndentedRect(position);
-			GUIStyle style = new GUIStyle(EditorStyles.boldLabel);
-			style.alignment = TextAnchor.LowerLeft;
-			style.border.bottom = 2;
-			GUI.Label(position, _header, style);
+			GUI.Label(position, _header, GUIStyles.title);
 		}
 	}
 

@@ -85,10 +85,10 @@ namespace LWGUI.PerformanceMonitor
                         hash = hash,
                     };
 
-                    shaderPerfData.shaderCacheNamePrefix = IOHelper.GetShaderCacheNamePrefix(shaderPerfData);
+                    shaderPerfData.shaderTypeName = shaderPerfData.shaderType.ToString();
                     shaderPerfData.compiledShaderDirectory = IOHelper.GetCompiledShaderVariantCacheDirectory(shader, shaderPerfData);
-                    shaderPerfData.compiledBinaryDxbcShaderPath = Path.Combine(shaderPerfData.compiledShaderDirectory, shaderPerfData.shaderCacheNamePrefix + ".dxbc");
-                    shaderPerfData.compiledReadableShaderPath = Path.Combine(shaderPerfData.compiledShaderDirectory, shaderPerfData.shaderCacheNamePrefix + ".txt");
+                    shaderPerfData.compiledBinaryDxbcShaderPath = Path.Combine(shaderPerfData.compiledShaderDirectory, shaderPerfData.shaderTypeName + ".dxbc");
+                    shaderPerfData.compiledReadableShaderPath = Path.Combine(shaderPerfData.compiledShaderDirectory, shaderPerfData.shaderTypeName + ".txt");
                     
                     // Compile and create cache
                     if (!File.Exists(shaderPerfData.compiledBinaryDxbcShaderPath))

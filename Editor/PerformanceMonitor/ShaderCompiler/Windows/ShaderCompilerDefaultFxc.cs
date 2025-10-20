@@ -366,12 +366,18 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
         
         public static ShaderPerfStats AnalyzeShaderPerformance(ShaderPerfData shaderPerfData)
         {
-            string log = string.Empty;
+            string output;
             
             // Disassemble With fxc.exe
             if (!File.Exists(shaderPerfData.compiledReadableShaderPath))
             {
-                log = IOHelper.RunProcess(FxcAbsPath, $"/dumpbin \"{ shaderPerfData.compiledBinaryDxbcShaderPath }\" > \"{ shaderPerfData.compiledReadableShaderPath }\"");
+                if (IOHelper.RunProcess(FxcAbsPath, $"/dumpbin \"{shaderPerfData.compiledBinaryDxbcShaderPath}\"", 
+                        out output))
+                {
+                    IOHelper.WriteTextFile(shaderPerfData.compiledReadableShaderPath, output);
+                    var stats = ParseAsmStats(output);
+                    return stats;
+                }
             }
 
             // Parsing ASM empirically
@@ -383,7 +389,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
             }
             else
             {
-                Debug.LogError($"LWGUI: { log }");
+                Debug.LogError($"LWGUI: Compiling Shader: { shaderPerfData.compiledBinaryDxbcShaderPath } failed!");
                 return new ShaderPerfStats();
             }
         }

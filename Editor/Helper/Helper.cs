@@ -178,54 +178,6 @@ namespace LWGUI
 
 		#region GUI Styles
 
-		// Tips: Use properties to fix null reference errors
-
-		private static GUIStyle _guiStyles_IconButton;
-		public static GUIStyle guiStyles_IconButton => _guiStyles_IconButton ?? new GUIStyle(EditorStyles.iconButton) { fixedHeight = 0, fixedWidth = 0 };
-
-		private static GUIStyle _guiStyle_Foldout;
-		public static GUIStyle guiStyle_Foldout => _guiStyle_Foldout ?? new GUIStyle(EditorStyles.miniButton)
-		{
-			contentOffset = new Vector2(22, 0),
-			fixedHeight = 27,
-			alignment = TextAnchor.MiddleLeft,
-			font = EditorStyles.boldLabel.font,
-			fontSize = EditorStyles.boldLabel.fontSize + 1
-		};
-
-		private static GUIStyle _guiStyle_Helpbox;
-		public static GUIStyle guiStyle_Helpbox => _guiStyle_Helpbox ?? new GUIStyle(EditorStyles.helpBox) { fontSize = 12 };
-		
-		private static GUIStyle _guiStyle_RampSelectButton;
-		public static GUIStyle guiStyle_RampSelectButton => _guiStyle_RampSelectButton ?? new GUIStyle(EditorStyles.miniButton) { alignment = TextAnchor.MiddleLeft };
-
-		private static GUIStyle _guiStyles_ToolbarSearchTextFieldPopup;
-		public static GUIStyle guiStyles_ToolbarSearchTextFieldPopup
-		{
-			get
-			{
-				if (_guiStyles_ToolbarSearchTextFieldPopup == null)
-				{
-					string toolbarSeachTextFieldPopupStr = "ToolbarSeachTextFieldPopup";
-					{
-						// ToolbarSeachTextFieldPopup has renamed at Unity 2021.3.28+
-#if !UNITY_2022_3_OR_NEWER
-						string[] versionParts = Application.unityVersion.Split('.');
-						int majorVersion = int.Parse(versionParts[0]);
-						int minorVersion = int.Parse(versionParts[1]);
-						Match patchVersionMatch = Regex.Match(versionParts[2], @"\d+");
-						int patchVersion = int.Parse(patchVersionMatch.Value);
-						if (majorVersion >= 2021 && minorVersion >= 3 && patchVersion >= 28)
-#endif
-						{
-							toolbarSeachTextFieldPopupStr = "ToolbarSearchTextFieldPopup";
-						}
-					}
-					_guiStyles_ToolbarSearchTextFieldPopup = new GUIStyle(toolbarSeachTextFieldPopupStr);
-				}
-				return _guiStyles_ToolbarSearchTextFieldPopup;
-			}
-		}
 
 		#endregion
 
@@ -283,7 +235,7 @@ namespace LWGUI
 				GUI.enabled = true;
 				var guiColor = GUI.backgroundColor;
 				GUI.backgroundColor = isFolding ? Color.white : new Color(0.85f, 0.85f, 0.85f);
-				if (GUI.Button(rect, label, guiStyle_Foldout))
+				if (GUI.Button(rect, label, GUIStyles.foldout))
 				{
 					isFolding = !isFolding;
 					GUI.changed = false;
@@ -347,10 +299,10 @@ namespace LWGUI
 			{
 				var content = new GUIContent(helpboxStr, _helpboxIcon);
 				var textWidth = GetCurrentPropertyLayoutWidth();
-				var textHeight = guiStyle_Helpbox.CalcHeight(content, textWidth);
+				var textHeight = GUIStyles.helpbox.CalcHeight(content, textWidth);
 				var helpboxRect = EditorGUI.IndentedRect(EditorGUILayout.GetControlRect(true, textHeight));
 				helpboxRect.xMax -= RevertableHelper.revertButtonWidth;
-				GUI.Label(helpboxRect, content, guiStyle_Helpbox);
+				GUI.Label(helpboxRect, content, GUIStyles.helpbox);
 				// EditorGUI.HelpBox(helpboxRect, helpboxStr, MessageType.Info);
 			}
 		}
@@ -370,7 +322,7 @@ namespace LWGUI
 			logoRect.xMin += w * 0.5f - _logo.width * 0.5f;
 			logoRect.xMax -= w * 0.5f - _logo.width * 0.5f;
 
-			if (EditorGUIUtility.currentViewWidth >= logoRect.width && GUI.Button(logoRect, _logoGuiContent, guiStyles_IconButton))
+			if (EditorGUIUtility.currentViewWidth >= logoRect.width && GUI.Button(logoRect, _logoGuiContent, GUIStyles.iconButton))
 			{
 				Application.OpenURL("https://github.com/JasonMa0012/LWGUI");
 			}

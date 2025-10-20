@@ -24,15 +24,13 @@ namespace LWGUI.PerformanceMonitor
         public string passName                      = string.Empty;
         public ShaderType shaderType;
         public string hash                          = string.Empty;
+        public bool isCompiledSuccessful            = false;
         
         // Path
-        public string shaderCacheNamePrefix         = string.Empty;
-        public string compiledShaderDirectory       = string.Empty;
-        public string compiledBinaryDxbcShaderPath  = string.Empty;
-        public string compiledReadableShaderPath    = string.Empty;
-
-        public bool isCompiledSuccessful            = false;
-        public bool isAnalysisSuccessful            = false;
+        public string shaderTypeName               = string.Empty;
+        public string compiledShaderDirectory      = string.Empty;
+        public string compiledBinaryDxbcShaderPath = string.Empty;
+        public string compiledReadableShaderPath   = string.Empty;
 
         public ShaderPerfStats stats;
     }

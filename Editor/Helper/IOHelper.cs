@@ -74,8 +74,11 @@ namespace LWGUI
 
         #region Process
 
-        public static string RunProcess(string file, string args)
+        public static bool RunProcess(string file, string args, 
+            out string output)
         {
+            output = string.Empty;
+            
             var psi = new ProcessStartInfo
             {
                 FileName = file,
@@ -88,42 +91,41 @@ namespace LWGUI
                 StandardErrorEncoding = Encoding.UTF8
             };
 
-            using (var p = Process.Start(psi))
+            using var p = Process.Start(psi);
+            var stdout = new StringBuilder();
+            var stderr = new StringBuilder();
+
+            p.OutputDataReceived += (_, e) =>
             {
-                var stdout = new StringBuilder();
-                var stderr = new StringBuilder();
+                if (e.Data != null) stdout.AppendLine(e.Data);
+            };
+            p.ErrorDataReceived += (_, e) =>
+            {
+                if (e.Data != null) stderr.AppendLine(e.Data);
+            };
 
-                p.OutputDataReceived += (_, e) =>
-                {
-                    if (e.Data != null) stdout.AppendLine(e.Data);
-                };
-                p.ErrorDataReceived += (_, e) =>
-                {
-                    if (e.Data != null) stderr.AppendLine(e.Data);
-                };
+            p.BeginOutputReadLine();
+            p.BeginErrorReadLine();
+            p.WaitForExit();
 
-                p.BeginOutputReadLine();
-                p.BeginErrorReadLine();
-                p.WaitForExit();
-
-                if (p.ExitCode != 0)
-                {
-                    Debug.LogError($"LWGUI: Exit Code { p.ExitCode }: { stderr }\n" +
-                                    $"file: { file }\n" +
-                                    $"args: { args }");
-                    return string.Empty;
-                }
-
-                var output = stdout.ToString();
-                if (string.IsNullOrWhiteSpace(output))
-                {
-                    var err = stderr.ToString();
-                    if (!string.IsNullOrWhiteSpace(err)) 
-                        return err;
-                }
-
-                return output;
+            output = stdout.ToString();
+                
+            if (p.ExitCode != 0)
+            {
+                Debug.LogError($"LWGUI: Process Exit Code { p.ExitCode }: { stderr }" +
+                               $"File: { file }\n" +
+                               $"Args: { args }");
+                output = stderr.ToString();
+                return false;
             }
+
+            if (string.IsNullOrWhiteSpace(output))
+            {
+                output = stderr.ToString();
+                return false;
+            }
+
+            return true;
         }
 
         #endregion
@@ -131,13 +133,19 @@ namespace LWGUI
         #region Performance Monitor
 
         public static string GetCompiledShaderVariantCacheDirectory(Shader shader, ShaderPerfData shaderPerfData)
-            => Path.Combine(CompiledShaderCacheRootPath, 
-                shader.name,
+        {
+            var shaderPath = AssetDatabase.Contains(shader) ? AssetDatabase.GetAssetPath(shader) : null;
+            var shaderCachePath = shaderPath != null
+                // Assets/Shaders/Lit.shader => Shaders/Lit
+                ? Path.Combine(Path.GetDirectoryName(shaderPath[7..]) ?? string.Empty, Path.GetFileNameWithoutExtension(shaderPath))
+                : shader.name.Replace('/', '_').Replace('\\', '_');
+             
+            return Path.Combine(CompiledShaderCacheRootPath, 
+                shaderCachePath,
                 shaderPerfData.subshaderIndex.ToString(),
                 shaderPerfData.passName,
                 shaderPerfData.hash);
-
-        public static string GetShaderCacheNamePrefix(ShaderPerfData shaderPerfData) => $"{shaderPerfData.shaderType.ToString()}Shader";
+        }
 
         public static void ClearShaderCache(Shader shader)
         {

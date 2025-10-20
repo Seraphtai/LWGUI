@@ -314,7 +314,7 @@ namespace LWGUI
 					var buttonRect = new Rect(rect.x + rect.width - buttonWidth, rect.y, buttonWidth, rect.height);
 					var previewRect = new Rect(rect.x, rect.y, rect.width - buttonWidth - 3.0f, rect.height);
 					
-					if (GUI.Button(buttonRect, guiContent, Helper.guiStyle_RampSelectButton) && _switchRampMapEvent != null)
+					if (GUI.Button(buttonRect, guiContent, GUIStyles.rampSelectButton) && _switchRampMapEvent != null)
 					{
 						_switchRampMapEvent(_prop, rampMap, i);
 						LwguiGradientWindow.CloseWindow();
