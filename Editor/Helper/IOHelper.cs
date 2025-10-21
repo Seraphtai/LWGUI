@@ -127,12 +127,17 @@ namespace LWGUI
 
             return true;
         }
+        
+        public static void OpenFile(string filePath)
+        {
+            Process.Start(filePath);
+        }
 
         #endregion
 
         #region Performance Monitor
 
-        public static string GetCompiledShaderVariantCacheDirectory(Shader shader, ShaderPerfData shaderPerfData)
+        public static string GetCompiledShaderCacheRootDirectory(Shader shader)
         {
             var shaderPath = AssetDatabase.Contains(shader) ? AssetDatabase.GetAssetPath(shader) : null;
             var shaderCachePath = shaderPath != null
@@ -140,18 +145,23 @@ namespace LWGUI
                 ? Path.Combine(Path.GetDirectoryName(shaderPath[7..]) ?? string.Empty, Path.GetFileNameWithoutExtension(shaderPath))
                 : shader.name.Replace('/', '_').Replace('\\', '_');
              
-            return Path.Combine(CompiledShaderCacheRootPath, 
-                shaderCachePath,
+            return Path.Combine(CompiledShaderCacheRootPath, shaderCachePath);
+        }
+
+        public static string GetCompiledShaderVariantCacheDirectory(Shader shader, ShaderPerfData shaderPerfData)
+        {
+            return Path.Combine(
+                GetCompiledShaderCacheRootDirectory(shader),
                 shaderPerfData.subshaderIndex.ToString(),
                 shaderPerfData.passName,
                 shaderPerfData.hash);
         }
 
-        public static void ClearShaderCache(Shader shader)
+        public static void ClearShaderPerfCache(Shader shader)
         {
             try
             {
-                var shaderDir = Path.Combine(CompiledShaderCacheRootPath, shader.name);
+                var shaderDir = GetCompiledShaderCacheRootDirectory(shader);
                 if (Directory.Exists(shaderDir)) 
                     Directory.Delete(shaderDir, true);
             }

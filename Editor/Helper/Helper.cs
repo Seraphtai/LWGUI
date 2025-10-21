@@ -25,22 +25,6 @@ namespace LWGUI
 			return (prop.GetPropertyFlags() & ShaderPropertyFlags.HideInInspector) != 0;
 		}
 
-		public static bool StringToBool(string str) => str?.ToLower() is "on" or "true";
-		
-		public static string GetKeywordName(string keyword, string propName)
-		{
-			string k;
-			if (string.IsNullOrEmpty(keyword) || keyword == "__")
-			{
-				k = propName.ToUpperInvariant() + "_ON";
-			}
-			else
-			{
-				k = keyword.ToUpperInvariant();
-			}
-			return k;
-		}
-
 		public static void SetShaderKeywordEnabled(Object[] materials, string keywordName, bool isEnable)
 		{
 			if (string.IsNullOrEmpty(keywordName) || string.IsNullOrEmpty(keywordName)) return;
@@ -108,13 +92,6 @@ namespace LWGUI
 
 		public static LWGUIMetaDatas GetLWGUIMetadatas(MaterialEditor editor) => GetLWGUI(editor).metaDatas;
 
-		public static void AdaptiveFieldWidth(GUIStyle style, GUIContent content)
-		{
-			var extraTextWidth = Mathf.Max(0, style.CalcSize(content).x - (EditorGUIUtility.fieldWidth - RevertableHelper.revertButtonWidth));
-			EditorGUIUtility.labelWidth -= extraTextWidth;
-			EditorGUIUtility.fieldWidth += extraTextWidth;
-		}
-
 		public static void BeginProperty(Rect rect, MaterialProperty property, LWGUIMetaDatas metaDatas)
 		{
 #if UNITY_2022_1_OR_NEWER
@@ -146,6 +123,43 @@ namespace LWGUI
 		#endregion
 
 
+		#region String
+
+		public static bool StringToBool(string str) => str?.ToLower() is "on" or "true";
+		
+		public static string FillStringLengthBySpace(string str, int minStringLength)
+		{
+			if (str.Length >= minStringLength)
+				return str;
+			
+			return str + string.Concat(Enumerable.Repeat(' ', minStringLength - str.Length));
+		} 
+		
+		public static string GetKeywordName(string keyword, string propName)
+		{
+			string k;
+			if (string.IsNullOrEmpty(keyword) || keyword == "__")
+			{
+				k = propName.ToUpperInvariant() + "_ON";
+			}
+			else
+			{
+				k = keyword.ToUpperInvariant();
+			}
+			return k;
+		}
+
+		public static void AdaptiveFieldWidth(GUIStyle style, GUIContent content)
+		{
+			var extraTextWidth = Mathf.Max(0, style.CalcSize(content).x - (EditorGUIUtility.fieldWidth - RevertableHelper.revertButtonWidth));
+			EditorGUIUtility.labelWidth -= extraTextWidth;
+			EditorGUIUtility.fieldWidth += extraTextWidth;
+		}
+
+
+		#endregion
+
+		
 		#region Math
 
 		public const double Float_Epsilon = 1e-10;
@@ -172,12 +186,6 @@ namespace LWGUI
 				return -num;
 			return num;
 		}
-
-		#endregion
-
-
-		#region GUI Styles
-
 
 		#endregion
 

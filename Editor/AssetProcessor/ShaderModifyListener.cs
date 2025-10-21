@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Jason Ma
 using System;
 using System.IO;
+using LWGUI.PerformanceMonitor;
 using UnityEditor;
 using UnityEngine;
 
@@ -15,10 +16,14 @@ namespace LWGUI
 		{
 			foreach (var assetPath in importedAssets)
 			{
-				if (Path.GetExtension(assetPath).Equals(".shader", StringComparison.OrdinalIgnoreCase))
+				var ext = Path.GetExtension(assetPath);
+				if (ext.Equals(".shader", StringComparison.OrdinalIgnoreCase)
+					|| ext.Equals(".shadergraph", StringComparison.OrdinalIgnoreCase)
+					)
 				{
 					var shader = AssetDatabase.LoadAssetAtPath<Shader>(assetPath);
 					MetaDataHelper.ReleaseShaderMetadataCache(shader);
+					ShaderPerfMonitor.ClearShaderPerfCache(shader);
 					ReflectionHelper.InvalidatePropertyCache(shader);
 				}
 			}

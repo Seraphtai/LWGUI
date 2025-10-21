@@ -44,18 +44,22 @@ namespace LWGUI
 				onDrawCustomHeader(this);
 
 			// Toolbar
-			bool enabled = GUI.enabled;
-			GUI.enabled = true;
-			var toolBarRect = EditorGUILayout.GetControlRect();
-			toolBarRect.xMin = 2;
+			{
+				bool enabled = GUI.enabled;
+				GUI.enabled = true;
+				var toolBarRect = EditorGUILayout.GetControlRect();
+				toolBarRect.xMin = 2;
 
-			ToolbarHelper.DrawToolbarButtons(ref toolBarRect, metaDatas);
-			ToolbarHelper.DrawSearchField(toolBarRect, metaDatas);
+				ToolbarHelper.DrawToolbarButtons(ref toolBarRect, metaDatas);
+				ToolbarHelper.DrawSearchField(toolBarRect, metaDatas);
 
-			GUILayoutUtility.GetRect(0, 0); // Space(0)
-			GUI.enabled = enabled;
-			Helper.DrawSplitLine();
+				GUILayoutUtility.GetRect(0, 0); // Space(0)
+				GUI.enabled = enabled;
+				Helper.DrawSplitLine();
 
+				ToolbarHelper.DrawShaderPerformanceStats(metaDatas);
+			}
+			
 
 			//-----------------------------------------------------------------------------
 			// Draw Properties
@@ -127,32 +131,6 @@ namespace LWGUI
 			editor.LightmapEmissionProperty();
 			editor.DoubleSidedGIField();
 
-			// Shader Performance Monitor
-			{
-				EditorGUILayout.Space();
-				Helper.DrawSplitLine();
-				EditorGUILayout.LabelField("Shader Performance Monitor", GUIStyles.title);
-				var lastPassName = string.Empty;
-				// var labelWidth = EditorGUIUtility.labelWidth;
-				// EditorGUIUtility.labelWidth = 0;
-				foreach (var shaderPerfData in metaDatas.perMaterialData.shaderPerfDatas)
-				{
-					if (lastPassName == string.Empty)
-						lastPassName = shaderPerfData.passName;
-					
-					if (lastPassName != shaderPerfData.passName)
-					{
-						lastPassName = shaderPerfData.passName;
-						EditorGUILayout.Space();
-					}
-					
-					var stats = shaderPerfData.stats.isValid ? $"Cost: {shaderPerfData.stats.estimatedCost}" : "ANALYSIS FAILS";
-					EditorGUILayout.LabelField($"{shaderPerfData.passName} | { shaderPerfData.shaderTypeName }", stats);
-				}
-				// EditorGUIUtility.labelWidth = labelWidth;
-				EditorGUILayout.Space();
-				Helper.DrawSplitLine();
-			}			
 			// Custom Footer
 			if (onDrawCustomFooter != null)
 				onDrawCustomFooter(this);

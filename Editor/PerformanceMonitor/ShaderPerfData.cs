@@ -8,7 +8,7 @@ namespace LWGUI.PerformanceMonitor
 {
     public struct ShaderPerfStats
     {
-        public float estimatedCost;
+        public float estimatedCost; // Estimated relative performance cost based on experience, not precise results.
         public int sampleCount;
         public int samplerCount;
         public int registerCount;

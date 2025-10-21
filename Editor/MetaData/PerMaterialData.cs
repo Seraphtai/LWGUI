@@ -171,8 +171,11 @@ namespace LWGUI
 			}
 			
 			// Get Shader Perf Stats
-			keywords = ShaderPerfMonitor.GetMaterialAndGlobalActiveKeywords(material);
-			shaderPerfDatas = ShaderPerfMonitor.GetShaderVariantPerfDatas(shader, keywords);
+			if (ToolbarHelper.IsDisplayShaderPerfStatsEnabled(shader))
+			{
+				keywords = ShaderPerfMonitor.GetMaterialAndGlobalActiveKeywords(material);
+				shaderPerfDatas = ShaderPerfMonitor.GetShaderVariantPerfDatas(shader, keywords);
+			}
 		}
 
 		public void Update(Shader shader, Material material, MaterialEditor editor, MaterialProperty[] props, PerShaderData perShaderData)

@@ -118,9 +118,9 @@ namespace LWGUI.PerformanceMonitor
             return output;
         }
 
-        public static void ClearShaderPerfCaches(Shader shader)
+        public static void ClearShaderPerfCache(Shader shader)
         {
-            
+            IOHelper.ClearShaderPerfCache(shader);
         }
     }
 }

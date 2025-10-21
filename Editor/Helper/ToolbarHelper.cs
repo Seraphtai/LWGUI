@@ -45,6 +45,7 @@ namespace LWGUI
 		private const string _iconCheckoutGUID   = "72488141525eaa8499e65e52755cb6d0";
 		private const string _iconExpandGUID     = "2382450e7f4ddb94c9180d6634c41378";
 		private const string _iconCollapseGUID   = "929b6e5dfacc42b429d715a3e1ca2b57";
+		private const string _iconStatsGUID		 = "88909414120107547a673b8fcddc5236";
 		private const string _iconVisibilityGUID = "9576e23a695b35d49a9fc55c9a948b4f";
 
 		private const string _iconCopyTooltip       = "Copy Material Properties";
@@ -53,29 +54,34 @@ namespace LWGUI
 		private const string _iconCheckoutTooltip   = "Checkout selected Material Assets";
 		private const string _iconExpandTooltip     = "Expand All Groups";
 		private const string _iconCollapseTooltip   = "Collapse All Groups";
+		private const string _iconStatsTooltip      = "Display Shader Performance Stats";
 		private const string _iconVisibilityTooltip = "Display Mode";
 
 		private static GUIContent _guiContentCopyCache;
 		private static GUIContent _guiContentPasteCache;
 		private static GUIContent _guiContentSelectCache;
-		private static GUIContent _guiContentChechoutCache;
+		private static GUIContent _guiContentCheckoutCache;
 		private static GUIContent _guiContentExpandCache;
 		private static GUIContent _guiContentCollapseCache;
+		private static GUIContent _guiContentStatsCache;
 		private static GUIContent _guiContentVisibilityCache;
 		
 		private static GUIContent _guiContentCopy       => _guiContentCopyCache = _guiContentCopyCache ?? new GUIContent("", AssetDatabase.LoadAssetAtPath<Texture>(AssetDatabase.GUIDToAssetPath(_iconCopyGUID)), _iconCopyTooltip);
 		private static GUIContent _guiContentPaste      => _guiContentPasteCache = _guiContentPasteCache ?? new GUIContent("", AssetDatabase.LoadAssetAtPath<Texture>(AssetDatabase.GUIDToAssetPath(_iconPasteGUID)), _iconPasteTooltip);
 		private static GUIContent _guiContentSelect     => _guiContentSelectCache = _guiContentSelectCache ?? new GUIContent("", AssetDatabase.LoadAssetAtPath<Texture>(AssetDatabase.GUIDToAssetPath(_iconSelectGUID)), _iconSelectTooltip);
-		private static GUIContent _guiContentChechout   => _guiContentChechoutCache = _guiContentChechoutCache ?? new GUIContent("", AssetDatabase.LoadAssetAtPath<Texture>(AssetDatabase.GUIDToAssetPath(_iconCheckoutGUID)), _iconCheckoutTooltip);
+		private static GUIContent _guiContentChechout   => _guiContentCheckoutCache = _guiContentCheckoutCache ?? new GUIContent("", AssetDatabase.LoadAssetAtPath<Texture>(AssetDatabase.GUIDToAssetPath(_iconCheckoutGUID)), _iconCheckoutTooltip);
 		private static GUIContent _guiContentExpand     => _guiContentExpandCache = _guiContentExpandCache ?? new GUIContent("", AssetDatabase.LoadAssetAtPath<Texture>(AssetDatabase.GUIDToAssetPath(_iconExpandGUID)), _iconExpandTooltip);
 		private static GUIContent _guiContentCollapse   => _guiContentCollapseCache = _guiContentCollapseCache ?? new GUIContent("", AssetDatabase.LoadAssetAtPath<Texture>(AssetDatabase.GUIDToAssetPath(_iconCollapseGUID)), _iconCollapseTooltip);
+		private static GUIContent _guiContentStats      => _guiContentStatsCache = _guiContentStatsCache ?? new GUIContent("", AssetDatabase.LoadAssetAtPath<Texture>(AssetDatabase.GUIDToAssetPath(_iconStatsGUID)), _iconStatsTooltip);
 		private static GUIContent _guiContentVisibility => _guiContentVisibilityCache = _guiContentVisibilityCache ?? new GUIContent("", AssetDatabase.LoadAssetAtPath<Texture>(AssetDatabase.GUIDToAssetPath(_iconVisibilityGUID)), _iconVisibilityTooltip);
 		
 
 		public static void DrawToolbarButtons(ref Rect toolBarRect, LWGUIMetaDatas metaDatas)
 		{
 			var (perShaderData, perMaterialData, perInspectorData) = metaDatas.GetDatas();
+			var shader = metaDatas.GetShader();
 
+			//----------------------------------------------------------------------------------------------------------------
 			// Copy
 			var buttonRectOffset = toolBarRect.height + 2;
 			var buttonRect = new Rect(toolBarRect.x, toolBarRect.y, toolBarRect.height, toolBarRect.height);
@@ -85,6 +91,7 @@ namespace LWGUI
 				ContextMenuHelper.CopyMaterial(metaDatas.GetMaterial());
 			}
 
+			//----------------------------------------------------------------------------------------------------------------
 			// Paste
 			buttonRect.x += buttonRectOffset;
 			toolBarRect.xMin += buttonRectOffset;
@@ -106,6 +113,7 @@ namespace LWGUI
 				ContextMenuHelper.DoPasteMaterialProperties(metaDatas, (uint)CopyMaterialValueMask.All);
 			}
 
+			//----------------------------------------------------------------------------------------------------------------
 			// Select Material Asset, jump from a Runtime Material Instance to a Material Asset
 			buttonRect.x += buttonRectOffset;
 			toolBarRect.xMin += buttonRectOffset;
@@ -126,6 +134,7 @@ namespace LWGUI
 				}
 			}
 
+			//----------------------------------------------------------------------------------------------------------------
 			// Checkout
 			buttonRect.x += buttonRectOffset;
 			toolBarRect.xMin += buttonRectOffset;
@@ -134,6 +143,7 @@ namespace LWGUI
 				VersionControlHelper.Checkout(metaDatas.GetMaterialEditor().targets);
 			}
 
+			//----------------------------------------------------------------------------------------------------------------
 			// Expand
 			buttonRect.x += buttonRectOffset;
 			toolBarRect.xMin += buttonRectOffset;
@@ -146,6 +156,7 @@ namespace LWGUI
 				}
 			}
 
+			//----------------------------------------------------------------------------------------------------------------
 			// Collapse
 			buttonRect.x += buttonRectOffset;
 			toolBarRect.xMin += buttonRectOffset;
@@ -158,64 +169,82 @@ namespace LWGUI
 				}
 			}
 
+			//----------------------------------------------------------------------------------------------------------------
+			// Shader Perf Stats
+			buttonRect.x += buttonRectOffset;
+			toolBarRect.xMin += buttonRectOffset;
+			{
+				var color = GUI.color;
+				if (IsDisplayShaderPerfStatsEnabled(shader))
+					GUI.color = Color.yellow;
+				if (GUI.Button(buttonRect, _guiContentStats, GUIStyles.iconButton))
+				{
+					SwitchDisplayShaderPerfStatsEnabled(shader);
+				}
+				GUI.color = color;
+			}
+			
+			//----------------------------------------------------------------------------------------------------------------
 			// Display Mode
 			buttonRect.x += buttonRectOffset;
 			toolBarRect.xMin += buttonRectOffset;
-			var color = GUI.color;
-			var displayModeData = perShaderData.displayModeData;
-			if (!displayModeData.IsDefaultDisplayMode())
-				GUI.color = Color.yellow;
-			if (GUI.Button(buttonRect, _guiContentVisibility, GUIStyles.iconButton))
 			{
-				// Build Display Mode Menu Items
-				var displayModeMenus = new[]
+				var color = GUI.color;
+				var displayModeData = perShaderData.displayModeData;
+				if (!displayModeData.IsDefaultDisplayMode())
+					GUI.color = Color.yellow;
+				if (GUI.Button(buttonRect, _guiContentVisibility, GUIStyles.iconButton))
 				{
-					$"Show All Advanced Properties				({ displayModeData.advancedCount } - { perShaderData.propStaticDatas.Count })",
-					$"Show All Hidden Properties				({ displayModeData.hiddenCount } - { perShaderData.propStaticDatas.Count })",
-					$"Show Only Modified Properties				({ perMaterialData.modifiedCount } - { perShaderData.propStaticDatas.Count })",
-					$"Show Only Modified Properties by Group	({ perMaterialData.modifiedCount } - { perShaderData.propStaticDatas.Count })",
-				};
-				var enabled = new[] { true, true, true, true };
-				var separator = new bool[4];
-				var selected = new[]
-				{
-					displayModeData.showAllAdvancedProperties ? 0 : -1,
-					displayModeData.showAllHiddenProperties ? 1 : -1,
-					displayModeData.showOnlyModifiedProperties ? 2 : -1,
-					displayModeData.showOnlyModifiedGroups ? 3 : -1,
-				};
-
-
-				// Click Event
-				void OnSwitchDisplayMode(object data, string[] options, int selectedIndex)
-				{
-					switch (selectedIndex)
+					// Build Display Mode Menu Items
+					var displayModeMenus = new[]
 					{
-						case 0: // Show All Advanced Properties
-							displayModeData.showAllAdvancedProperties = !displayModeData.showAllAdvancedProperties;
-							perShaderData.ToggleShowAllAdvancedProperties();
-							break;
-						case 1: // Show All Hidden Properties
-							displayModeData.showAllHiddenProperties = !displayModeData.showAllHiddenProperties;
-							break;
-						case 2: // Show Only Modified Properties
-							displayModeData.showOnlyModifiedProperties = !displayModeData.showOnlyModifiedProperties;
-							if (displayModeData.showOnlyModifiedProperties) displayModeData.showOnlyModifiedGroups = false;
-							MetaDataHelper.ForceUpdateAllMaterialsMetadataCache(metaDatas.GetShader());
-							break;
-						case 3: // Show Only Modified Groups
-							displayModeData.showOnlyModifiedGroups = !displayModeData.showOnlyModifiedGroups;
-							if (displayModeData.showOnlyModifiedGroups) displayModeData.showOnlyModifiedProperties = false;
-							MetaDataHelper.ForceUpdateAllMaterialsMetadataCache(metaDatas.GetShader());
-							break;
+						$"Show All Advanced Properties				({displayModeData.advancedCount} - {perShaderData.propStaticDatas.Count})",
+						$"Show All Hidden Properties				({displayModeData.hiddenCount} - {perShaderData.propStaticDatas.Count})",
+						$"Show Only Modified Properties				({perMaterialData.modifiedCount} - {perShaderData.propStaticDatas.Count})",
+						$"Show Only Modified Properties by Group	({perMaterialData.modifiedCount} - {perShaderData.propStaticDatas.Count})",
+					};
+					var enabled = new[] { true, true, true, true };
+					var separator = new bool[4];
+					var selected = new[]
+					{
+						displayModeData.showAllAdvancedProperties ? 0 : -1,
+						displayModeData.showAllHiddenProperties ? 1 : -1,
+						displayModeData.showOnlyModifiedProperties ? 2 : -1,
+						displayModeData.showOnlyModifiedGroups ? 3 : -1,
+					};
+
+
+					// Click Event
+					void OnSwitchDisplayMode(object data, string[] options, int selectedIndex)
+					{
+						switch (selectedIndex)
+						{
+							case 0: // Show All Advanced Properties
+								displayModeData.showAllAdvancedProperties = !displayModeData.showAllAdvancedProperties;
+								perShaderData.ToggleShowAllAdvancedProperties();
+								break;
+							case 1: // Show All Hidden Properties
+								displayModeData.showAllHiddenProperties = !displayModeData.showAllHiddenProperties;
+								break;
+							case 2: // Show Only Modified Properties
+								displayModeData.showOnlyModifiedProperties = !displayModeData.showOnlyModifiedProperties;
+								if (displayModeData.showOnlyModifiedProperties) displayModeData.showOnlyModifiedGroups = false;
+								MetaDataHelper.ForceUpdateAllMaterialsMetadataCache(shader);
+								break;
+							case 3: // Show Only Modified Groups
+								displayModeData.showOnlyModifiedGroups = !displayModeData.showOnlyModifiedGroups;
+								if (displayModeData.showOnlyModifiedGroups) displayModeData.showOnlyModifiedProperties = false;
+								MetaDataHelper.ForceUpdateAllMaterialsMetadataCache(shader);
+								break;
+						}
 					}
+
+					ReflectionHelper.DisplayCustomMenuWithSeparators(new Rect(Event.current.mousePosition.x, Event.current.mousePosition.y, 0, 0),
+						displayModeMenus, enabled, separator, selected, OnSwitchDisplayMode);
 				}
-
-				ReflectionHelper.DisplayCustomMenuWithSeparators(new Rect(Event.current.mousePosition.x, Event.current.mousePosition.y, 0, 0),
-																 displayModeMenus, enabled, separator, selected, OnSwitchDisplayMode);
+				GUI.color = color;
 			}
-			GUI.color = color;
-
+			
 			toolBarRect.xMin += 2;
 		}
 
@@ -327,5 +356,74 @@ namespace LWGUI
 
 		#endregion
 
+		#region Shader Perf Stats
+
+				
+		private static string GetDisplayShaderPerfStatsPreferenceKey(Shader shader) => $"LWGUI/DisplayShaderPerformanceStats/{shader.name}";
+		
+		public static bool IsDisplayShaderPerfStatsEnabled(Shader shader) => EditorPrefs.HasKey(GetDisplayShaderPerfStatsPreferenceKey(shader));
+
+		public static void SetDisplayShaderPerfStatsEnabled(Shader shader, bool enabled)
+		{
+			if (enabled)
+				EditorPrefs.SetBool(GetDisplayShaderPerfStatsPreferenceKey(shader), true);
+			else
+				EditorPrefs.DeleteKey(GetDisplayShaderPerfStatsPreferenceKey(shader));
+			MetaDataHelper.ForceUpdateAllMaterialsMetadataCache(shader);
+		}
+
+		public static void SwitchDisplayShaderPerfStatsEnabled(Shader shader)
+		{
+			var key = GetDisplayShaderPerfStatsPreferenceKey(shader);
+			if (EditorPrefs.HasKey(key))
+				EditorPrefs.DeleteKey(GetDisplayShaderPerfStatsPreferenceKey(shader));
+			else
+				EditorPrefs.SetBool(GetDisplayShaderPerfStatsPreferenceKey(shader), true);
+			MetaDataHelper.ForceUpdateAllMaterialsMetadataCache(shader);
+		}
+
+		public static void DrawShaderPerformanceStats(LWGUIMetaDatas metaDatas)
+		{
+			if (!IsDisplayShaderPerfStatsEnabled(metaDatas.GetShader()) || metaDatas.perMaterialData.shaderPerfDatas == null)
+				return;
+			
+			// var labelWidth = EditorGUIUtility.labelWidth;
+			EditorGUIUtility.fieldWidth = 0;
+
+			EditorGUILayout.LabelField("Shader Performance Stats", GUIStyles.title);
+			var lastPassName = string.Empty;
+			foreach (var shaderPerfData in metaDatas.perMaterialData.shaderPerfDatas)
+			{
+				if (lastPassName == string.Empty)
+					lastPassName = shaderPerfData.passName;
+				
+				if (lastPassName != shaderPerfData.passName)
+				{
+					lastPassName = shaderPerfData.passName;
+					EditorGUILayout.Space();
+				}
+
+				EditorGUILayout.BeginHorizontal();
+				var stats = shaderPerfData.stats;
+				var statsStr = stats.isValid 
+					? $"Cost: {stats.estimatedCost:0.0}	Samples: {stats.sampleCount:0}	Registers: {stats.registerCount:0}" 
+					: "COMPILATION OR ANALYSIS FAILED";
+				EditorGUILayout.LabelField($"{shaderPerfData.passName} | {shaderPerfData.shaderTypeName}", statsStr);
+				if (stats.isValid)
+				{
+					if (GUILayout.Button("Find", GUILayout.MaxWidth(40)))
+						EditorUtility.RevealInFinder(shaderPerfData.compiledReadableShaderPath);
+					if (GUILayout.Button("Open", GUILayout.MaxWidth(40)))
+						IOHelper.OpenFile(shaderPerfData.compiledReadableShaderPath);
+				}
+				EditorGUILayout.EndHorizontal();
+			}
+
+			// EditorGUIUtility.labelWidth = labelWidth;
+			EditorGUILayout.Space();
+			Helper.DrawSplitLine();
+		}
+
+		#endregion
     }
 }
