@@ -48,8 +48,8 @@ namespace LWGUI
         {
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-                File.WriteAllBytes(filePath, bytes);
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? string.Empty);
+                File.WriteAllBytes(filePath, bytes ?? Array.Empty<byte>());
             }
             catch (Exception e)
             {
@@ -61,12 +61,25 @@ namespace LWGUI
         {
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-                File.WriteAllText(filePath, text, Encoding.UTF8);
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? string.Empty);
+                File.WriteAllText(filePath, text ?? string.Empty, Encoding.UTF8);
             }
             catch (Exception e)
             {
                 Debug.LogError(e.Message);
+            }
+        }
+
+        public static string ReadTextFile(string filePath)
+        {
+            try
+            {
+                return File.ReadAllText(filePath, Encoding.UTF8);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e.Message);
+                return null;
             }
         }
 

@@ -9,14 +9,95 @@ using System.Text;
 using UnityEditor;
 using UnityEditor.Rendering;
 using UnityEngine;
+using UnityEngine.Rendering;
+using LWGUI.PerformanceMonitor;
 using Debug = UnityEngine.Debug;
 
 namespace LWGUI.PerformanceMonitor.ShaderCompiler
 {
-    public class ShaderCompilerDefaultFxc
+    public class ShaderCompilerDefaultFxc : IShaderCompiler
     {
+        // Per-compiler stats structure moved here so FXC owns its output data shape.
+        public struct ShaderPerfStats
+        {
+            public float estimatedCost; // Estimated relative performance cost based on experience, not precise results.
+            public int   sampleCount;
+            public int   samplerCount;
+            public int   registerCount;
+            public int   interpolatorChannelCount;
+
+            public bool isValid;
+        }
+
+        public string CompilerName => "Default FXC";
+
+        public ShaderCompilerPlatform Api    { get; private set; }
+        public BuildTarget            Target { get; private set; }
+        public GraphicsTier           Tier   { get; private set; }
+
+        public bool isSupportCurrentPlatform => true;
+
+        public string GetCompiledShaderPath(ShaderPerfData shaderPerfData, string compiledShaderDirectory, string shaderTypeName)
+            => Path.Combine(compiledShaderDirectory, shaderTypeName + ".txt");
+
+        public string GetCompiledDxbcPath(ShaderPerfData shaderPerfData)
+            => Path.Combine(shaderPerfData.compiledShaderDirectory, shaderPerfData.shaderTypeName + ".dxbc");
+
+        public ShaderCompilerDefaultFxc(ShaderCompilerPlatform api, BuildTarget target, GraphicsTier tier)
+        {
+            Api    = api;
+            Target = target;
+            Tier   = tier;
+        }
+
+        public bool CompilePass(ShaderPerfData shaderPerfData, ShaderData.Pass pass, ShaderType shaderType, string[] keywords,
+                                out string     compiledShader)
+        {
+            compiledShader = string.Empty;
+
+            if (shaderPerfData == null || pass == null || keywords == null)
+                return false;
+
+            var compileInfo = pass.CompileVariant(shaderType, keywords, Api, Target, Tier, true);
+            if (!compileInfo.Success)
+                return false;
+
+            // Write DXBC
+            var dxbcPath = GetCompiledDxbcPath(shaderPerfData);
+            IOHelper.WriteBinaryFile(dxbcPath, compileInfo.ShaderData);
+
+            // Disassemble With fxc.exe
+            return IOHelper.RunProcess(_fxcAbsPath, $"/dumpbin \"{dxbcPath}\"", out compiledShader);
+        }
+
+        public object AnalyzeShaderPerformance(ShaderPerfData shaderPerfData, string compiledShader)
+            => ParseAsmStats(compiledShader);
+
+        public void DrawShaderPerformanceStatsLine(ShaderPerfData shaderPerfData)
+        {
+            EditorGUILayout.BeginHorizontal();
+
+            var statsObj = shaderPerfData.stats;
+            if (statsObj is ShaderPerfStats { isValid: true } stats)
+            {
+                var statsStr = $"Cost: {stats.estimatedCost:0.0}\tSamples: {stats.sampleCount:0}\tRegisters: {stats.registerCount:0}";
+                EditorGUILayout.LabelField($"{shaderPerfData.passName} | {shaderPerfData.shaderTypeName}", statsStr);
+
+                ToolbarHelper.DrawShaderPerformanceStatsLineButtons(shaderPerfData);
+            }
+            else
+            {
+                var status = shaderPerfData.isCompiledSuccessful ? "ANALYSIS FAILED" : "COMPILATION FAILED";
+                EditorGUILayout.LabelField($"{shaderPerfData.passName} | {shaderPerfData.shaderTypeName}", status);
+            }
+            
+            EditorGUILayout.EndHorizontal();
+        }
+
+
         private static string _cachedFxcPath;
-        public static string FxcAbsPath
+
+        private static string _fxcAbsPath
         {
             get
             {
@@ -27,7 +108,6 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
                 return _cachedFxcPath;
             }
         }
-
 
         // https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/shader-model-5-assembly--directx-hlsl-
         private static readonly Dictionary<string, float> _opcodeWeight = new()
@@ -239,9 +319,8 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
             { "switch", 0f },
             { "sync", 0f },
         };
-        
 
-        static int IndexOfWhitespace(string s)
+        private static int IndexOfWhitespace(string s)
         {
             for (int i = 0; i < s.Length; i++)
             {
@@ -251,7 +330,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
             return -1;
         }
 
-        static string NormalizeOpcode(string opcode)
+        private static string NormalizeOpcode(string opcode)
         {
             // normalize to lower, strip optional _sat suffix used in some ops like mul_sat/mov_sat
             // opcode = opcode.ToLowerInvariant();
@@ -259,7 +338,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
                 opcode = opcode.Substring(0, opcode.Length - 3);
             return opcode;
         }
-        
+
         private static ShaderPerfStats ParseAsmStats(string asmText)
         {
             if (string.IsNullOrEmpty(asmText))
@@ -267,31 +346,42 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
                 return new ShaderPerfStats();
             }
 
-            var totalCost = 0f;
-            var sampleCount = 0;
-            var samplers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var registerCount = 0;
+            var totalCost      = 0f;
+            var sampleCount    = 0;
+            var samplers       = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var registerCount  = 0;
             var interpChannels = 0;
             using (var reader = new StringReader(asmText))
             {
-                string line;
-                while ((line = reader.ReadLine()) != null)
+                int lineIndex = -1;
+                while (reader.ReadLine() is { } line)
                 {
+                    lineIndex++;
                     line = line.Trim();
-                    if (line.Length == 0) continue;
+                    
+                    if (lineIndex < 2) continue;
+                    if (string.IsNullOrEmpty(line)) continue;
                     if (line.StartsWith("//")) continue;
 
-                    // Skip headers like ps_#_# labels not considered
+                    // TODO: Statistical flow control and other special instructions
 
-                    // Extract opcode: first token before space/tab
                     var firstSpace = IndexOfWhitespace(line);
+                    // Skip headers like ps_#_# labels not considered
                     if (firstSpace <= 0) continue;
+                    
                     var opcode = line.Substring(0, firstSpace).Trim();
                     opcode = NormalizeOpcode(opcode);
+                    
+                    if (string.IsNullOrWhiteSpace(opcode)) continue;
+                    if (!char.IsLetter(opcode[0])) continue;
 
                     if (_opcodeWeight.TryGetValue(opcode, out var w))
                     {
                         totalCost += w;
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"LWGUI: {typeof(ShaderCompilerDefaultFxc)}: Unknown opcode: {opcode}");
                     }
 
                     // Texture sampling stats
@@ -340,58 +430,24 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
                             for (int i = dot + 1; i < line.Length; i++)
                             {
                                 var c = line[i];
-                                if (c == 'x' || c == 'y' || c == 'z' || c == 'w') count++; else break;
+                                if (c == 'x' || c == 'y' || c == 'z' || c == 'w') count++;
+                                else break;
                             }
                             interpChannels += count;
                         }
                     }
                 }
             }
-            
+
             return new ShaderPerfStats
             {
-                estimatedCost = totalCost,
-                sampleCount = sampleCount,
-                samplerCount = samplers.Count,
-                registerCount = registerCount,
+                estimatedCost            = totalCost,
+                sampleCount              = sampleCount,
+                samplerCount             = samplers.Count,
+                registerCount            = registerCount,
                 interpolatorChannelCount = interpChannels,
-                isValid = true
+                isValid                  = true
             };
-        }
-
-        public static string CompilerName = "Default FXC"; 
-        
-        public static bool isSupportCurrentPlatform =>
-            true;
-        
-        public static ShaderPerfStats AnalyzeShaderPerformance(ShaderPerfData shaderPerfData)
-        {
-            string output;
-            
-            // Disassemble With fxc.exe
-            if (!File.Exists(shaderPerfData.compiledReadableShaderPath))
-            {
-                if (IOHelper.RunProcess(FxcAbsPath, $"/dumpbin \"{shaderPerfData.compiledBinaryDxbcShaderPath}\"", 
-                        out output))
-                {
-                    IOHelper.WriteTextFile(shaderPerfData.compiledReadableShaderPath, output);
-                    var stats = ParseAsmStats(output);
-                    return stats;
-                }
-            }
-
-            // Parsing ASM empirically
-            if (IOHelper.ExistAndNotEmpty(shaderPerfData.compiledReadableShaderPath))
-            {
-                var asmText = File.ReadAllText(shaderPerfData.compiledReadableShaderPath, Encoding.UTF8);
-                var stats = ParseAsmStats(asmText);
-                return stats;
-            }
-            else
-            {
-                Debug.LogError($"LWGUI: Compiling Shader: { shaderPerfData.compiledBinaryDxbcShaderPath } failed!");
-                return new ShaderPerfStats();
-            }
         }
     }
 }

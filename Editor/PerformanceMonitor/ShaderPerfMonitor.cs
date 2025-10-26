@@ -1,4 +1,5 @@
 ﻿// Copyright (c) Jason Ma
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,15 +18,15 @@ namespace LWGUI.PerformanceMonitor
     public class ShaderPerfMonitor
     {
         #region Global Settings
-        
-        public static GraphicsTier graphicsTier = (GraphicsTier)(-1);
+
+        public static GraphicsTier           graphicsTier           = (GraphicsTier)(-1);
         public static ShaderCompilerPlatform shaderCompilerPlatform = ShaderCompilerPlatform.D3D;
-        public static BuildTarget buildTarget = BuildTarget.StandaloneWindows64;
-        
+        public static BuildTarget            buildTarget            = BuildTarget.StandaloneWindows64;
+
         #endregion
-        
+
         public static bool IsCalculating { get; private set; }
-        
+
         public static List<string> GetMaterialAndGlobalActiveKeywords(Material material)
         {
             var output = new List<string>();
@@ -64,6 +65,8 @@ namespace LWGUI.PerformanceMonitor
             var shaderData = ShaderUtil.GetShaderData(shader);
             var subshader = shaderData.ActiveSubshader;
 
+            IShaderCompiler compiler = GetActiveCompiler();
+
             for (int i = 0; i < subshader.PassCount; i++)
             {
                 var pass = subshader.GetPass(i);
@@ -87,40 +90,69 @@ namespace LWGUI.PerformanceMonitor
 
                     shaderPerfData.shaderTypeName = shaderPerfData.shaderType.ToString();
                     shaderPerfData.compiledShaderDirectory = IOHelper.GetCompiledShaderVariantCacheDirectory(shader, shaderPerfData);
-                    shaderPerfData.compiledBinaryDxbcShaderPath = Path.Combine(shaderPerfData.compiledShaderDirectory, shaderPerfData.shaderTypeName + ".dxbc");
-                    shaderPerfData.compiledReadableShaderPath = Path.Combine(shaderPerfData.compiledShaderDirectory, shaderPerfData.shaderTypeName + ".txt");
-                    
-                    // Compile and create cache
-                    if (!File.Exists(shaderPerfData.compiledBinaryDxbcShaderPath))
+
+                    if (compiler != null)
                     {
-                        var compileInfo = pass.CompileVariant(shaderType, keywords.ToArray(), shaderCompilerPlatform, buildTarget, graphicsTier, true);
-                        var compiledShader = compileInfo.Success ? compileInfo.ShaderData : Array.Empty<byte>();
-                        IOHelper.WriteBinaryFile(shaderPerfData.compiledBinaryDxbcShaderPath, compiledShader);
+                        shaderPerfData.compiledShaderPath = compiler.GetCompiledShaderPath(shaderPerfData, shaderPerfData.compiledShaderDirectory, shaderPerfData.shaderTypeName);
+
+                        // Compile and create cache
+                        shaderPerfData.isCompiledSuccessful = true;
+                        string compiledShader;
+                        if (!File.Exists(shaderPerfData.compiledShaderPath))
+                        {
+                            shaderPerfData.isCompiledSuccessful = compiler.CompilePass(shaderPerfData, pass, shaderType, keywords.ToArray(),
+                                out compiledShader);
+                            IOHelper.WriteTextFile(shaderPerfData.compiledShaderPath, compiledShader);
+                        }
+                        else
+                        {
+                            compiledShader = IOHelper.ReadTextFile(shaderPerfData.compiledShaderPath);
+                        }
+
+                        shaderPerfData.isCompiledSuccessful &= IOHelper.ExistAndNotEmpty(shaderPerfData.compiledShaderPath);
+
+                        // Analyze performance
+                        if (shaderPerfData.isCompiledSuccessful)
+                        {
+                            shaderPerfData.stats = compiler.AnalyzeShaderPerformance(shaderPerfData, compiledShader);
+                            
+                            if (shaderPerfData.stats == null)
+                                Debug.LogError($"LWGUI: Failed to Analyze Shader: {shader.name} | Subshader: {shaderPerfData.subshaderIndex} | Pass: {passNameOrIndex} | Stage: {shaderType}\n" +
+                                               $"Keywords: \n{string.Join('\n', keywords)}");
+                        }
+                        else
+                        {
+                            Debug.LogError($"LWGUI: Failed to Compile Shader: {shader.name} | Subshader: {shaderPerfData.subshaderIndex} | Pass: {passNameOrIndex} | Stage: {shaderType}\n" +
+                                           $"Keywords: \n{string.Join('\n', keywords)}");
+                        }
                     }
-                    
-                    shaderPerfData.isCompiledSuccessful = File.Exists(shaderPerfData.compiledBinaryDxbcShaderPath) 
-                                                            && new FileInfo(shaderPerfData.compiledBinaryDxbcShaderPath).Length > 1;
-                    
-                    if (shaderPerfData.isCompiledSuccessful)
-                    {
-                        // Analyze Shader Performance
-                        shaderPerfData.stats = ShaderCompilerDefaultFxc.AnalyzeShaderPerformance(shaderPerfData);
-                        
-                        if (!shaderPerfData.stats.isValid)
-                            Debug.LogError($"LWGUI: Failed to Analyze Shader: { shader.name } | Subshader: { shaderPerfData.subshaderIndex } | Pass: { passNameOrIndex } | Stage: { shaderType }\n" +
-                                           $"Keywords: \n{ string.Join('\n', keywords) }");
-                    }
-                    
+
                     output.Add(shaderPerfData);
                 }
             }
-            
+
             return output;
         }
 
         public static void ClearShaderPerfCache(Shader shader)
         {
             IOHelper.ClearShaderPerfCache(shader);
+        }
+
+        public static IShaderCompiler GetActiveCompiler()
+        {
+            // Factory: return compiler instance based on selected platform
+            switch (shaderCompilerPlatform)
+            {
+                case ShaderCompilerPlatform.D3D:
+                    return new ShaderCompiler.ShaderCompilerDefaultFxc(shaderCompilerPlatform, buildTarget, graphicsTier);
+                case ShaderCompilerPlatform.Vulkan:
+                case ShaderCompilerPlatform.GLES3x:
+                    // For now use Mali implementation as placeholder
+                    return new ShaderCompilerMali(shaderCompilerPlatform, buildTarget, graphicsTier);
+                default:
+                    return new ShaderCompiler.ShaderCompilerDefaultFxc(shaderCompilerPlatform, buildTarget, graphicsTier);
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using LWGUI.PerformanceMonitor;
 
 namespace LWGUI
 {
@@ -387,41 +388,41 @@ namespace LWGUI
 			if (!IsDisplayShaderPerfStatsEnabled(metaDatas.GetShader()) || metaDatas.perMaterialData.shaderPerfDatas == null)
 				return;
 			
-			// var labelWidth = EditorGUIUtility.labelWidth;
+			var fieldWidth = EditorGUIUtility.fieldWidth;
 			EditorGUIUtility.fieldWidth = 0;
 
 			EditorGUILayout.LabelField("Shader Performance Stats", GUIStyles.title);
+			
 			var lastPassName = string.Empty;
-			foreach (var shaderPerfData in metaDatas.perMaterialData.shaderPerfDatas)
+			var compiler = ShaderPerfMonitor.GetActiveCompiler();
+			if (compiler != null)
 			{
-				if (lastPassName == string.Empty)
-					lastPassName = shaderPerfData.passName;
-				
-				if (lastPassName != shaderPerfData.passName)
+				foreach (var shaderPerfData in metaDatas.perMaterialData.shaderPerfDatas)
 				{
-					lastPassName = shaderPerfData.passName;
-					EditorGUILayout.Space();
-				}
+					if (lastPassName == string.Empty)
+						lastPassName = shaderPerfData.passName;
 
-				EditorGUILayout.BeginHorizontal();
-				var stats = shaderPerfData.stats;
-				var statsStr = stats.isValid 
-					? $"Cost: {stats.estimatedCost:0.0}	Samples: {stats.sampleCount:0}	Registers: {stats.registerCount:0}" 
-					: "COMPILATION OR ANALYSIS FAILED";
-				EditorGUILayout.LabelField($"{shaderPerfData.passName} | {shaderPerfData.shaderTypeName}", statsStr);
-				if (stats.isValid)
-				{
-					if (GUILayout.Button("Find", GUILayout.MaxWidth(40)))
-						EditorUtility.RevealInFinder(shaderPerfData.compiledReadableShaderPath);
-					if (GUILayout.Button("Open", GUILayout.MaxWidth(40)))
-						IOHelper.OpenFile(shaderPerfData.compiledReadableShaderPath);
+					if (lastPassName != shaderPerfData.passName)
+					{
+						lastPassName = shaderPerfData.passName;
+						EditorGUILayout.Space();
+					}
+
+					compiler.DrawShaderPerformanceStatsLine(shaderPerfData);
 				}
-				EditorGUILayout.EndHorizontal();
 			}
 
-			// EditorGUIUtility.labelWidth = labelWidth;
+			EditorGUIUtility.fieldWidth = fieldWidth;
 			EditorGUILayout.Space();
 			Helper.DrawSplitLine();
+		}
+
+		public static void DrawShaderPerformanceStatsLineButtons(ShaderPerfData shaderPerfData)
+		{
+			if (GUILayout.Button("Find", GUILayout.MaxWidth(40)))
+				EditorUtility.RevealInFinder(shaderPerfData.compiledShaderPath);
+			if (GUILayout.Button("Open", GUILayout.MaxWidth(40)))
+				IOHelper.OpenFile(shaderPerfData.compiledShaderPath);
 		}
 
 		#endregion
