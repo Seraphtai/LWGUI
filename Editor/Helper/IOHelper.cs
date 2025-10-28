@@ -17,6 +17,7 @@ namespace LWGUI
         #region Paths
 
         private static string _cachedProjectPath;
+
         public static string ProjectPath
         {
             get
@@ -28,6 +29,7 @@ namespace LWGUI
         }
 
         private static string _cachedCompiledShaderCachePath;
+
         public static string CompiledShaderCacheRootPath
         {
             get
@@ -36,6 +38,21 @@ namespace LWGUI
                     _cachedCompiledShaderCachePath = Path.Combine(ProjectPath, "Library", "LWGUI", "ShaderPerfCache");
                 return _cachedCompiledShaderCachePath;
             }
+        }
+
+        public static string GetValidFileName(string text)
+        {
+            StringBuilder str = new StringBuilder();
+            var invalidFileNameChars = Path.GetInvalidFileNameChars();
+            foreach (var c in text)
+            {
+                if (!invalidFileNameChars.Contains(c))
+                {
+                    str.Append(c);
+                }
+            }
+
+            return str.ToString();
         }
 
         #endregion
@@ -87,47 +104,44 @@ namespace LWGUI
 
         #region Process
 
-        public static bool RunProcess(string file, string args, 
-            out string output)
+        public static bool RunProcess(string     file, string args,
+                                      out string output)
         {
             output = string.Empty;
-            
-            var psi = new ProcessStartInfo
+
+            var p = new Process
             {
-                FileName = file,
-                Arguments = args,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-                StandardOutputEncoding = Encoding.UTF8,
-                StandardErrorEncoding = Encoding.UTF8
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = file,
+                    Arguments = args,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    StandardErrorEncoding = Encoding.UTF8
+                }
             };
 
-            using var p = Process.Start(psi);
             var stdout = new StringBuilder();
             var stderr = new StringBuilder();
 
-            p.OutputDataReceived += (_, e) =>
-            {
-                if (e.Data != null) stdout.AppendLine(e.Data);
-            };
-            p.ErrorDataReceived += (_, e) =>
-            {
-                if (e.Data != null) stderr.AppendLine(e.Data);
-            };
+            p.OutputDataReceived += (_, e) => stdout.AppendLine(e.Data);
+            p.ErrorDataReceived += (_,  e) => stderr.AppendLine(e.Data);
 
+            p.Start();
             p.BeginOutputReadLine();
             p.BeginErrorReadLine();
             p.WaitForExit();
 
             output = stdout.ToString();
-                
+
             if (p.ExitCode != 0)
             {
-                Debug.LogError($"LWGUI: Process Exit Code { p.ExitCode }: { stderr }" +
-                               $"File: { file }\n" +
-                               $"Args: { args }");
+                Debug.LogError($"LWGUI: Process Exit Code {p.ExitCode}: {stderr}" +
+                               $"File: {file}\n" +
+                               $"Args: {args}");
                 output = stderr.ToString();
                 return false;
             }
@@ -140,7 +154,14 @@ namespace LWGUI
 
             return true;
         }
-        
+
+        public static bool RunCMD(string     args,
+                                  out string output)
+        {
+            return RunProcess("cmd.exe", $"/C {args}",
+                out output);
+        }
+
         public static void OpenFile(string filePath)
         {
             Process.Start(filePath);
@@ -156,8 +177,8 @@ namespace LWGUI
             var shaderCachePath = shaderPath != null
                 // Assets/Shaders/Lit.shader => Shaders/Lit
                 ? Path.Combine(Path.GetDirectoryName(shaderPath[7..]) ?? string.Empty, Path.GetFileNameWithoutExtension(shaderPath))
-                : shader.name.Replace('/', '_').Replace('\\', '_');
-             
+                : GetValidFileName(shader.name.Replace('/', '_').Replace('\\', '_'));
+
             return Path.Combine(CompiledShaderCacheRootPath, shaderCachePath);
         }
 
@@ -175,17 +196,15 @@ namespace LWGUI
             try
             {
                 var shaderDir = GetCompiledShaderCacheRootDirectory(shader);
-                if (Directory.Exists(shaderDir)) 
+                if (Directory.Exists(shaderDir))
                     Directory.Delete(shaderDir, true);
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"LWGUI: Cleaning the Shader({ shader.name }) cache failed: { e.Message }");
+                Debug.LogWarning($"LWGUI: Cleaning the Shader({shader.name}) cache failed: {e.Message}");
             }
         }
 
-
         #endregion
-
     }
 }

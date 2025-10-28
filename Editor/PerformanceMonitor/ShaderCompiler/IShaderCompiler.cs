@@ -9,11 +9,13 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
 {
     public interface IShaderCompiler
     {
-        ShaderCompilerPlatform Api                      { get; }
-        BuildTarget            Target                   { get; }
-        GraphicsTier           Tier                     { get; }
-        string                 CompilerName             { get; }
-        bool                   isSupportCurrentPlatform { get; }
+        static bool isSupportCurrentPlatform { get; }
+
+        string compilerName { get; }
+
+        ShaderCompilerPlatform Api    { get; }
+        BuildTarget            Target { get; }
+        GraphicsTier           Tier   { get; }
 
         /// <summary>
         /// The path to the Shader compilation result stored in text.
@@ -37,6 +39,14 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
         /// Draw a single line (pass) of shader performance UI inside the toolbar area.
         /// Compiler-specific UI (Find/Open buttons, label contents) should be implemented here.
         /// </summary>
-        void DrawShaderPerformanceStatsLine(ShaderPerfData shaderPerfData);
+        void DrawShaderPerformanceStatsLine(LWGUIMetaDatas metaDatas, ShaderPerfData shaderPerfData);
+
+        void DrawShaderPerformanceStatsHeader(LWGUIMetaDatas metaDatas)
+        {
+        }
+
+        void DrawShaderPerformanceStatsFooter(LWGUIMetaDatas metaDatas)
+        {
+        }
     }
 }

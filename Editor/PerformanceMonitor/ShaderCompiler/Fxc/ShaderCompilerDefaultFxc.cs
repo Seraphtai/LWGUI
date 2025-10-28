@@ -29,26 +29,27 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
             public bool isValid;
         }
 
-        public string CompilerName => "Default FXC";
+        public static bool isSupportCurrentPlatform => true;
+
+        public string compilerName => "Default Fxc";
 
         public ShaderCompilerPlatform Api    { get; private set; }
         public BuildTarget            Target { get; private set; }
         public GraphicsTier           Tier   { get; private set; }
 
-        public bool isSupportCurrentPlatform => true;
-
-        public string GetCompiledShaderPath(ShaderPerfData shaderPerfData, string compiledShaderDirectory, string shaderTypeName)
-            => Path.Combine(compiledShaderDirectory, shaderTypeName + ".txt");
-
-        public string GetCompiledDxbcPath(ShaderPerfData shaderPerfData)
-            => Path.Combine(shaderPerfData.compiledShaderDirectory, shaderPerfData.shaderTypeName + ".dxbc");
 
         public ShaderCompilerDefaultFxc(ShaderCompilerPlatform api, BuildTarget target, GraphicsTier tier)
         {
-            Api    = api;
+            Api = api;
             Target = target;
-            Tier   = tier;
+            Tier = tier;
         }
+
+        public string GetCompiledShaderPath(ShaderPerfData shaderPerfData, string compiledShaderDirectory, string shaderTypeName)
+            => Path.Combine(compiledShaderDirectory, $"Fxc_{Api}_{Target}_{shaderTypeName}.txt");
+
+        public string GetCompiledDxbcPath(ShaderPerfData shaderPerfData)
+            => Path.Combine(shaderPerfData.compiledShaderDirectory, $"Fxc_{Api}_{Target}_{shaderPerfData.shaderTypeName}.dxbc");
 
         public bool CompilePass(ShaderPerfData shaderPerfData, ShaderData.Pass pass, ShaderType shaderType, string[] keywords,
                                 out string     compiledShader)
@@ -73,7 +74,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
         public object AnalyzeShaderPerformance(ShaderPerfData shaderPerfData, string compiledShader)
             => ParseAsmStats(compiledShader);
 
-        public void DrawShaderPerformanceStatsLine(ShaderPerfData shaderPerfData)
+        public void DrawShaderPerformanceStatsLine(LWGUIMetaDatas metaDatas, ShaderPerfData shaderPerfData)
         {
             EditorGUILayout.BeginHorizontal();
 
@@ -90,7 +91,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
                 var status = shaderPerfData.isCompiledSuccessful ? "ANALYSIS FAILED" : "COMPILATION FAILED";
                 EditorGUILayout.LabelField($"{shaderPerfData.passName} | {shaderPerfData.shaderTypeName}", status);
             }
-            
+
             EditorGUILayout.EndHorizontal();
         }
 
@@ -346,10 +347,10 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
                 return new ShaderPerfStats();
             }
 
-            var totalCost      = 0f;
-            var sampleCount    = 0;
-            var samplers       = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var registerCount  = 0;
+            var totalCost = 0f;
+            var sampleCount = 0;
+            var samplers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var registerCount = 0;
             var interpChannels = 0;
             using (var reader = new StringReader(asmText))
             {
@@ -358,7 +359,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
                 {
                     lineIndex++;
                     line = line.Trim();
-                    
+
                     if (lineIndex < 2) continue;
                     if (string.IsNullOrEmpty(line)) continue;
                     if (line.StartsWith("//")) continue;
@@ -368,10 +369,10 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
                     var firstSpace = IndexOfWhitespace(line);
                     // Skip headers like ps_#_# labels not considered
                     if (firstSpace <= 0) continue;
-                    
+
                     var opcode = line.Substring(0, firstSpace).Trim();
                     opcode = NormalizeOpcode(opcode);
-                    
+
                     if (string.IsNullOrWhiteSpace(opcode)) continue;
                     if (!char.IsLetter(opcode[0])) continue;
 
@@ -441,12 +442,12 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
 
             return new ShaderPerfStats
             {
-                estimatedCost            = totalCost,
-                sampleCount              = sampleCount,
-                samplerCount             = samplers.Count,
-                registerCount            = registerCount,
+                estimatedCost = totalCost,
+                sampleCount = sampleCount,
+                samplerCount = samplers.Count,
+                registerCount = registerCount,
                 interpolatorChannelCount = interpChannels,
-                isValid                  = true
+                isValid = true
             };
         }
     }

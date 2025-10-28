@@ -70,7 +70,6 @@ namespace LWGUI.PerformanceMonitor
             for (int i = 0; i < subshader.PassCount; i++)
             {
                 var pass = subshader.GetPass(i);
-                var passNameOrIndex = string.IsNullOrEmpty(pass.Name) ? i.ToString() : pass.Name;
                 for (int j = 0; j < (int)ShaderType.Count; j++)
                 {
                     var shaderType = (ShaderType)j;
@@ -83,7 +82,7 @@ namespace LWGUI.PerformanceMonitor
                     {
                         subshaderIndex = shaderData.ActiveSubshaderIndex,
                         passIndex = i,
-                        passName = passNameOrIndex,
+                        passName = IOHelper.GetValidFileName(pass.Name),
                         shaderType = shaderType,
                         hash = hash,
                     };
@@ -95,35 +94,43 @@ namespace LWGUI.PerformanceMonitor
                     {
                         shaderPerfData.compiledShaderPath = compiler.GetCompiledShaderPath(shaderPerfData, shaderPerfData.compiledShaderDirectory, shaderPerfData.shaderTypeName);
 
-                        // Compile and create cache
-                        shaderPerfData.isCompiledSuccessful = true;
-                        string compiledShader;
-                        if (!File.Exists(shaderPerfData.compiledShaderPath))
+                        if (!string.IsNullOrEmpty(shaderPerfData.compiledShaderPath))
                         {
-                            shaderPerfData.isCompiledSuccessful = compiler.CompilePass(shaderPerfData, pass, shaderType, keywords.ToArray(),
-                                out compiledShader);
-                            IOHelper.WriteTextFile(shaderPerfData.compiledShaderPath, compiledShader);
-                        }
-                        else
-                        {
-                            compiledShader = IOHelper.ReadTextFile(shaderPerfData.compiledShaderPath);
-                        }
+                            // Compile and create cache
+                            shaderPerfData.isCompiledSuccessful = true;
+                            string compiledShader;
+                            if (!File.Exists(shaderPerfData.compiledShaderPath))
+                            {
+                                shaderPerfData.isCompiledSuccessful = compiler.CompilePass(shaderPerfData, pass, shaderType, keywords.ToArray(),
+                                    out compiledShader);
+                                IOHelper.WriteTextFile(shaderPerfData.compiledShaderPath, compiledShader);
+                            }
+                            else
+                            {
+                                compiledShader = IOHelper.ReadTextFile(shaderPerfData.compiledShaderPath);
+                            }
 
-                        shaderPerfData.isCompiledSuccessful &= IOHelper.ExistAndNotEmpty(shaderPerfData.compiledShaderPath);
+                            shaderPerfData.isCompiledSuccessful &= IOHelper.ExistAndNotEmpty(shaderPerfData.compiledShaderPath);
 
-                        // Analyze performance
-                        if (shaderPerfData.isCompiledSuccessful)
-                        {
-                            shaderPerfData.stats = compiler.AnalyzeShaderPerformance(shaderPerfData, compiledShader);
-                            
-                            if (shaderPerfData.stats == null)
-                                Debug.LogError($"LWGUI: Failed to Analyze Shader: {shader.name} | Subshader: {shaderPerfData.subshaderIndex} | Pass: {passNameOrIndex} | Stage: {shaderType}\n" +
+                            // Analyze performance
+                            if (shaderPerfData.isCompiledSuccessful)
+                            {
+                                shaderPerfData.stats = compiler.AnalyzeShaderPerformance(shaderPerfData, compiledShader);
+                                
+                                if (shaderPerfData.stats == null)
+                                    Debug.LogError($"LWGUI: Failed to Analyze Shader: {shader.name} | Subshader: {shaderPerfData.subshaderIndex} | Pass: {shaderPerfData.passName} | Stage: {shaderType}\n" +
+                                                   $"Keywords: \n{string.Join('\n', keywords)}");
+                            }
+                            else
+                            {
+                                Debug.LogError($"LWGUI: Failed to Compile Shader: {shader.name} | Subshader: {shaderPerfData.subshaderIndex} | Pass: {shaderPerfData.passName} | Stage: {shaderType}\n" +
                                                $"Keywords: \n{string.Join('\n', keywords)}");
+                            }
                         }
                         else
                         {
-                            Debug.LogError($"LWGUI: Failed to Compile Shader: {shader.name} | Subshader: {shaderPerfData.subshaderIndex} | Pass: {passNameOrIndex} | Stage: {shaderType}\n" +
-                                           $"Keywords: \n{string.Join('\n', keywords)}");
+                            Debug.LogError("LWGUI: Unable to get the compiled Shader path!");
+                            break;
                         }
                     }
 
@@ -141,18 +148,10 @@ namespace LWGUI.PerformanceMonitor
 
         public static IShaderCompiler GetActiveCompiler()
         {
-            // Factory: return compiler instance based on selected platform
-            switch (shaderCompilerPlatform)
-            {
-                case ShaderCompilerPlatform.D3D:
-                    return new ShaderCompiler.ShaderCompilerDefaultFxc(shaderCompilerPlatform, buildTarget, graphicsTier);
-                case ShaderCompilerPlatform.Vulkan:
-                case ShaderCompilerPlatform.GLES3x:
-                    // For now use Mali implementation as placeholder
-                    return new ShaderCompilerMali(shaderCompilerPlatform, buildTarget, graphicsTier);
-                default:
-                    return new ShaderCompiler.ShaderCompilerDefaultFxc(shaderCompilerPlatform, buildTarget, graphicsTier);
-            }
+            if (ShaderCompilerMali.isSupportCurrentPlatform)
+                return new ShaderCompilerMali(ShaderCompilerPlatform.GLES3x, BuildTarget.Android, graphicsTier);
+            
+            return new ShaderCompilerDefaultFxc(shaderCompilerPlatform, buildTarget, graphicsTier);
         }
     }
 }

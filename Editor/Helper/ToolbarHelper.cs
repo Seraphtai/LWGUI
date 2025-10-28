@@ -390,13 +390,16 @@ namespace LWGUI
 			
 			var fieldWidth = EditorGUIUtility.fieldWidth;
 			EditorGUIUtility.fieldWidth = 0;
-
-			EditorGUILayout.LabelField("Shader Performance Stats", GUIStyles.title);
 			
 			var lastPassName = string.Empty;
 			var compiler = ShaderPerfMonitor.GetActiveCompiler();
+
+			
 			if (compiler != null)
 			{
+				EditorGUILayout.LabelField($"Shader Performance Stats (Current Compiler: {compiler.compilerName})", GUIStyles.title);
+				
+				compiler.DrawShaderPerformanceStatsHeader(metaDatas);
 				foreach (var shaderPerfData in metaDatas.perMaterialData.shaderPerfDatas)
 				{
 					if (lastPassName == string.Empty)
@@ -408,8 +411,9 @@ namespace LWGUI
 						EditorGUILayout.Space();
 					}
 
-					compiler.DrawShaderPerformanceStatsLine(shaderPerfData);
+					compiler.DrawShaderPerformanceStatsLine(metaDatas, shaderPerfData);
 				}
+				compiler.DrawShaderPerformanceStatsFooter(metaDatas);
 			}
 
 			EditorGUIUtility.fieldWidth = fieldWidth;
