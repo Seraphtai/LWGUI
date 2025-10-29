@@ -393,7 +393,6 @@ namespace LWGUI
 			
 			var lastPassName = string.Empty;
 			var compiler = ShaderPerfMonitor.GetActiveCompiler();
-
 			
 			if (compiler != null)
 			{
@@ -425,8 +424,8 @@ namespace LWGUI
 		{
 			if (GUILayout.Button("Find", GUILayout.MaxWidth(40)))
 				EditorUtility.RevealInFinder(shaderPerfData.compiledShaderPath);
-			if (GUILayout.Button("Open", GUILayout.MaxWidth(40)))
-				IOHelper.OpenFile(shaderPerfData.compiledShaderPath);
+			// if (GUILayout.Button("Open", GUILayout.MaxWidth(40)))
+			// 	IOHelper.OpenFile(shaderPerfData.compiledShaderPath);
 		}
 
 		#endregion

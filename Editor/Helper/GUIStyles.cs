@@ -5,13 +5,14 @@ namespace LWGUI
 {
     public static class GUIStyles
     {
-		// Tips: Use properties to fix null reference errors
+        // Tips: Use properties to fix null reference errors
         private static GUIStyle _title;
         private static GUIStyle _iconButton;
         private static GUIStyle _foldout;
         private static GUIStyle _helpbox;
         private static GUIStyle _rampSelectButton;
         private static GUIStyle _toolbarSearchTextFieldPopup;
+        private static GUIStyle _label_monospace;
 
 
         public static GUIStyle title => _title ?? new GUIStyle(EditorStyles.boldLabel)
@@ -22,7 +23,7 @@ namespace LWGUI
                 bottom = 2
             }
         };
-        
+
         public static GUIStyle iconButton => _iconButton ?? new GUIStyle(EditorStyles.iconButton) { fixedHeight = 0, fixedWidth = 0 };
 
         public static GUIStyle foldout => _foldout ?? new GUIStyle(EditorStyles.miniButton)
@@ -63,5 +64,7 @@ namespace LWGUI
                 return _toolbarSearchTextFieldPopup;
             }
         }
+
+        public static GUIStyle label_monospace => _label_monospace ?? new GUIStyle(EditorStyles.label) { font = EditorGUIUtility.Load("Fonts/RobotoMono/RobotoMono-Regular.ttf") as Font };
     }
 }

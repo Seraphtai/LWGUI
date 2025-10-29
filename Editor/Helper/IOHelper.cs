@@ -18,15 +18,20 @@ namespace LWGUI
 
         private static string _cachedProjectPath;
 
+        // D:/Unity/ProjectName/
         public static string ProjectPath
         {
             get
             {
                 if (string.IsNullOrEmpty(_cachedProjectPath))
-                    _cachedProjectPath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+                    _cachedProjectPath = Application.dataPath[..^6];
                 return _cachedProjectPath;
             }
         }
+
+        public static string GetAbsPath(string unityProjectRelativePath) => Path.Combine(ProjectPath, unityProjectRelativePath);
+        
+        public static string GetRelativePath(string absPath) => Path.GetFullPath(absPath).Replace(Path.GetFullPath(ProjectPath), string.Empty);
 
         private static string _cachedCompiledShaderCachePath;
 

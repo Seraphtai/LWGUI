@@ -143,9 +143,8 @@ namespace LWGUI
 			// Save texture to disk
 			if (doSaveToDisk)
 			{
-				var systemPath = IOHelper.ProjectPath + path;
 				VersionControlHelper.Checkout(path);
-				File.WriteAllBytes(systemPath, texture2D.EncodeToPNG());
+				File.WriteAllBytes(IOHelper.GetAbsPath(path), texture2D.EncodeToPNG());
 				assetImporter.SaveAndReimport();
 			}
 		}
@@ -197,8 +196,7 @@ namespace LWGUI
 			var ramp = gradient.GetPreviewRampTexture(width, height, ColorSpace.Linear);
 			var png = ramp.EncodeToPNG();
 
-			var systemPath = IOHelper.ProjectPath + unityPath;
-			File.WriteAllBytes(systemPath, png);
+			File.WriteAllBytes(IOHelper.GetAbsPath(unityPath), png);
 
 			AssetDatabase.ImportAsset(unityPath);
 			SetRampTextureImporter(unityPath, true, isLinear, EncodeGradientToJSON(gradient, gradient));

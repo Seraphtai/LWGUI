@@ -9,13 +9,15 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
 {
     public interface IShaderCompiler
     {
-        static bool isSupportCurrentPlatform { get; }
+        static IShaderCompiler instance { get; }
+
+        static bool isSupportCurrentPlatform => true;
 
         string compilerName { get; }
 
-        ShaderCompilerPlatform Api    { get; }
-        BuildTarget            Target { get; }
-        GraphicsTier           Tier   { get; }
+        ShaderCompilerPlatform api    { get; set; }
+        BuildTarget            target { get; set; }
+        GraphicsTier           tier   { get; set; }
 
         /// <summary>
         /// The path to the Shader compilation result stored in text.

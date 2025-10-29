@@ -25,8 +25,6 @@ namespace LWGUI.PerformanceMonitor
 
         #endregion
 
-        public static bool IsCalculating { get; private set; }
-
         public static List<string> GetMaterialAndGlobalActiveKeywords(Material material)
         {
             var output = new List<string>();
@@ -149,9 +147,9 @@ namespace LWGUI.PerformanceMonitor
         public static IShaderCompiler GetActiveCompiler()
         {
             if (ShaderCompilerMali.isSupportCurrentPlatform)
-                return new ShaderCompilerMali(ShaderCompilerPlatform.GLES3x, BuildTarget.Android, graphicsTier);
+                return ShaderCompilerMali.instance;
             
-            return new ShaderCompilerDefaultFxc(shaderCompilerPlatform, buildTarget, graphicsTier);
+            return ShaderCompilerDefaultFxc.instance;
         }
     }
 }

@@ -29,27 +29,20 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
             public bool isValid;
         }
 
-        public static bool isSupportCurrentPlatform => true;
+        private static ShaderCompilerDefaultFxc _instance;
+        public static  ShaderCompilerDefaultFxc instance => _instance ??= new ShaderCompilerDefaultFxc();
+
+        public ShaderCompilerPlatform api    { get; set; } = ShaderCompilerPlatform.D3D;
+        public BuildTarget            target { get; set; } = BuildTarget.StandaloneWindows64;
+        public GraphicsTier           tier   { get; set; } = (GraphicsTier)(-1);
 
         public string compilerName => "Default Fxc";
-
-        public ShaderCompilerPlatform Api    { get; private set; }
-        public BuildTarget            Target { get; private set; }
-        public GraphicsTier           Tier   { get; private set; }
-
-
-        public ShaderCompilerDefaultFxc(ShaderCompilerPlatform api, BuildTarget target, GraphicsTier tier)
-        {
-            Api = api;
-            Target = target;
-            Tier = tier;
-        }
-
+        
         public string GetCompiledShaderPath(ShaderPerfData shaderPerfData, string compiledShaderDirectory, string shaderTypeName)
-            => Path.Combine(compiledShaderDirectory, $"Fxc_{Api}_{Target}_{shaderTypeName}.txt");
+            => Path.Combine(compiledShaderDirectory, $"Fxc_{api}_{target}_{shaderTypeName}.txt");
 
         public string GetCompiledDxbcPath(ShaderPerfData shaderPerfData)
-            => Path.Combine(shaderPerfData.compiledShaderDirectory, $"Fxc_{Api}_{Target}_{shaderPerfData.shaderTypeName}.dxbc");
+            => Path.Combine(shaderPerfData.compiledShaderDirectory, $"Fxc_{api}_{target}_{shaderPerfData.shaderTypeName}.dxbc");
 
         public bool CompilePass(ShaderPerfData shaderPerfData, ShaderData.Pass pass, ShaderType shaderType, string[] keywords,
                                 out string     compiledShader)
@@ -59,7 +52,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
             if (shaderPerfData == null || pass == null || keywords == null)
                 return false;
 
-            var compileInfo = pass.CompileVariant(shaderType, keywords, Api, Target, Tier, true);
+            var compileInfo = pass.CompileVariant(shaderType, keywords, api, target, tier, true);
             if (!compileInfo.Success)
                 return false;
 
@@ -81,8 +74,8 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
             var statsObj = shaderPerfData.stats;
             if (statsObj is ShaderPerfStats { isValid: true } stats)
             {
-                var statsStr = $"Cost: {stats.estimatedCost:0.0}\tSamples: {stats.sampleCount:0}\tRegisters: {stats.registerCount:0}";
-                EditorGUILayout.LabelField($"{shaderPerfData.passName} | {shaderPerfData.shaderTypeName}", statsStr);
+                var statsStr = $"Cost: {stats.estimatedCost,6:0.0}  Samples: {stats.sampleCount,3:0}  Registers: {stats.registerCount,3:0}";
+                EditorGUILayout.LabelField($"{shaderPerfData.passName} | {shaderPerfData.shaderTypeName}", statsStr, GUIStyles.label_monospace);
 
                 ToolbarHelper.DrawShaderPerformanceStatsLineButtons(shaderPerfData);
             }
@@ -103,7 +96,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
             get
             {
                 if (string.IsNullOrEmpty(_cachedFxcPath))
-                    _cachedFxcPath = Path.Combine(IOHelper.ProjectPath, AssetDatabase.GUIDToAssetPath("994434336edc8a8469c9afcbb92c5936"));
+                    _cachedFxcPath = IOHelper.GetAbsPath(AssetDatabase.GUIDToAssetPath("994434336edc8a8469c9afcbb92c5936"));
                 if (string.IsNullOrEmpty(_cachedFxcPath) || !File.Exists(_cachedFxcPath))
                     Debug.LogError("LWGUI: Can not find fxc.exe!");
                 return _cachedFxcPath;

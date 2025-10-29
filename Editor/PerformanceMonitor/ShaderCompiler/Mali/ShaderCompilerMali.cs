@@ -16,12 +16,22 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
 {
     public class ShaderCompilerMali : IShaderCompiler
     {
+        private static ShaderCompilerMali _instance;
+        public static  ShaderCompilerMali instance => _instance ??= new ShaderCompilerMali();
+
+        public ShaderCompilerPlatform api    { get; set; } = ShaderCompilerPlatform.GLES3x;
+        public BuildTarget            target { get; set; } = BuildTarget.Android;
+        public GraphicsTier           tier   { get; set; } = (GraphicsTier)(-1);
+
+        public string compilerName => "Mali Offline Compiler";
+
         private static int _isSupportCurrentPlatform = -1;
+
         public static bool isSupportCurrentPlatform
         {
             get
             {
-                // if (_isSupportCurrentPlatform == -1)
+                if (_isSupportCurrentPlatform == -1)
                 {
                     if (!IOHelper.RunCMD("malioc --list", out var output) || string.IsNullOrWhiteSpace(output) || !output.Contains("Compiler"))
                         _isSupportCurrentPlatform = 0;
@@ -31,20 +41,6 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
 
                 return _isSupportCurrentPlatform == 1;
             }
-        }
-
-        public string compilerName => "Mali Offline Compiler";
-
-        public ShaderCompilerPlatform Api    { get; private set; }
-        public BuildTarget            Target { get; private set; }
-        public GraphicsTier           Tier   { get; private set; }
-
-
-        public ShaderCompilerMali(ShaderCompilerPlatform api, BuildTarget target, GraphicsTier tier)
-        {
-            Api = api;
-            Target = target;
-            Tier = tier;
         }
 
         public string GetCompiledShaderPath(ShaderPerfData shaderPerfData, string compiledShaderDirectory, string shaderTypeName)
@@ -59,11 +55,11 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
                 default:                  return null;
             }
 
-            return Path.Combine(compiledShaderDirectory, $"Mali_{Api}_{Target}_{shaderTypeName}{ext}");
+            return Path.Combine(compiledShaderDirectory, $"Mali_{api}_{target}_{shaderTypeName}{ext}");
         }
 
         public string GetMaliJsonOutputPath(ShaderPerfData shaderPerfData)
-            => Path.Combine(shaderPerfData.compiledShaderDirectory, $"Mali_{Api}_{Target}_{shaderPerfData.shaderTypeName}.json");
+            => Path.Combine(shaderPerfData.compiledShaderDirectory, $"Mali_{api}_{target}_{shaderPerfData.shaderTypeName}.json");
 
 
         public bool CompilePass(ShaderPerfData shaderPerfData, ShaderData.Pass pass, ShaderType shaderType, string[] keywords,
@@ -74,7 +70,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
             if (shaderPerfData == null || pass == null || keywords == null)
                 return false;
 
-            var compileInfo = pass.CompileVariant(shaderType, keywords, Api, Target, Tier, true);
+            var compileInfo = pass.CompileVariant(shaderType, keywords, api, target, tier, true);
             if (!compileInfo.Success)
                 return false;
 
@@ -153,10 +149,12 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
                     }
                 }
 
-                var statsStr = $"A: {arithmeticCycle,-5:0.0}\tLS: {loadStoreCycle,-6:0.0}\tV: {varyingCycle,-5:0.0}\tT: {textureCycle,-5:0.0}";
-                EditorGUILayout.LabelField($"{shaderPerfData.passName} | {shaderPerfData.shaderTypeName}", statsStr);
+                var statsStr = $"A: {arithmeticCycle,5:0.0}  LS: {loadStoreCycle,5:0.0}  V: {varyingCycle,4:0.0}  T: {textureCycle,4:0.0}";
+                EditorGUILayout.LabelField($"{shaderPerfData.passName} | {shaderPerfData.shaderTypeName}", statsStr, GUIStyles.label_monospace);
 
                 ToolbarHelper.DrawShaderPerformanceStatsLineButtons(shaderPerfData);
+                if (GUILayout.Button("Json", GUILayout.MaxWidth(40)))
+                    IOHelper.OpenFile(GetMaliJsonOutputPath(shaderPerfData));
             }
             else
             {
