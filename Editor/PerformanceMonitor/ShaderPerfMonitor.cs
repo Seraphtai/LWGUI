@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Jason Ma
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,7 +14,7 @@ using Debug = UnityEngine.Debug;
 
 namespace LWGUI.PerformanceMonitor
 {
-    public class ShaderPerfMonitor
+    public static class ShaderPerfMonitor
     {
         #region Global Settings
 

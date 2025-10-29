@@ -1,7 +1,5 @@
 ﻿// Copyright (c) Jason Ma
 
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,7 +7,6 @@ using UnityEditor.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine;
 using UnityEditor;
-using LWGUI.PerformanceMonitor;
 using LWGUI.PerformanceMonitor.ShaderCompiler.Mali;
 
 namespace LWGUI.PerformanceMonitor.ShaderCompiler

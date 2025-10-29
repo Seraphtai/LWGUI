@@ -1,6 +1,5 @@
 // Copyright (c) Jason Ma
 
-using System;
 using UnityEditor.Rendering;
 using UnityEngine.Rendering;
 using UnityEditor;
