@@ -14,7 +14,6 @@ namespace LWGUI
 		public PerMaterialData  perMaterialData;
 		public PerInspectorData perInspectorData;
 
-
 		#region Get Prop Data
 		
 		public PropertyStaticData GetPropStaticData(string propName) => perShaderData?.GetPropStaticData(propName);
@@ -47,6 +46,8 @@ namespace LWGUI
 		public Material GetMaterial() => perMaterialData.material;
 
 		public Shader GetShader() => perShaderData.shader;
+		
+		public string GetShaderUID() => perShaderData.shaderUID;
 
 		public MaterialEditor GetMaterialEditor() => perInspectorData.materialEditor;
 	}

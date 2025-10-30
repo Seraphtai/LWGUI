@@ -24,7 +24,7 @@ namespace LWGUI.PerformanceMonitor
 
         #endregion
 
-        public static List<string> GetMaterialAndGlobalActiveKeywords(Material material)
+        public static List<string> GetMaterialAndGlobalAndUserOverrideActiveKeywords(Material material, string shaderUID)
         {
             var output = new List<string>();
 
@@ -35,15 +35,18 @@ namespace LWGUI.PerformanceMonitor
 
             foreach (var keyword in material.shader.keywordSpace.keywords)
             {
+                if (!keyword.isValid)
+                    continue;
+                
                 // Is a global keyword?
-                if (keyword.isOverridable)
-                {
-                    if (Shader.IsKeywordEnabled(keyword.name) && !output.Contains(keyword.name))
-                        output.Add(keyword.name);
-                }
+                if (keyword.isOverridable && Shader.IsKeywordEnabled(keyword.name))
+                    output.Add(keyword.name);
+
+                if (ToolbarHelper.IsUserKeywordOverrideAndEnabled(shaderUID, keyword.name))
+                    output.Add(keyword.name);
             }
 
-            return output;
+            return output.Distinct().ToList();
         }
 
         public static string ComputeShaderVariantHash(List<string> keywords, BuildTarget target, ShaderCompilerPlatform platform, GraphicsTier tier)
