@@ -36,18 +36,14 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
         /// </summary>
         object AnalyzeShaderPerformance(ShaderPerfData shaderPerfData, string compiledShader);
 
+        void DrawShaderPerformanceStatsHeader(LWGUIMetaDatas metaDatas) { }
+
         /// <summary>
         /// Draw a single line (pass) of shader performance UI inside the toolbar area.
         /// Compiler-specific UI (Find/Open buttons, label contents) should be implemented here.
         /// </summary>
         void DrawShaderPerformanceStatsLine(LWGUIMetaDatas metaDatas, ShaderPerfData shaderPerfData);
 
-        void DrawShaderPerformanceStatsHeader(LWGUIMetaDatas metaDatas)
-        {
-        }
-
-        void DrawShaderPerformanceStatsFooter(LWGUIMetaDatas metaDatas)
-        {
-        }
+        void DrawShaderPerformanceStatsFooter(LWGUIMetaDatas metaDatas) { }
     }
 }

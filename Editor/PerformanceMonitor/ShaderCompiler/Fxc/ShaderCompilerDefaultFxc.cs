@@ -67,6 +67,11 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
         public object AnalyzeShaderPerformance(ShaderPerfData shaderPerfData, string compiledShader)
             => ParseAsmStats(compiledShader);
 
+        public void DrawShaderPerformanceStatsHeader(LWGUIMetaDatas metaDatas)
+        {
+            EditorGUILayout.LabelField(" ", "       Cost   Samples   Registers");
+        }
+
         public void DrawShaderPerformanceStatsLine(LWGUIMetaDatas metaDatas, ShaderPerfData shaderPerfData)
         {
             EditorGUILayout.BeginHorizontal();
@@ -74,7 +79,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
             var statsObj = shaderPerfData.stats;
             if (statsObj is ShaderPerfStats { isValid: true } stats)
             {
-                var statsStr = $"Cost: {stats.estimatedCost,6:0.0}  Samples: {stats.sampleCount,3:0}  Registers: {stats.registerCount,3:0}";
+                var statsStr = $"{stats.estimatedCost,7:0.0} {stats.sampleCount,7:0} {stats.registerCount,8:0}";
                 EditorGUILayout.LabelField($"{shaderPerfData.passName} | {shaderPerfData.shaderTypeName}", statsStr, GUIStyles.label_monospace);
 
                 ToolbarHelper.DrawShaderPerformanceStatsLineButtons(shaderPerfData);

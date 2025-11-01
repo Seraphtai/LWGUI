@@ -84,7 +84,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
         public object AnalyzeShaderPerformance(ShaderPerfData shaderPerfData, string compiledShader)
         {
             var jsonPath = GetMaliJsonOutputPath(shaderPerfData);
-            string jsonString = string.Empty;
+            string jsonString;
 
             if (!File.Exists(jsonPath))
             {
@@ -107,7 +107,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
 
         public void DrawShaderPerformanceStatsHeader(LWGUIMetaDatas metaDatas)
         {
-            EditorGUILayout.LabelField(" ", "Cycles, A = Arithmetic, LS = Load/Store, V = Varying, T = Texture");
+            EditorGUILayout.LabelField(" ", "Arithmetic   Load/Store   Varying   Texture");
         }
 
         // https://developer.arm.com/documentation/101863/8-8/Using-Mali-Offline-Compiler/Performance-analysis
@@ -115,10 +115,8 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
         {
             EditorGUILayout.BeginHorizontal();
 
-            var statsObj = shaderPerfData.stats;
-            RuntimeMaliocShader stats = statsObj is RuntimeMaliocShader ? statsObj as RuntimeMaliocShader : null;
-            if (stats is { Variants                      : { Count: > 0 } }
-                && stats.Variants[0].Pipelines is { Count: > 0 })
+            if (shaderPerfData.stats is RuntimeMaliocShader { Variants: { Count: > 0 } } stats
+                && stats.Variants[0].Pipelines is { Count : > 0 })
             {
                 var variant = stats.Variants[0];
                 var cycles = Enumerable.Repeat(0.0f, variant.Pipelines.Count).ToList();
@@ -146,7 +144,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
                     }
                 }
 
-                var statsStr = $"A: {arithmeticCycle,5:0.0}  LS: {loadStoreCycle,5:0.0}  V: {varyingCycle,4:0.0}  T: {textureCycle,4:0.0}";
+                var statsStr = $"{arithmeticCycle,8:0.0} {loadStoreCycle,9:0.0} {varyingCycle,7:0.0} {textureCycle,6:0.0}";
                 EditorGUILayout.LabelField($"{shaderPerfData.passName} | {shaderPerfData.shaderTypeName}", statsStr, GUIStyles.label_monospace);
 
                 ToolbarHelper.DrawShaderPerformanceStatsLineButtons(shaderPerfData);
