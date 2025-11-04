@@ -153,12 +153,12 @@ namespace LWGUI
 		{
 			var propDynamicData = metaDatas.GetPropDynamicData(prop.name);
 			propDynamicData.hasRevertChanged = true;
-			SetPropertyToDefault(propDynamicData.defualtProperty, prop);
+			SetPropertyToDefault(propDynamicData.defaultProperty, prop);
 			foreach (var extraPropName in metaDatas.GetPropStaticData(prop.name).extraPropNames)
 			{
 				var extraPropDynamicData = metaDatas.GetPropDynamicData(extraPropName);
 				extraPropDynamicData.hasRevertChanged = true;
-				SetPropertyToDefault(extraPropDynamicData.defualtProperty, extraPropDynamicData.property);
+				SetPropertyToDefault(extraPropDynamicData.defaultProperty, extraPropDynamicData.property);
 			}
 		}
 

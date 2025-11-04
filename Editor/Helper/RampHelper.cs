@@ -143,9 +143,8 @@ namespace LWGUI
 			// Save texture to disk
 			if (doSaveToDisk)
 			{
-				var systemPath = Helper.ProjectPath + path;
 				VersionControlHelper.Checkout(path);
-				File.WriteAllBytes(systemPath, texture2D.EncodeToPNG());
+				File.WriteAllBytes(IOHelper.GetAbsPath(path), texture2D.EncodeToPNG());
 				assetImporter.SaveAndReimport();
 			}
 		}
@@ -197,8 +196,7 @@ namespace LWGUI
 			var ramp = gradient.GetPreviewRampTexture(width, height, ColorSpace.Linear);
 			var png = ramp.EncodeToPNG();
 
-			var systemPath = Helper.ProjectPath + unityPath;
-			File.WriteAllBytes(systemPath, png);
+			File.WriteAllBytes(IOHelper.GetAbsPath(unityPath), png);
 
 			AssetDatabase.ImportAsset(unityPath);
 			SetRampTextureImporter(unityPath, true, isLinear, EncodeGradientToJSON(gradient, gradient));
@@ -314,7 +312,7 @@ namespace LWGUI
 					var buttonRect = new Rect(rect.x + rect.width - buttonWidth, rect.y, buttonWidth, rect.height);
 					var previewRect = new Rect(rect.x, rect.y, rect.width - buttonWidth - 3.0f, rect.height);
 					
-					if (GUI.Button(buttonRect, guiContent, Helper.guiStyle_RampSelectButton) && _switchRampMapEvent != null)
+					if (GUI.Button(buttonRect, guiContent, GUIStyles.rampSelectButton) && _switchRampMapEvent != null)
 					{
 						_switchRampMapEvent(_prop, rampMap, i);
 						LwguiGradientWindow.CloseWindow();

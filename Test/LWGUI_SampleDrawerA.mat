@@ -35,7 +35,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Ramp2:
-        m_Texture: {fileID: 2800000, guid: fad186cbfd0faf2488e2edb774c6d08f, type: 3}
+        m_Texture: {fileID: 2800000, guid: a5406a04c724bbc4296e1588506e80a2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RampAtlas:
@@ -62,9 +62,11 @@ Material:
     - _Queue: 2000
     - _RampAtlasIndex0: 0
     - _RampAtlasIndex1: 1
-    - _RampAtlasIndex2: 3
+    - _RampAtlasIndex2: 1
     - _RampAtlasIndexer: 0
     - _SrcBlend: 5
+    - _Stencil: 0
+    - _StencilWithDescription: 0
     - _ZTest: 4
     - _ZWrite: 0
     - _blendMode: 1

@@ -34,6 +34,14 @@ Shader "Hidden"
 			#pragma fragment frag
 			// make fog work
 			#pragma multi_compile_fog
+			#pragma multi_compile _TEST_MULTI_COMPILE0
+			#pragma shader_feature _TEST_SHADER_FEATURE0
+			#pragma shader_feature _ _TEST_SHADER_FEATURE1
+			#pragma shader_feature _TEST_SHADER_FEATURE2 _TEST_SHADER_FEATURE3
+			#pragma shader_feature_local _TEST_SHADER_FEATURE_LOCAL0
+			#pragma shader_feature_local _ _TEST_SHADER_FEATURE_LOCAL1
+			#pragma shader_feature_local _TEST_SHADER_FEATURE_LOCAL2 _TEST_SHADER_FEATURE_LOCAL3
+			
 			#pragma multi_compile _KWENUM_KEY1 _KWENUM_KEY2
 			#pragma multi_compile _KEYWORDENUM_KEY1 _KEYWORDENUM_KEY2
 			#pragma multi_compile _SUBKEYWORDENUM_KEY1 _SUBKEYWORDENUM_KEY2

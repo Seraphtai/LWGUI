@@ -412,9 +412,9 @@ namespace LWGUI
 			}
 
 			inoutPerMaterialData.propDynamicDatas[inProp.name].defaultValueDescription =
-				inoutPerMaterialData.propDynamicDatas[_minPropName].defualtProperty.floatValue
+				inoutPerMaterialData.propDynamicDatas[_minPropName].defaultProperty.floatValue
 			  + " - "
-			  + inoutPerMaterialData.propDynamicDatas[_maxPropName].defualtProperty.floatValue;
+			  + inoutPerMaterialData.propDynamicDatas[_maxPropName].defaultProperty.floatValue;
 		}
 
 		public override void DrawProp(Rect position, MaterialProperty prop, GUIContent label, MaterialEditor editor)
@@ -925,9 +925,10 @@ namespace LWGUI
 					buttonRect.xMin -= _buttonPadding;
 					buttonRect.xMax += _buttonPadding * 2;
 				}
-				
-				if (style.richText = prop.hasMixedValue)
+
+				if (prop.hasMixedValue)
 				{
+					style.richText = true;
 					// https://docs.unity3d.com/2021.3/Documentation/Manual/StyledText.html
 					buttonLable = new GUIContent($"<b><i>{ buttonLable.text }</i></b>");
 				}
@@ -1210,7 +1211,7 @@ namespace LWGUI
 
 		public override void GetDefaultValueDescription(Shader inShader, MaterialProperty inProp, MaterialProperty inDefaultProp, PerShaderData inPerShaderData, PerMaterialData inoutPerMaterialData)
 		{
-			var defaultExtraProp = inoutPerMaterialData.GetPropDynamicData(_extraPropName)?.defualtProperty;
+			var defaultExtraProp = inoutPerMaterialData.GetPropDynamicData(_extraPropName)?.defaultProperty;
 			if (defaultExtraProp != null)
 			{
 				var text = string.Empty;
@@ -1373,21 +1374,22 @@ namespace LWGUI
 			string createdFileRelativePath = string.Empty;
 			while (true)
 			{
-				if (!Directory.Exists(Helper.ProjectPath + rootPath))
-					Directory.CreateDirectory(Helper.ProjectPath + rootPath);
+				var absRootPath = IOHelper.GetAbsPath(rootPath);
+				if (!Directory.Exists(absRootPath))
+					Directory.CreateDirectory(absRootPath);
 
 				// TODO: Warning:
 				// PropertiesGUI() is being called recursively. If you want to render the default gui for shader properties then call PropertiesDefaultGUI() instead
 				var absPath = EditorUtility.SaveFilePanel(saveFilePanelTitle, rootPath, defaultFileName, fileExtension);
 					
-				if (absPath.StartsWith(Helper.ProjectPath + rootPath))
+				if (absPath.StartsWith(absRootPath))
 				{
-					createdFileRelativePath = absPath.Replace(Helper.ProjectPath, string.Empty);
+					createdFileRelativePath = IOHelper.GetRelativePath(absPath);
 					break;
 				}
 				else if (absPath != string.Empty)
 				{
-					var retry = EditorUtility.DisplayDialog("Invalid Path", "Please select the subdirectory of '" + Helper.ProjectPath + rootPath + "'", "Retry", "Cancel");
+					var retry = EditorUtility.DisplayDialog("Invalid Path", $"Please select the subdirectory of '{absRootPath}'", "Retry", "Cancel");
 					if (!retry) break;
 				}
 				else
@@ -1703,20 +1705,19 @@ namespace LWGUI
 		public override void BuildStaticMetaData(Shader inShader, MaterialProperty inProp, MaterialProperty[] inProps, PropertyStaticData inoutPropertyStaticData)
 		{
 			var inputPath = (inProp.displayName ?? string.Empty).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
-			var projectRoot = Helper.ProjectPath;
-			string imagePath = null;
+			string imageAbsPath = null;
 
 			try
 			{
 				// If the display path already starts with Assets (project-relative), resolve from project root
 				if (inputPath.StartsWith("Assets"))
 				{
-					imagePath = Path.Combine(projectRoot, inputPath);
+					imageAbsPath = IOHelper.GetAbsPath(inputPath);
 				}
 				// If it's an absolute path, use it directly
 				else if (Path.IsPathRooted(inputPath))
 				{
-					imagePath = inputPath;
+					imageAbsPath = inputPath;
 				}
 				else
 				{
@@ -1724,7 +1725,7 @@ namespace LWGUI
 					var shaderAssetPath = AssetDatabase.GetAssetPath(inShader);
 					if (!string.IsNullOrEmpty(shaderAssetPath))
 					{
-						var shaderFullPath = Path.Combine(projectRoot, shaderAssetPath);
+						var shaderFullPath = IOHelper.GetAbsPath(shaderAssetPath);
 						var shaderDir = Path.GetDirectoryName(shaderFullPath);
 						if (!string.IsNullOrEmpty(shaderDir))
 						{
@@ -1732,21 +1733,21 @@ namespace LWGUI
 							var candidate = Path.GetFullPath(Path.Combine(shaderDir, inputPath));
 							if (File.Exists(candidate))
 							{
-								imagePath = candidate;
+								imageAbsPath = candidate;
 							}
 						}
 					}
 					// Fallback: try project-root relative resolution
-					if (imagePath == null)
+					if (imageAbsPath == null)
 					{
-						var candidate2 = Path.Combine(projectRoot, inputPath);
-						if (File.Exists(candidate2)) imagePath = candidate2;
+						var candidate2 = IOHelper.GetAbsPath(inputPath);
+						if (File.Exists(candidate2)) imageAbsPath = candidate2;
 					}
 				}
 
-				if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
+				if (!string.IsNullOrEmpty(imageAbsPath) && File.Exists(imageAbsPath))
 				{
-					var fileData = File.ReadAllBytes(imagePath);
+					var fileData = File.ReadAllBytes(imageAbsPath);
 					Texture2D texture = new Texture2D(2, 2);
 
 					// LoadImage will auto-resize the texture dimensions
@@ -1756,7 +1757,7 @@ namespace LWGUI
 					}
 					else
 					{
-						Debug.LogError($"LWGUI: Failed to load image data into texture: { imagePath }");
+						Debug.LogError($"LWGUI: Failed to load image data into texture: { imageAbsPath }");
 					}
 				}
 				else
@@ -2161,10 +2162,7 @@ namespace LWGUI
 		public override void DrawProp(Rect position, MaterialProperty prop, GUIContent label, MaterialEditor editor)
 		{
 			position = EditorGUI.IndentedRect(position);
-			GUIStyle style = new GUIStyle(EditorStyles.boldLabel);
-			style.alignment = TextAnchor.LowerLeft;
-			style.border.bottom = 2;
-			GUI.Label(position, _header, style);
+			GUI.Label(position, _header, GUIStyles.title);
 		}
 	}
 

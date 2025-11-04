@@ -53,7 +53,8 @@ namespace LWGUI
 
 			if (!_loadedPresets.ContainsKey(presetFileName) || !_loadedPresets[presetFileName])
 			{
-				Debug.LogError("LWGUI: Invalid ShaderPropertyPreset path: ‘" + presetFileName + "’ !");
+				if (!BuildPipeline.isBuildingPlayer)
+					Debug.LogError("LWGUI: Invalid ShaderPropertyPreset path: ‘" + presetFileName + "’ !");
 				return null;
 			}
 

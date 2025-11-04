@@ -44,19 +44,22 @@ namespace LWGUI
 				onDrawCustomHeader(this);
 
 			// Toolbar
-			bool enabled = GUI.enabled;
-			GUI.enabled = true;
-			var toolBarRect = EditorGUILayout.GetControlRect();
-			toolBarRect.xMin = 2;
+			{
+				bool enabled = GUI.enabled;
+				GUI.enabled = true;
+				var toolBarRect = EditorGUILayout.GetControlRect();
+				toolBarRect.xMin = 2;
 
-			Helper.DrawToolbarButtons(ref toolBarRect, metaDatas);
+				ToolbarHelper.DrawToolbarButtons(ref toolBarRect, metaDatas);
+				ToolbarHelper.DrawSearchField(toolBarRect, metaDatas);
 
-			Helper.DrawSearchField(toolBarRect, metaDatas);
+				GUILayoutUtility.GetRect(0, 0); // Space(0)
+				GUI.enabled = enabled;
+				Helper.DrawSplitLine();
 
-			GUILayoutUtility.GetRect(0, 0); // Space(0)
-			GUI.enabled = enabled;
-			Helper.DrawSplitLine();
-
+				ToolbarHelper.DrawShaderPerformanceStats(metaDatas);
+			}
+			
 
 			//-----------------------------------------------------------------------------
 			// Draw Properties
@@ -147,7 +150,7 @@ namespace LWGUI
 			if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && rect.Contains(Event.current.mousePosition))
 				propStaticData.isExpanding = !propStaticData.isExpanding;
 			RevertableHelper.DrawRevertableProperty(revertButtonRect, prop, metaDatas, true);
-			Helper.DoPropertyContextMenus(rect, prop, metaDatas);
+			ContextMenuHelper.DoPropertyContextMenus(rect, prop, metaDatas);
 		}
 
 		private void DrawProperty(MaterialProperty prop)
@@ -169,7 +172,7 @@ namespace LWGUI
 			var enabled = GUI.enabled;
 			if (propStaticData.isReadOnly) GUI.enabled = false;
 			Helper.BeginProperty(rect, prop, metaDatas);
-			Helper.DoPropertyContextMenus(rect, prop, metaDatas);
+			ContextMenuHelper.DoPropertyContextMenus(rect, prop, metaDatas);
 			
 			RevertableHelper.FixGUIWidthMismatch(prop.GetPropertyType(), materialEditor);
 			if (propStaticData.isAdvancedHeaderProperty)
