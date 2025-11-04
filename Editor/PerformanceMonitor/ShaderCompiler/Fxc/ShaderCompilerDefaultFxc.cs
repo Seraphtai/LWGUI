@@ -31,12 +31,20 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
 
         private static ShaderCompilerDefaultFxc _instance;
         public static  ShaderCompilerDefaultFxc instance => _instance ??= new ShaderCompilerDefaultFxc();
+        
+#if UNITY_STANDALONE_WIN
+        public static bool isSupportCurrentPlatform => true;
+#else
+        public static bool isSupportCurrentPlatform => false;
+#endif
 
+        public static int priority => 0;
+        
+        public string compilerName => "Default Fxc";
+        
         public ShaderCompilerPlatform api    { get; set; } = ShaderCompilerPlatform.D3D;
         public BuildTarget            target { get; set; } = BuildTarget.StandaloneWindows64;
         public GraphicsTier           tier   { get; set; } = (GraphicsTier)(-1);
-
-        public string compilerName => "Default Fxc";
         
         public string GetCompiledShaderPath(ShaderPerfData shaderPerfData, string compiledShaderDirectory, string shaderTypeName)
             => Path.Combine(compiledShaderDirectory, $"Fxc_{api}_{target}_{shaderTypeName}.txt");

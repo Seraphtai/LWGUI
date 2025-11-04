@@ -415,7 +415,7 @@ namespace LWGUI
             {
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Enabled");
-                EditorGUILayout.LabelField("Override");
+                EditorGUILayout.LabelField("    Override");
                 EditorGUILayout.EndHorizontal();
 
                 var activeKeywords = metaDatas.perMaterialData.activeKeywords;
@@ -510,7 +510,10 @@ namespace LWGUI
             EditorGUIUtility.fieldWidth = 0;
 
             var compiler = ShaderPerfMonitor.GetActiveCompiler();
-            EditorGUILayout.LabelField($"Shader Performance Stats (Current Compiler: {compiler?.compilerName})", GUIStyles.title);
+            if (compiler != null)
+                EditorGUILayout.LabelField($"Shader Performance Stats (Compiler: {compiler?.compilerName ?? "NULL"}, API: {compiler.api}, Target: {compiler.target})", GUIStyles.title);
+            else
+                EditorGUILayout.LabelField($"Shader Performance Stats (Compiler: NULL)", GUIStyles.title);
 
             if (compiler != null)
             {

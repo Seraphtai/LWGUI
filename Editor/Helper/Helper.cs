@@ -72,6 +72,7 @@ namespace LWGUI
 				{
 					material.SetShaderPassEnabled(lightModeNames[i], enabled);
 				}
+				EditorUtility.SetDirty(material);
 			}
 		}
 

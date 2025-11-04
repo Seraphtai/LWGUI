@@ -20,7 +20,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
         public BuildTarget            target { get; set; } = BuildTarget.Android;
         public GraphicsTier           tier   { get; set; } = (GraphicsTier)(-1);
 
-        public string compilerName => "Mali Offline Compiler";
+        public string compilerName => "Malioc";
 
         private static int _isSupportCurrentPlatform = -1;
 
@@ -39,6 +39,8 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
                 return _isSupportCurrentPlatform == 1;
             }
         }
+        
+        public static int priority => 10;
 
         public string GetCompiledShaderPath(ShaderPerfData shaderPerfData, string compiledShaderDirectory, string shaderTypeName)
         {

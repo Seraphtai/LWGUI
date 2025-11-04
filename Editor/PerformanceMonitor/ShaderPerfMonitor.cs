@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Jason Ma
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using LWGUI.PerformanceMonitor.ShaderCompiler;
@@ -146,12 +148,93 @@ namespace LWGUI.PerformanceMonitor
             IOHelper.ClearShaderPerfCache(shader);
         }
 
+        private static IShaderCompiler _cachedActiveCompiler;
+        private static readonly object _compilerLock = new object();
+        
         public static IShaderCompiler GetActiveCompiler()
         {
-            if (ShaderCompilerMali.isSupportCurrentPlatform)
-                return ShaderCompilerMali.instance;
+            if (_cachedActiveCompiler != null)
+                return _cachedActiveCompiler;
             
-            return ShaderCompilerDefaultFxc.instance;
+            lock (_compilerLock)
+            {
+                if (_cachedActiveCompiler != null)
+                    return _cachedActiveCompiler;
+                
+                var assembly = Assembly.GetExecutingAssembly();
+                var compilerTypes = assembly.GetTypes()
+                    .Where(t => !t.IsInterface && !t.IsAbstract && typeof(IShaderCompiler).IsAssignableFrom(t))
+                    .ToList();
+
+                Type bestType = null;
+                int bestPriority = int.MinValue;
+
+                foreach (var compilerType in compilerTypes)
+                {
+                    try
+                    {
+                        var isSupportProp = compilerType.GetProperty("isSupportCurrentPlatform",
+                            BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+                        if (isSupportProp == null)
+                            continue;
+
+                        bool isSupported = (bool)isSupportProp.GetValue(null);
+                        if (!isSupported)
+                            continue;
+
+                        var priorityProp = compilerType.GetProperty("priority",
+                            BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+                        int priority = 0;
+                        if (priorityProp != null)
+                        {
+                            try { priority = (int)priorityProp.GetValue(null); } catch { priority = 0; }
+                        }
+
+                        if (bestType == null || priority > bestPriority)
+                        {
+                            bestType = compilerType;
+                            bestPriority = priority;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"LWGUI: Error inspecting compiler type {compilerType.Name}: {e.Message}");
+                    }
+                }
+
+                if (bestType != null)
+                {
+                    try
+                    {
+                        var instanceProp = bestType.GetProperty("instance",
+                            BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+                        if (instanceProp != null)
+                        {
+                            var instance = instanceProp.GetValue(null) as IShaderCompiler;
+                            if (instance != null)
+                            {
+                                _cachedActiveCompiler = instance;
+                                return instance;
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"LWGUI: Error getting compiler instance of type {bestType.Name}: {e.Message}");
+                    }
+                }
+
+                Debug.LogWarning("LWGUI: No supported shader compiler found!");
+                return null;
+            }
+        }
+
+        public static void ResetActiveCompiler()
+        {
+            lock (_compilerLock)
+            {
+                _cachedActiveCompiler = null;
+            }
         }
     }
 }

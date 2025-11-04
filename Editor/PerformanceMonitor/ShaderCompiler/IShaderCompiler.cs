@@ -8,42 +8,44 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
 {
     public interface IShaderCompiler
     {
-        static IShaderCompiler instance { get; }
+        public static IShaderCompiler instance { get; }
 
-        static bool isSupportCurrentPlatform => true;
+        public static bool isSupportCurrentPlatform => true;
 
-        string compilerName { get; }
+        public static int priority => 0;
 
-        ShaderCompilerPlatform api    { get; set; }
-        BuildTarget            target { get; set; }
-        GraphicsTier           tier   { get; set; }
+        public string compilerName { get; }
+
+        public ShaderCompilerPlatform api    { get; set; }
+        public BuildTarget            target { get; set; }
+        public GraphicsTier           tier   { get; set; }
 
         /// <summary>
         /// The path to the Shader compilation result stored in text.
         /// </summary>
-        string GetCompiledShaderPath(ShaderPerfData shaderPerfData, string compiledShaderDirectory, string shaderTypeName);
+        public string GetCompiledShaderPath(ShaderPerfData shaderPerfData, string compiledShaderDirectory, string shaderTypeName);
 
         /// <summary>
         /// Try to compile a pass variant. Returns true and outputs string on success.
         /// </summary>
-        bool CompilePass(ShaderPerfData shaderPerfData, ShaderData.Pass pass, ShaderType shaderType, string[] keywords,
-                         out string     compiledShader);
+        public bool CompilePass(ShaderPerfData shaderPerfData, ShaderData.Pass pass, ShaderType shaderType, string[] keywords,
+                                out string     compiledShader);
 
         /// <summary>
         /// Analyze a compiled shader (or readable asm) and return a compiler-specific stats object.
         /// The returned object is opaque to the caller and will be stored in ShaderPerfData.stats.
         /// Return null on failure.
         /// </summary>
-        object AnalyzeShaderPerformance(ShaderPerfData shaderPerfData, string compiledShader);
+        public object AnalyzeShaderPerformance(ShaderPerfData shaderPerfData, string compiledShader);
 
-        void DrawShaderPerformanceStatsHeader(LWGUIMetaDatas metaDatas) { }
+        public void DrawShaderPerformanceStatsHeader(LWGUIMetaDatas metaDatas) { }
 
         /// <summary>
         /// Draw a single line (pass) of shader performance UI inside the toolbar area.
         /// Compiler-specific UI (Find/Open buttons, label contents) should be implemented here.
         /// </summary>
-        void DrawShaderPerformanceStatsLine(LWGUIMetaDatas metaDatas, ShaderPerfData shaderPerfData);
+        public void DrawShaderPerformanceStatsLine(LWGUIMetaDatas metaDatas, ShaderPerfData shaderPerfData);
 
-        void DrawShaderPerformanceStatsFooter(LWGUIMetaDatas metaDatas) { }
+        public void DrawShaderPerformanceStatsFooter(LWGUIMetaDatas metaDatas) { }
     }
 }
