@@ -22,7 +22,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler.Mali
         {
             public string display_name;
             public string name;
-            public object value;
+            public string value;
         }
 
         [Serializable]
@@ -46,7 +46,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler.Mali
         public class ShaderVariantCycles
         {
             public string[] bound_pipelines;
-            public float?[] cycle_count;
+            public float[] cycle_count;
         }
     }
 }
