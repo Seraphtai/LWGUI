@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Jason Ma
 
 using System;
+using System.Globalization;
 using System.Linq;
-using Newtonsoft.Json;
-using NUnit.Framework;
+using UnityEngine;
 
 namespace LWGUI.PerformanceMonitor.ShaderCompiler.Mali
 {
@@ -14,15 +14,23 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler.Mali
             if (json == null)
                 return null;
 
-            var jsonSerializerSettings = new JsonSerializerSettings
+            JsonMaliocOutput jsonModel;
+            try
             {
-                NullValueHandling = NullValueHandling.Ignore,
-            };
-            var jsonModel = JsonConvert.DeserializeObject<JsonMaliocOutput>(json, jsonSerializerSettings);
-            
-            Assert.IsNotNull(jsonModel);
-            Assert.IsTrue(jsonModel.shaders.Length == 1);
-            
+                jsonModel = JsonUtility.FromJson<JsonMaliocOutput>(json);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"LWGUI: Failed to parse malioc json: {e.Message}");
+                return null;
+            }
+
+            if (jsonModel == null || jsonModel.shaders == null || jsonModel.shaders.Length != 1)
+            {
+                Debug.LogError("LWGUI: malioc json missing shaders or unexpected format.");
+                return null;
+            }
+
             var shader = jsonModel.shaders[0];
 
             return new RuntimeMaliocShader
@@ -48,13 +56,13 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler.Mali
         }
 
         private static RuntimeMaliocShader.ShaderProperty ConvertProperty(JsonMaliocOutput.ShaderProperty property) =>
-            new() { Name = property.display_name, Value = new DynamicValue(property.value) };
+            new() { Name = property.display_name, Value = new DynamicValue(ParseValue(property.value)) };
 
         private static RuntimeMaliocShader.ShaderProperty
             ConvertVariantProperty(JsonMaliocOutput.ShaderProperty property) =>
             new()
             {
-                Name = property.display_name, Value = new DynamicValue(property.value),
+                Name = property.display_name, Value = new DynamicValue(ParseValue(property.value)),
                 ValueUnit = ParseValueUnit(property.name),
             };
 
@@ -73,6 +81,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler.Mali
                 "load_store" => RuntimeMaliocShader.ShaderVariantPipelineType.LoadStore,
                 "varying" => RuntimeMaliocShader.ShaderVariantPipelineType.Varying,
                 "texture" => RuntimeMaliocShader.ShaderVariantPipelineType.Texture,
+                "" => RuntimeMaliocShader.ShaderVariantPipelineType.Null,
                 null => RuntimeMaliocShader.ShaderVariantPipelineType.Null,
                 var _ => throw new ArgumentOutOfRangeException(nameof(text), text, "Invalid pipeline type."),
             };
@@ -81,8 +90,33 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler.Mali
             JsonMaliocOutput.ShaderVariantCycles cycles) =>
             new()
             {
-                PipelineCycles = cycles.cycle_count.Select(f => f ?? 0).ToList(),
-                BoundPipeline = ParsePipelineType(cycles.bound_pipelines.First()),
+                PipelineCycles = (cycles.cycle_count ?? Array.Empty<float>()).Select(f => f).ToList(),
+                BoundPipeline = ParsePipelineType(cycles.bound_pipelines?.First()),
             };
+
+        private static object ParseValue(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return null;
+
+            var s = value.Trim();
+            if (s.Equals("null", StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            // Try int
+            if (int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var i))
+                return i;
+
+            // Try float
+            if (float.TryParse(s, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var f))
+                return f;
+
+            // Try bool
+            if (bool.TryParse(s, out var b))
+                return b;
+
+            // Fallback: return string
+            return s;
+        }
     }
 }
