@@ -283,18 +283,25 @@ namespace LWGUI
 			if (presets == null)
 				return null;
 
-			if (index < presets.Count)
-			{
+			if (index < presets.Count && index >= 0)
 				return presets[index];
-			}
-			else
-			{
-				Debug.LogError($"LWGUI: Index ({ index }) is out of range when accessing PresetFile: { name }");
-				return null;
-			}
+			
+			Debug.LogError($"LWGUI: Index ({ index }) is out of range when accessing PresetFile: { name }");
+			return null;
 		}
 
-		public Preset GetPreset(float index) => GetPreset((int)index);
+		public Preset TryGetPreset(int index)
+		{
+			if (presets == null)
+				return null;
+
+			if (index < presets.Count && index >= 0)
+				return presets[index];
+
+			return null;
+		}
+		
+		public Preset TryGetPreset(float floatIndex) => TryGetPreset(Mathf.CeilToInt(floatIndex));
 		
 		private void OnValidate()
 		{
