@@ -219,8 +219,9 @@ public SubToggleDrawer(string group, string keyWord, string presetFileName)
 ///    "Right Click > Create > LWGUI > Shader Property Preset" in Project window,  
 ///    *any Preset in the entire project cannot have the same name*
 /// Target Property Type: Range
-public SubPowerSliderDrawer(float power) : this("_", power) { }
-public SubPowerSliderDrawer(string group, float power)
+public SubPowerSliderDrawer(float power) : this("_", power) { }  
+public SubPowerSliderDrawer(string group, float power) : this(group, power, string.Empty) { }  
+public SubPowerSliderDrawer(string group, float power, string presetFileName)
 ```
 
 
