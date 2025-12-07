@@ -214,6 +214,10 @@ public SubToggleDrawer(string group, string keyWord, string presetFileName)
 /// 
 /// group: parent group name (Default: none)
 /// power: power of slider (Default: 1)
+/// presetFileName: "Shader Property Preset" asset name, it rounds up the float to choose which Preset to use.  
+///    You can create new Preset by  
+///    "Right Click > Create > LWGUI > Shader Property Preset" in Project window,  
+///    *any Preset in the entire project cannot have the same name*
 /// Target Property Type: Range
 public SubPowerSliderDrawer(float power) : this("_", power) { }
 public SubPowerSliderDrawer(string group, float power)

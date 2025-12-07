@@ -30,7 +30,8 @@ namespace LWGUI
 	{
 		public string GetPresetFileName();
 		
-		public LwguiShaderPropertyPreset.Preset GetActivePreset(MaterialProperty inProp, LwguiShaderPropertyPreset lwguiShaderPropertyPreset);
+		public LwguiShaderPropertyPreset.Preset GetActivePreset(MaterialProperty inProp, LwguiShaderPropertyPreset lwguiShaderPropertyPreset) =>
+			lwguiShaderPropertyPreset?.TryGetPreset(inProp?.floatValue ?? -1);
 	}
 	#endregion
 
@@ -110,9 +111,6 @@ namespace LWGUI
 
 		public string GetPresetFileName() => _presetFileName;
 
-		public LwguiShaderPropertyPreset.Preset GetActivePreset(MaterialProperty inProp, LwguiShaderPropertyPreset lwguiShaderPropertyPreset) =>
-			PresetDrawer.GetActivePresetFromFloatProperty(inProp, lwguiShaderPropertyPreset);
-
 		public override void OnGUI(Rect position, MaterialProperty prop, GUIContent label, MaterialEditor editor)
 		{
 			metaDatas = Helper.GetLWGUIMetadatas(editor);
@@ -128,7 +126,7 @@ namespace LWGUI
 				prop.floatValue = toggleResult ? 1.0f : 0.0f;
 				var keyword = Helper.GetKeywordName(_keyword, prop.name);
 				Helper.SetShaderKeywordEnabled(editor.targets, keyword, toggleResult);
-				PresetHelper.GetPresetAsset(_presetFileName)?.GetPreset(prop.floatValue)?.ApplyToEditingMaterial(editor, metaDatas.perMaterialData);
+				PresetHelper.GetPresetAsset(_presetFileName)?.TryGetPreset(prop.floatValue)?.ApplyToEditingMaterial(editor, metaDatas.perMaterialData);
 				TimelineHelper.SetKeywordToggleToTimeline(prop, editor, keyword);
 			}
 			EditorGUI.showMixedValue = showMixedValue;
@@ -265,9 +263,6 @@ namespace LWGUI
 		}
 		
 		public string GetPresetFileName() => _presetFileName;
-		
-		public LwguiShaderPropertyPreset.Preset GetActivePreset(MaterialProperty inProp, LwguiShaderPropertyPreset lwguiShaderPropertyPreset) =>
-			PresetDrawer.GetActivePresetFromFloatProperty(inProp, lwguiShaderPropertyPreset);
 
 		public override void DrawProp(Rect position, MaterialProperty prop, GUIContent label, MaterialEditor editor)
 		{
@@ -279,7 +274,7 @@ namespace LWGUI
 				prop.floatValue = value ? 1.0f : 0.0f;
 				var keyword = Helper.GetKeywordName(_keyWord, prop.name);
 				Helper.SetShaderKeywordEnabled(editor.targets, keyword, value);
-				PresetHelper.GetPresetAsset(_presetFileName)?.GetPreset(prop.floatValue)?.ApplyToEditingMaterial(editor, metaDatas.perMaterialData);
+				PresetHelper.GetPresetAsset(_presetFileName)?.TryGetPreset(prop.floatValue)?.ApplyToEditingMaterial(editor, metaDatas.perMaterialData);
 				TimelineHelper.SetKeywordToggleToTimeline(prop, editor, keyword);
 			}
 			EditorGUI.showMixedValue = false;
@@ -301,29 +296,60 @@ namespace LWGUI
 	/// 
 	/// group: parent group name (Default: none)
 	/// power: power of slider (Default: 1)
+	///	presetFileName: "Shader Property Preset" asset name, it rounds up the float to choose which Preset to use.
+	///		You can create new Preset by
+	///		"Right Click > Create > LWGUI > Shader Property Preset" in Project window,
+	///		*any Preset in the entire project cannot have the same name*
 	/// Target Property Type: Range
 	/// </summary>
-	public class SubPowerSliderDrawer : SubDrawer
+	public class SubPowerSliderDrawer : SubDrawer, IPresetDrawer
 	{
+		public string presetFileName;
+		
 		private float _power = 1;
 
 		public SubPowerSliderDrawer(float power) : this("_", power) { }
+		
+		public SubPowerSliderDrawer(string group, float power) : this(group, power, string.Empty) { }
 
-		public SubPowerSliderDrawer(string group, float power)
+		public SubPowerSliderDrawer(string group, float power, string presetFileName)
 		{
 			this.group = group;
 			this._power = Mathf.Clamp(power, 0, float.MaxValue);
+			this.presetFileName = presetFileName;
 		}
 
 		protected override bool IsMatchPropType(MaterialProperty property) { return property.GetPropertyType() == ShaderPropertyType.Range; }
+		
+		public override void BuildStaticMetaData(Shader inShader, MaterialProperty inProp, MaterialProperty[] inProps, PropertyStaticData inoutPropertyStaticData)
+		{
+			base.BuildStaticMetaData(inShader, inProp, inProps, inoutPropertyStaticData);
+			PresetDrawer.SetPresetAssetToStaticData(inoutPropertyStaticData, presetFileName);
+		}
+
+		public string GetPresetFileName() => presetFileName;
 
 		public override void DrawProp(Rect position, MaterialProperty prop, GUIContent label, MaterialEditor editor)
 		{
 			RevertableHelper.FixGUIWidthMismatch(prop.GetPropertyType(), editor);
 			EditorGUI.showMixedValue = prop.hasMixedValue;
 			var rect = position;
+			var oldValue = prop.floatValue;
 			ReflectionHelper.DoPowerRangeProperty(rect, prop, label, _power);
+			if (prop.floatValue != oldValue)
+			{
+				PresetHelper.GetPresetAsset(presetFileName)?.TryGetPreset(prop.floatValue)?.ApplyToEditingMaterial(editor, metaDatas.perMaterialData);
+			}
 			EditorGUI.showMixedValue = false;
+		}
+
+		public override void Apply(MaterialProperty prop)
+		{
+			base.Apply(prop);
+			if (!prop.hasMixedValue && VersionControlHelper.IsWriteable(prop.targets))
+			{
+				PresetDrawer.ApplyPresetWithoutPropertyChanges(presetFileName, prop);
+			}
 		}
 	}
 
@@ -717,28 +743,14 @@ namespace LWGUI
 			inoutPropertyStaticData.propertyPresetAsset = PresetHelper.GetPresetAsset(presetFileName);
 		}
 
-		public static LwguiShaderPropertyPreset.Preset GetActivePresetFromFloatProperty(MaterialProperty inProp, LwguiShaderPropertyPreset lwguiShaderPropertyPreset)
-		{
-			LwguiShaderPropertyPreset.Preset preset = null;
-			var index = (int)inProp.floatValue;
-			if (lwguiShaderPropertyPreset && index >= 0 && index < lwguiShaderPropertyPreset.GetPresetCount())
-			{
-				preset = lwguiShaderPropertyPreset.GetPreset(index);
-			}
-			return preset;
-		}
-
 		// Apply Keywords and Passes in presets without modifying other property values
 		// Used to call in MaterialPropertyDrawer.Apply()
 		public static void ApplyPresetWithoutPropertyChanges(string presetFileName, MaterialProperty prop)
 		{
 			var presetFile = PresetHelper.GetPresetAsset(presetFileName);
-			if (presetFile != null
-			    && prop.floatValue < presetFile.GetPresetCount()
-			    && ShowIfDecorator.GetShowIfResultToFilterDrawerApplying(prop)
-			   )
+			if (presetFile && ShowIfDecorator.GetShowIfResultToFilterDrawerApplying(prop))
 			{
-				presetFile.GetPreset(prop.floatValue)?.ApplyKeywordsAndPassesToMaterials(prop.targets);
+				presetFile.TryGetPreset(prop.floatValue)?.ApplyKeywordsAndPassesToMaterials(prop.targets);
 			}
 		}
 
@@ -752,17 +764,12 @@ namespace LWGUI
 
 		public override void GetDefaultValueDescription(Shader inShader, MaterialProperty inProp, MaterialProperty inDefaultProp, PerShaderData inPerShaderData, PerMaterialData inoutPerMaterialData)
 		{
-			var index = (int)inDefaultProp.floatValue;
 			var propertyPreset = inPerShaderData.propStaticDatas[inProp.name].propertyPresetAsset;
-
-			if (propertyPreset && index < propertyPreset.GetPresetCount() && index >= 0)
-				inoutPerMaterialData.propDynamicDatas[inProp.name].defaultValueDescription = propertyPreset.GetPreset(index).presetName;
+			if (propertyPreset)
+				inoutPerMaterialData.propDynamicDatas[inProp.name].defaultValueDescription = propertyPreset.TryGetPreset(inDefaultProp.floatValue)?.presetName;
 		}
 
 		public string GetPresetFileName() => presetFileName;
-
-		public LwguiShaderPropertyPreset.Preset GetActivePreset(MaterialProperty inProp, LwguiShaderPropertyPreset lwguiShaderPropertyPreset) =>
-			GetActivePresetFromFloatProperty(inProp, lwguiShaderPropertyPreset);
 
 		public override void DrawProp(Rect position, MaterialProperty prop, GUIContent label, MaterialEditor editor)
 		{
@@ -773,7 +780,7 @@ namespace LWGUI
 
 			int index = (int)Mathf.Max(0, prop.floatValue);
 			var presetFile = PresetHelper.GetPresetAsset(presetFileName);
-			if (presetFile == null || presetFile.GetPresetCount() == 0)
+			if (!presetFile || presetFile.GetPresetCount() == 0)
 			{
 				Helper.DrawShaderPropertyWithErrorLabel(rect, prop, label, editor, $"Invalid Preset File: {presetFileName}");
 				return;
@@ -790,7 +797,7 @@ namespace LWGUI
 				if (Helper.EndChangeCheck(metaDatas, prop))
 				{
 					prop.floatValue = newIndex;
-					presetFile.GetPreset(newIndex).ApplyToEditingMaterial(editor, metaDatas.perMaterialData);
+					presetFile.TryGetPreset(newIndex)?.ApplyToEditingMaterial(editor, metaDatas.perMaterialData);
 				}
 				EditorGUI.showMixedValue = false;
 			}
@@ -799,7 +806,6 @@ namespace LWGUI
 				Helper.DrawShaderPropertyWithErrorLabel(position, prop, label, editor, $"Out of Index Range");
 				Debug.LogError($"LWGUI: { prop.name } out of Preset index range!");
 			}
-
 		}
 
 		public override void Apply(MaterialProperty prop)
