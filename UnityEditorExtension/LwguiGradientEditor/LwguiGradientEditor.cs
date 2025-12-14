@@ -20,7 +20,7 @@ namespace LWGUI.LwguiGradientEditor
             public float selectedKeysAverageTime = 0;
             public uint selectedChannel = 0;
             public bool isOnlyColorKeySelected;
-            public LwguiGradient.LwguiMergedColorCurves mergedCurves;
+            public LwguiMergedColorCurves mergedCurves;
             
             public bool hasMixedTime;
             public bool hasMixedFloatValue; // Selected multiple keys with different values in a same Curve
@@ -69,7 +69,7 @@ namespace LWGUI.LwguiGradientEditor
                     if (selectedFloatValue == float.NegativeInfinity)
                         selectedFloatValue = 0;
 
-                    mergedCurves = new LwguiGradient.LwguiMergedColorCurves(selectedAnimationCurves);
+                    mergedCurves = new LwguiMergedColorCurves(selectedAnimationCurves);
 
                     var noAlphaKeySelected = mergedCurves.curves[(int)LwguiGradient.Channel.Alpha].Count == 0;
                     hasMixedColorValue      = noAlphaKeySelected && hasMixedChannelValue.   Where((_, c) => c < (int)LwguiGradient.Channel.Alpha).Any(b => b);
@@ -77,7 +77,7 @@ namespace LWGUI.LwguiGradientEditor
                 }
                 else
                 {
-                    mergedCurves = new LwguiGradient.LwguiMergedColorCurves();
+                    mergedCurves = new LwguiMergedColorCurves();
                 }
             }
 
@@ -201,7 +201,7 @@ namespace LWGUI.LwguiGradientEditor
 
             var lastSelectedGradientKey = _gradientEditor != null && _selectedGradientKey != null ? new GradientEditor.Swatch(_selectedGradientKey.m_Time, _selectedGradientKey.m_Value, _selectedGradientKey.m_IsAlpha) : null;
 
-            var lwguiMergedCurves = new LwguiGradient.LwguiMergedColorCurves(lwguiGradient.rawCurves);
+            var lwguiMergedCurves = new LwguiMergedColorCurves(lwguiGradient.rawCurves);
             _gradientEditor ??= new GradientEditor();
             _gradientEditor.Init(lwguiMergedCurves.ToGradient(ReflectionHelper.maxGradientKeyCount), 1024, colorSpace == ColorSpace.Linear, colorSpace);
             
@@ -754,7 +754,7 @@ namespace LWGUI.LwguiGradientEditor
             
             // Get curve key index
             _curveEditor.SelectNone();
-            var lwguiMergedCurves = new LwguiGradient.LwguiMergedColorCurves(lwguiGradient.rawCurves);
+            var lwguiMergedCurves = new LwguiMergedColorCurves(lwguiGradient.rawCurves);
             for (int c = 0; c < (int)LwguiGradient.Channel.Num; c++)
             {
                 if (selectedGradientKeyIndexes[c] < 0)

@@ -50,8 +50,8 @@ namespace LWGUI.Runtime.LwguiGradient
 
         #region Const
 
-        public static readonly Color[] channelColors = new[] { Color.red, Color.green, Color.blue, Color.white };
-        public static readonly char[] channelNames = new[] { 'r', 'g', 'b', 'a' };
+        public static readonly Color[] channelColors = { Color.red, Color.green, Color.blue, Color.white };
+        public static readonly char[] channelNames = { 'r', 'g', 'b', 'a' };
 
         public static AnimationCurve defaultCurve => new (new Keyframe(0, 1).SetLinearTangentMode(), new Keyframe(1, 1).SetLinearTangentMode());
 
@@ -61,6 +61,11 @@ namespace LWGUI.Runtime.LwguiGradient
 
         // The complete data is stored by RGBA Curves and can be converted into Texture
         [SerializeField] private List<AnimationCurve> _curves;
+        
+        // Reusable buffer to reduce per-call allocations when generating preview pixels
+        [NonSerialized] private static Color[] _pixelsCache;
+        [NonSerialized] private static int _pixelsCacheWidth;
+        [NonSerialized] private static int _pixelsCacheHeight;
         
         public List<AnimationCurve> rawCurves
         {
@@ -154,50 +159,23 @@ namespace LWGUI.Runtime.LwguiGradient
 
         public LwguiGradient(List<AnimationCurve> inRgbaCurves) => SetRgbaCurves(inRgbaCurves);
 
-        public static LwguiGradient white
-        {
-	        get => new ();
-        }
+        public static LwguiGradient white   => new ();
 
-        public static LwguiGradient gray
-        {
-	        get => new (new []{Color.gray, Color.gray}, new []{0.0f, 1.0f});
-        }
+        public static LwguiGradient gray    => new (new []{Color.gray, Color.gray}, new []{0.0f, 1.0f});
 
-        public static LwguiGradient black
-        {
-	        get => new (new []{Color.black, Color.black}, new []{0.0f, 1.0f});
-        }
+        public static LwguiGradient black   => new (new []{Color.black, Color.black}, new []{0.0f, 1.0f});
 
-        public static LwguiGradient red
-        {
-	        get => new (new []{Color.red, Color.red}, new []{0.0f, 1.0f});
-        }
+        public static LwguiGradient red     => new (new []{Color.red, Color.red}, new []{0.0f, 1.0f});
 
-        public static LwguiGradient green
-        {
-	        get => new (new []{Color.green, Color.green}, new []{0.0f, 1.0f});
-        }
+        public static LwguiGradient green   => new (new []{Color.green, Color.green}, new []{0.0f, 1.0f});
 
-        public static LwguiGradient blue
-        {
-	        get => new (new []{Color.blue, Color.blue}, new []{0.0f, 1.0f});
-        }
+        public static LwguiGradient blue    => new (new []{Color.blue, Color.blue}, new []{0.0f, 1.0f});
 
-        public static LwguiGradient cyan
-        {
-	        get => new (new []{Color.cyan, Color.cyan}, new []{0.0f, 1.0f});
-        }
+        public static LwguiGradient cyan    => new (new []{Color.cyan, Color.cyan}, new []{0.0f, 1.0f});
 
-        public static LwguiGradient magenta
-        {
-	        get => new (new []{Color.magenta, Color.magenta}, new []{0.0f, 1.0f});
-        }
+        public static LwguiGradient magenta => new (new []{Color.magenta, Color.magenta}, new []{0.0f, 1.0f});
 
-        public static LwguiGradient yellow
-        {
-	        get => new (new []{Color.yellow, Color.yellow}, new []{0.0f, 1.0f});
-        }
+        public static LwguiGradient yellow  => new (new []{Color.yellow, Color.yellow}, new []{0.0f, 1.0f});
 
         #endregion
 
@@ -207,8 +185,9 @@ namespace LWGUI.Runtime.LwguiGradient
 
             if (_curves != null)
             {
-                foreach (var curve in _curves)
+                for (int i = 0; i < _curves.Count; i++)
                 {
+                    var curve = _curves[i];
                     if (curve != null)
                     {
                         hash = hash * 23 + curve.GetHashCode();
@@ -222,6 +201,8 @@ namespace LWGUI.Runtime.LwguiGradient
         public void Dispose()
         {
             _curves?.Clear();
+            _pixelsCache = null;
+            _pixelsCacheWidth = _pixelsCacheHeight = 0;
         }
         
         public void Clear(ChannelMask channelMask = ChannelMask.All)
@@ -249,9 +230,10 @@ namespace LWGUI.Runtime.LwguiGradient
 
             for (int c = 0; c < src._curves.Count; c++)
             {
-                foreach (var key in src._curves[c].keys)
+                var keys = src._curves[c].keys;
+                for (int k = 0; k < keys.Length; k++)
                 {
-                    _curves[c].AddKey(key);
+                    _curves[c].AddKey(keys[k]);
                 }
             }
         }
@@ -306,12 +288,36 @@ namespace LWGUI.Runtime.LwguiGradient
 
         public Color Evaluate(float time, ChannelMask channelMask = ChannelMask.All, GradientTimeRange timeRange = GradientTimeRange.One)
         {
-            time /= (int)timeRange;
+            switch (timeRange)
+            {
+                case GradientTimeRange.One:                                         break;
+                case GradientTimeRange.TwentyFour:        time *= 1.0f / 24.0f;     break;
+                case GradientTimeRange.TwentyFourHundred: time *= 1.0f / 2400.0f;   break;
+                default:                                  throw new ArgumentOutOfRangeException(nameof(timeRange), timeRange, null);
+            }
             
             if (channelMask == ChannelMask.Alpha)
             {
                 var alpha = rawCurves[(int)Channel.Alpha].Evaluate(time);
                 return new Color(alpha, alpha, alpha, 1);
+            }
+
+            // Fast paths to avoid redundant mask checks and alpha evaluation
+            if (channelMask == ChannelMask.All)
+            {
+                return new Color(
+                    rawCurves[(int)Channel.Red].Evaluate(time),
+                    rawCurves[(int)Channel.Green].Evaluate(time),
+                    rawCurves[(int)Channel.Blue].Evaluate(time),
+                    rawCurves[(int)Channel.Alpha].Evaluate(time));
+            }
+            if (channelMask == ChannelMask.RGB)
+            {
+                return new Color(
+                    rawCurves[(int)Channel.Red].Evaluate(time),
+                    rawCurves[(int)Channel.Green].Evaluate(time),
+                    rawCurves[(int)Channel.Blue].Evaluate(time),
+                    1);
             }
 
             return new Color(
@@ -334,16 +340,7 @@ namespace LWGUI.Runtime.LwguiGradient
         public Color[] GetPixels(int width, int height, ChannelMask channelMask = ChannelMask.All)
         {
             var pixels = new Color[width * height];
-            for (var x = 0; x < width; x++)
-            {
-                var u   = x / (float)width;
-                var col = Evaluate(u, channelMask);
-                for (int i = 0; i < height; i++)
-                {
-                    pixels[x + i * width] = col;
-                }
-            }
-
+            FillPixelsNonAlloc(pixels, width, height, channelMask);
             return pixels;
         }
 
@@ -352,9 +349,10 @@ namespace LWGUI.Runtime.LwguiGradient
             if (outputPixels == null || currentIndex >= outputPixels.Length)
                 return;
             
+            var invWidth = 1.0f / width;
             for (var x = 0; x < width; x++)
             {
-                var u   = x / (float)width;
+                var u   = x * invWidth;
                 var col = Evaluate(u, channelMask);
                 for (int i = 0; i < height; i++)
                 {
@@ -364,14 +362,44 @@ namespace LWGUI.Runtime.LwguiGradient
             }
         }
 
+        // Non-alloc helper to fill a provided buffer with gradient pixels
+        private void FillPixelsNonAlloc(Color[] buffer, int width, int height, ChannelMask channelMask = ChannelMask.All)
+        {
+            if (buffer == null || buffer.Length < width * height) return;
+            var invWidth = 1.0f / width;
+            int rowStride = width;
+            for (int x = 0; x < width; x++)
+            {
+                var u = x * invWidth;
+                var col = Evaluate(u, channelMask);
+                int idx = x;
+                for (int y = 0; y < height; y++)
+                {
+                    buffer[idx] = col;
+                    idx += rowStride;
+                }
+            }
+        }
+
+        private void EnsurePixelCache(int width, int height)
+        {
+            if (_pixelsCache == null || _pixelsCacheWidth != width || _pixelsCacheHeight != height)
+            {
+                _pixelsCache = new Color[width * height];
+                _pixelsCacheWidth = width;
+                _pixelsCacheHeight = height;
+            }
+        }
+
         public Texture2D GetPreviewRampTexture(int width = 256, int height = 1, ColorSpace colorSpace = ColorSpace.Gamma, ChannelMask channelMask = ChannelMask.All)
         {
             if (LwguiGradientHelper.TryGetRampPreview(this, width, height, colorSpace, channelMask, out var cachedPreview)) 
                 return cachedPreview;
             
-            var rampPreview   = new Texture2D(width, height, TextureFormat.RGBA32, false, colorSpace == ColorSpace.Linear);
-            var pixels = GetPixels(width, height, channelMask);
-            rampPreview.SetPixels(pixels);
+            var rampPreview = new Texture2D(width, height, TextureFormat.RGBA32, false, colorSpace == ColorSpace.Linear);
+            EnsurePixelCache(width, height);
+            FillPixelsNonAlloc(_pixelsCache, width, height, channelMask);
+            rampPreview.SetPixels(_pixelsCache);
             rampPreview.wrapMode = TextureWrapMode.Clamp;
             rampPreview.name = "LWGUI Gradient Preview";
             rampPreview.Apply();
@@ -398,129 +426,121 @@ namespace LWGUI.Runtime.LwguiGradient
             }
         }
 
-        public class LwguiMergedColorCurves : IDisposable
-        {
-            public List<List<LwguiKeyframe>> curves = new ();
-
-            public LwguiMergedColorCurves()
-            {
-                for (int c = 0; c < (int)Channel.Num; c++)
-                    curves.Add(new List<LwguiKeyframe>());
-            }
-
-            public LwguiMergedColorCurves(List<AnimationCurve> rgbaCurves)
-            {
-                for (int c = 0; c < (int)Channel.Num; c++)
-                    curves.Add(new List<LwguiKeyframe>());
-                
-                // Get color keys
-                {
-                    var timeColorDic = new Dictionary<float, List<(float value, int index)>>();
-                    for (int c = 0; c < (int)Channel.Num - 1; c++)
-                    {
-                        var keys = rgbaCurves[c].keys;
-                        for (int j = 0; j < keys.Length; j++)
-                        {
-                            var keyframe = keys[j];
-                            if (timeColorDic.ContainsKey(keyframe.time))
-                            {
-                                timeColorDic[keyframe.time].Add((keyframe.value, j));
-                            }
-                            else
-                            {
-                                timeColorDic.Add(keyframe.time, new List<(float value, int index)> { (keyframe.value, j) });
-                            }
-                        }
-                    }
-
-                    foreach (var kwPair in timeColorDic)
-                    {
-                        if (kwPair.Value.Count == (int)Channel.Num - 1)
-                        {
-                            for (int c = 0; c < (int)Channel.Num - 1; c++)
-                            {
-                                curves[c].Add(new LwguiKeyframe(kwPair.Key, kwPair.Value[c].value, kwPair.Value[c].index));
-                            }
-                        }
-                    }
-                }
-            
-                // Get alpha keys
-                for (int i = 0; i < rgbaCurves[(int)Channel.Alpha].keys.Length; i++)
-                {
-                    var alphaKey = rgbaCurves[(int)Channel.Alpha].keys[i];
-                    curves[(int)Channel.Alpha].Add(new LwguiKeyframe(alphaKey.time, alphaKey.value, i));
-                }
-            }
-
-            public LwguiMergedColorCurves(Gradient gradient)
-            {
-                for (int c = 0; c < (int)Channel.Num; c++)
-                    curves.Add(new List<LwguiKeyframe>());
-
-                foreach (var colorKey in gradient.colorKeys)
-                {
-                    for (int c = 0; c < (int)Channel.Num - 1; c++)
-                    {
-                        curves[c].Add(new LwguiKeyframe(colorKey.time, colorKey.color[c], 0));
-                    }
-                }
-                foreach (var alphaKey in gradient.alphaKeys)
-                {
-                    curves[(int)Channel.Alpha].Add(new LwguiKeyframe(alphaKey.time, alphaKey.alpha, 0));
-                }
-            }
-
-            public Gradient ToGradient(int maxGradientKeyCount = 8) => new Gradient
-            {
-                colorKeys = curves[(int)Channel.Red].Select((keyframe, i) => new GradientColorKey(
-                    new Color(
-                        curves[(int)Channel.Red][i].value,
-                        curves[(int)Channel.Green][i].value,
-                        curves[(int)Channel.Blue][i].value), 
-                    curves[(int)Channel.Red][i].time))
-                    .Where((key, i) => i < maxGradientKeyCount).ToArray(),
-                    
-                alphaKeys = curves[(int)Channel.Alpha].Select(alphaKey => new GradientAlphaKey(alphaKey.value, alphaKey.time))
-                    .Where((key, i) => i < maxGradientKeyCount).ToArray()
-            };
-
-            public List<AnimationCurve> ToAnimationCurves()
-            {
-                var outCurves = new List<AnimationCurve>();
-                for (int c = 0; c < (int)Channel.Num; c++)
-                {
-                    var curve = new AnimationCurve();
-                    foreach (var key in curves[c])
-                    {
-                        curve.AddKey(new Keyframe(key.time, key.value).SetLinearTangentMode());
-                    }
-                    curve.SetLinearTangents();
-                    outCurves.Add(curve);
-                }
-
-                return outCurves;
-            }
-
-            public LwguiGradient ToLwguiGradient()
-            {
-                return new LwguiGradient(ToAnimationCurves());
-            }
-
-            public void Dispose()
-            {
-                curves?.Clear();
-            }
-        }
-
         public static LwguiGradient FromGradient(Gradient gradient)
         {
-            return new LwguiMergedColorCurves(gradient).ToLwguiGradient();
+            if (gradient == null)
+                return new LwguiGradient();
+
+            var curves = new List<AnimationCurve>((int)Channel.Num);
+            for (int c = 0; c < (int)Channel.Num; c++)
+                curves[c] = new AnimationCurve();
+
+            var colorKeys = gradient.colorKeys;
+            for (int i = 0; i < colorKeys.Length; i++)
+            {
+                var ck = colorKeys[i];
+                curves[(int)Channel.Red]  .AddKey(new Keyframe(ck.time, ck.color.r).SetLinearTangentMode());
+                curves[(int)Channel.Green].AddKey(new Keyframe(ck.time, ck.color.g).SetLinearTangentMode());
+                curves[(int)Channel.Blue] .AddKey(new Keyframe(ck.time, ck.color.b).SetLinearTangentMode());
+            }
+
+            var alphaKeys = gradient.alphaKeys;
+            for (int i = 0; i < alphaKeys.Length; i++)
+            {
+                var ak = alphaKeys[i];
+                curves[(int)Channel.Alpha].AddKey(new Keyframe(ak.time, ak.alpha).SetLinearTangentMode());
+            }
+
+            for (int c = 0; c < (int)Channel.Num; c++)
+                curves[c].SetLinearTangents();
+
+            return new LwguiGradient(curves);
         }
 
+        /// Warning: This is a lossy conversion and will ignore keys that are not aligned with the RGB channels
         public Gradient ToGradient(int maxGradientKeyCount = 8)
         {
-            return new LwguiMergedColorCurves(rawCurves).ToGradient(maxGradientKeyCount);
+            if (rawCurves == null || rawCurves.Count < (int)Channel.Num)
+            {
+                return new Gradient();
+            }
+
+            var redKeys = rawCurves[(int)Channel.Red].keys;
+            var greenKeys = rawCurves[(int)Channel.Green].keys;
+            var blueKeys = rawCurves[(int)Channel.Blue].keys;
+            var alphaKeys = rawCurves[(int)Channel.Alpha].keys;
+            
+            int maxColorCount = Math.Max(Math.Max(redKeys.Length, greenKeys.Length), blueKeys.Length);
+            var timeColorDic = new Dictionary<float, (float r, float g, float b, int count)>(maxColorCount);
+            
+            // R
+            for (int i = 0; i < redKeys.Length; i++)
+            {
+                float time = redKeys[i].time;
+                timeColorDic[time] = (redKeys[i].value, 0, 0, 1);
+            }
+            
+            // G
+            for (int i = 0; i < greenKeys.Length; i++)
+            {
+                float time = greenKeys[i].time;
+                if (timeColorDic.TryGetValue(time, out var existing))
+                {
+                    timeColorDic[time] = (existing.r, greenKeys[i].value, existing.b, existing.count + 1);
+                }
+                else
+                {
+                    timeColorDic[time] = (0, greenKeys[i].value, 0, 1);
+                }
+            }
+            
+            // B
+            for (int i = 0; i < blueKeys.Length; i++)
+            {
+                float time = blueKeys[i].time;
+                if (timeColorDic.TryGetValue(time, out var existing))
+                {
+                    timeColorDic[time] = (existing.r, existing.g, blueKeys[i].value, existing.count + 1);
+                }
+                else
+                {
+                    timeColorDic[time] = (0, 0, blueKeys[i].value, 1);
+                }
+            }
+
+            // Collect aligned RGB channels
+            var validColorKeys = new List<GradientColorKey>(timeColorDic.Count);
+            foreach (var kvp in timeColorDic)
+            {
+                if (kvp.Value.count == 3)
+                {
+                    validColorKeys.Add(new GradientColorKey(
+                        new Color(kvp.Value.r, kvp.Value.g, kvp.Value.b),
+                        kvp.Key));
+                }
+            }
+            
+            validColorKeys.Sort((a, b) => a.time.CompareTo(b.time));
+            int colorKeyCount = Math.Min(validColorKeys.Count, maxGradientKeyCount);
+            var colorKeys = new GradientColorKey[colorKeyCount];
+            for (int i = 0; i < colorKeyCount; i++)
+            {
+                colorKeys[i] = validColorKeys[i];
+            }
+
+            // A
+            int alphaKeyCount = Math.Min(alphaKeys.Length, maxGradientKeyCount);
+            var alphaKeysArray = new GradientAlphaKey[alphaKeyCount];
+            for (int i = 0; i < alphaKeyCount; i++)
+            {
+                alphaKeysArray[i] = new GradientAlphaKey(alphaKeys[i].value, alphaKeys[i].time);
+            }
+
+            return new Gradient
+            {
+                colorKeys = colorKeys,
+                alphaKeys = alphaKeysArray
+            };
         }
 
         #endregion
