@@ -53,9 +53,11 @@ namespace LWGUI.Timeline
                 GroupTrack baseGroupTrack = null;
                 TimelineAsset targetTimelineAsset = null;
                 AnimationTrack srcAnimationTrack = null;
+                AnimationClip srcAnimationClip = null;
+                AnimationCurve srcAnimationCurve = null;
                 Animator rootAnimator = null;
 
-                // Find the existing track
+                // Find tracks
                 foreach (var director in directors)
                 {
                     if (director == null || director.playableAsset == null)
@@ -71,18 +73,28 @@ namespace LWGUI.Timeline
                     
                     foreach (var trackAsset in allTrackAssets)
                     {
-                        if (trackAsset is AnimationTrack animationTrack)
+                        // Find Src Animation Track
+                        if (srcAnimationCurve == null && trackAsset is AnimationTrack animationTrack && animationTrack.IsRecording())
                         {
                             var bindedAnimator = director.GetGenericBinding(animationTrack);
                             if (parentAnimators.Contains(bindedAnimator))
                             {
-                                srcAnimationTrack = animationTrack;
-                                targetDirector = director;
-                                targetTimelineAsset = timelineAsset;
-                                rootAnimator = bindedAnimator as Animator;
+                                // Find the Animation Curve
+                                var animationClip = animationTrack.infiniteClip ?? animationTrack.curves;
+                                if (animationClip != null 
+                                    && GetMaterialPropertyEditorCurveFromAnimationClip(renderer, prop.name, bindedAnimator as Animator, animationClip,
+                                        out srcAnimationCurve))
+                                {
+                                    srcAnimationTrack = animationTrack;
+                                    srcAnimationClip = animationClip;
+                                    targetDirector = director;
+                                    targetTimelineAsset = timelineAsset;
+                                    rootAnimator = bindedAnimator as Animator;
+                                }
                             }
                         }
                         
+                        // Find Exist MaterialKeywordToggleTrack
                         if (trackAsset is MaterialKeywordToggleTrack materialKeywordTrack 
                             && director.GetGenericBinding(materialKeywordTrack) == renderer
                             && materialKeywordTrack.keywordName == keywordName)
@@ -103,10 +115,11 @@ namespace LWGUI.Timeline
                 Debug.Assert(targetDirector != null 
                              && targetTimelineAsset != null
                              && srcAnimationTrack != null
+                             && srcAnimationCurve != null
                              && rootAnimator != null,
                     $"LWGUI: Unable to find the existing Animation Track for MaterialProperty({ prop.name }) and Material({(editor.target as Material).name })!");
 
-                // Create a track
+                // Create a MaterialKeywordToggleTrack
                 if (targetToggleTrack == null)
                 {
                     if (baseGroupTrack == null)
@@ -123,22 +136,16 @@ namespace LWGUI.Timeline
                     }
                     
                     targetToggleTrack = targetTimelineAsset.CreateTrack<MaterialKeywordToggleTrack>();
-                    targetToggleTrack.keywordName = keywordName;
-                    targetToggleTrack.propName = prop.name;
-                    targetToggleTrack.srcAnimationTrack = srcAnimationTrack;
                     targetToggleTrack.SetGroup(targetGroupTrack);
                     targetDirector.SetGenericBinding(targetToggleTrack, renderer);
                 }
                 
-                // Find the Animation Curve
-                AnimationClip srcAnimationClip = srcAnimationTrack.infiniteClip ?? srcAnimationTrack.curves;
-                if (srcAnimationClip != null && GetMaterialPropertyEditorCurveFromAnimationClip(renderer, prop.name, rootAnimator, srcAnimationClip,
-                        out var srcAnimationCurve))
-                {
-                    targetToggleTrack.srcAnimationClip = srcAnimationClip;
-
-                    CopyAnimationCurveToMaterialKeywordToggleTrack(srcAnimationTrack, srcAnimationCurve, targetToggleTrack);
-                }
+                // Set Target Track Config
+                targetToggleTrack.keywordName = keywordName;
+                targetToggleTrack.propName = prop.name;
+                targetToggleTrack.srcAnimationTrack = srcAnimationTrack;
+                targetToggleTrack.srcAnimationClip = srcAnimationClip;
+                targetToggleTrack.srcAnimationCurve = srcAnimationCurve;
 
                 TimelineEditor.Refresh(RefreshReason.ContentsAddedOrRemoved | RefreshReason.ContentsModified);
             }

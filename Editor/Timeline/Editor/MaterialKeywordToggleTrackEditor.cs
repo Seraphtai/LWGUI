@@ -23,11 +23,7 @@ namespace LWGUI.Timeline
                 return;
             
             var targetToggleTrack = track as MaterialKeywordToggleTrack;
-            if (targetToggleTrack == null 
-                || targetToggleTrack.srcAnimationTrack == null 
-                || targetToggleTrack.srcAnimationClip == null 
-                || string.IsNullOrEmpty(targetToggleTrack.propName)
-                )
+            if (targetToggleTrack == null || !targetToggleTrack.IsValid())
                 return;
             
             var directors = Object.FindObjectsByType<PlayableDirector>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
@@ -38,12 +34,8 @@ namespace LWGUI.Timeline
                 if (targetRenderer == null || rootAnimator == null)
                     continue;
                 
-                if (TimelineHelper.GetMaterialPropertyEditorCurveFromAnimationClip(targetRenderer, targetToggleTrack.propName, rootAnimator, targetToggleTrack.srcAnimationClip,
-                        out var srcAnimationCurve))
-                {
-                    TimelineHelper.CopyAnimationCurveToMaterialKeywordToggleTrack(targetToggleTrack.srcAnimationTrack, srcAnimationCurve, targetToggleTrack);
-                    break;
-                }
+                TimelineHelper.CopyAnimationCurveToMaterialKeywordToggleTrack(targetToggleTrack.srcAnimationTrack, targetToggleTrack.srcAnimationCurve, targetToggleTrack);
+                break;
             }
         }
     }

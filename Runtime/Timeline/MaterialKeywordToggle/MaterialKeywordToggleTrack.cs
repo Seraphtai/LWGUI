@@ -19,10 +19,11 @@ namespace LWGUI.Runtime.Timeline
     [TrackBindingType(typeof(Renderer))]
     public class MaterialKeywordToggleTrack : TrackAsset
     {
-        public string keywordName;
-        public string propName;
+        public string         keywordName;
+        public string         propName;
         public AnimationTrack srcAnimationTrack = null;
-        public AnimationClip srcAnimationClip = null;
+        public AnimationClip  srcAnimationClip  = null;
+        public AnimationCurve srcAnimationCurve = null;
 
         // Creates a runtime instance of the track, represented by a PlayableBehaviour.
         // The runtime instance performs mixing on the timeline clips.
@@ -41,6 +42,17 @@ namespace LWGUI.Runtime.Timeline
             };
 
             return ScriptPlayable<MaterialKeywordToggleTrackBehaviour>.Create(graph, template, inputCount);
+        }
+        
+        public bool IsValid()
+        {
+            return keywordName != "_"
+                && !string.IsNullOrWhiteSpace(keywordName)
+                && !string.IsNullOrWhiteSpace(propName)
+                && srcAnimationTrack != null 
+                && srcAnimationClip != null
+                && srcAnimationCurve != null
+                ;
         }
     }
 }
