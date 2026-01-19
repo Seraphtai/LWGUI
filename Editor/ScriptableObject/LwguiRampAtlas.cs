@@ -13,19 +13,19 @@ using UnityEngine.Serialization;
 
 namespace LWGUI
 {
+    [Serializable]
+    public class Ramp
+    {
+        public string                          name        = "New Ramp";
+        public LwguiGradient                   gradient    = LwguiGradient.white;
+        public ColorSpace                      colorSpace  = ColorSpace.Gamma;
+        public LwguiGradient.ChannelMask       channelMask = LwguiGradient.ChannelMask.All;
+        public LwguiGradient.GradientTimeRange timeRange   = LwguiGradient.GradientTimeRange.One;
+    }
+
     [CreateAssetMenu(fileName = "LWGUI_RampAtlas.asset", menuName = "LWGUI/Ramp Atlas", order = 84)]
     public class LwguiRampAtlas : ScriptableObject
     {
-        [Serializable]
-        public class Ramp
-        {
-            public string                          name        = "New Ramp";
-            public LwguiGradient                   gradient    = LwguiGradient.white;
-            public ColorSpace                      colorSpace  = ColorSpace.Gamma;
-            public LwguiGradient.ChannelMask       channelMask = LwguiGradient.ChannelMask.All;
-            public LwguiGradient.GradientTimeRange timeRange   = LwguiGradient.GradientTimeRange.One;
-        }
-
         public const string RampAtlasSOExtensionName      = "asset";
         public const string RampAtlasTextureExtensionName = "tga";
 
@@ -342,7 +342,7 @@ namespace LWGUI
                 var maxIndex = defaultRampAtlasIndexerDrawers.Max((tuple => tuple.defaultIndex));
                 for (int i = 0; i < maxIndex + 1; i++)
                 {
-                    newRampAtlasSO.ramps.Add(new LwguiRampAtlas.Ramp());
+                    newRampAtlasSO.ramps.Add(new Ramp());
                     if (newRampAtlasSO.ramps.Count >= newRampAtlasSO.rampAtlasHeight)
                         newRampAtlasSO.rampAtlasHeight *= 2;
                 }

@@ -985,7 +985,7 @@ namespace LWGUI
 			set => _rampAtlasSO = value;
 		}
 
-		private LwguiRampAtlas.Ramp _currentRamp;
+		private Ramp _currentRamp;
 		private bool _rampAtlasSOHasMixedValue;
 		
 		public RampAtlasIndexerDrawer(string group, string rampAtlasPropName) : this(group, rampAtlasPropName, "Ramp") {}
@@ -1071,10 +1071,9 @@ namespace LWGUI
 			{
 				var newIndex = rampAtlasSO.ramps.Count;
 				
-				rampAtlasSO.ramps.Add(new LwguiRampAtlas.Ramp()
+				rampAtlasSO.ramps.Add(new Ramp()
 				{
 					name = defaultRampName,
-					gradient = LwguiGradient.white,
 					colorSpace = colorSpace,
 					channelMask = viewChannelMask,
 					timeRange = timeRange
