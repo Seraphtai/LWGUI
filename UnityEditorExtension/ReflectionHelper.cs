@@ -1,4 +1,4 @@
-﻿// Copyright (c) Jason Ma
+// Copyright (c) Jason Ma
 
 using System;
 using System.Collections.Generic;
@@ -266,6 +266,58 @@ namespace LWGUI
         internal static CurveSelection AddKeyAtTime(this CurveEditor curveEditor, CurveWrapper cw, float time)
         {
             return AddKeyAtTime_Method.Invoke(curveEditor, new object[] { cw, time }) as CurveSelection;
+        }
+
+        #endregion
+
+
+        #region Type Lookup
+
+        private static Dictionary<string, Type> _typeCache = new Dictionary<string, Type>();
+
+        /// <summary>
+        /// Get a Type by its name, searching all loaded assemblies.
+        /// Supports both full type name (Namespace.ClassName) and simple type name.
+        /// </summary>
+        public static Type GetTypeByName(string typeName)
+        {
+            if (string.IsNullOrEmpty(typeName))
+                return null;
+
+            if (_typeCache.TryGetValue(typeName, out var cachedType))
+                return cachedType;
+
+            // Try to get type directly
+            var type = Type.GetType(typeName);
+            if (type != null)
+            {
+                _typeCache[typeName] = type;
+                return type;
+            }
+
+            // Search in all loaded assemblies
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                type = assembly.GetType(typeName);
+                if (type != null)
+                {
+                    _typeCache[typeName] = type;
+                    return type;
+                }
+
+                // Try to find by simple name (without namespace)
+                foreach (var t in assembly.GetTypes())
+                {
+                    if (t.Name == typeName || t.FullName == typeName)
+                    {
+                        _typeCache[typeName] = t;
+                        return t;
+                    }
+                }
+            }
+
+            _typeCache[typeName] = null;
+            return null;
         }
 
         #endregion

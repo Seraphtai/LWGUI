@@ -1,4 +1,4 @@
-﻿// Copyright (c) Jason Ma
+// Copyright (c) Jason Ma
 
 using System;
 using System.Collections.Generic;
@@ -966,27 +966,39 @@ namespace LWGUI
 		public string rampAtlasPropName = string.Empty;
 		public string defaultRampName = "Ramp";
 
-		private LwguiRampAtlas _rampAtlasSO;
-		public LwguiRampAtlas rampAtlasSO
+		private MaterialProperty _rampAtlasProp;
+		public MaterialProperty rampAtlasProp
 		{
 			get
 			{
-				if (!_rampAtlasSO)
+				if (_rampAtlasProp == null)
 				{
-					var rampAtlasProp = metaDatas.GetProperty(rampAtlasPropName);
-					if (rampAtlasProp != null && rampAtlasProp.GetPropertyType() == ShaderPropertyType.Texture)
-					{
-						_rampAtlasSO = LwguiRampAtlas.LoadRampAtlasSO(rampAtlasProp.textureValue);
-					}
-				} 
-				return _rampAtlasSO;
+					var prop = metaDatas?.GetProperty(rampAtlasPropName);
+					if (prop != null && prop.GetPropertyType() == ShaderPropertyType.Texture)
+						_rampAtlasProp = prop;
+				}
+				return _rampAtlasProp;
 			}
+			set => _rampAtlasProp = value;
+		}
 
+		private LwguiRampAtlas _rampAtlasSO;
+		public LwguiRampAtlas rampAtlasSO
+		{
+			get => _rampAtlasSO ??= LwguiRampAtlas.LoadRampAtlasSO(rampAtlasProp?.textureValue);
 			set => _rampAtlasSO = value;
 		}
 
-		private Ramp _currentRamp;
+		private IRamp _currentRamp;
 		private bool _rampAtlasSOHasMixedValue;
+		private bool _isOutOfRange;
+
+		private static readonly float _previewRowHeight = EditorGUIUtility.singleLineHeight;
+		private static readonly float _previewRowSpacing = 2f;
+
+		private int currentRowCount => rampAtlasSO?.RowCountPerRamp ?? 1;
+
+		protected override float rampPreviewHeight => currentRowCount * _previewRowHeight + Mathf.Max(0, currentRowCount - 1) * _previewRowSpacing;
 		
 		public RampAtlasIndexerDrawer(string group, string rampAtlasPropName) : this(group, rampAtlasPropName, "Ramp") {}
 		
@@ -1030,12 +1042,11 @@ namespace LWGUI
 
 		protected override void OnGradientEditorChange(LwguiGradient gradient)
 		{
-			LwguiGradientWindow.RegisterSerializedObjectUndo(rampAtlasSO);
+			rampAtlasSO?.UpdateTexturePixels();
 		}
 
 		protected override void OnEditRampMap(MaterialProperty prop, LwguiGradient gradient)
-		{	
-			rampAtlasSO?.UpdateTexturePixels();
+		{
 			OnGradientEditorChange(null);
 		}
 
@@ -1048,17 +1059,17 @@ namespace LWGUI
 		protected override LwguiGradient GetLwguiGradient(MaterialProperty prop, out bool isDirty)
 		{
 			isDirty = false;
-			if (rampAtlasSO && (int)prop.GetNumericValue() < rampAtlasSO.ramps.Count)
+			if (rampAtlasSO && (int)prop.GetNumericValue() < rampAtlasSO.RampCount)
 			{
 				_currentRamp = rampAtlasSO.GetRamp((int)prop.GetNumericValue());
 				if (_currentRamp == null)
 					return null;
-				
+
 				isDirty = EditorUtility.IsDirty(rampAtlasSO);
-				colorSpace = _currentRamp.colorSpace;
-				viewChannelMask = _currentRamp.channelMask;
-				timeRange = _currentRamp.timeRange;
-				return _currentRamp.gradient;
+				colorSpace = _currentRamp.ColorSpace;
+				viewChannelMask = _currentRamp.ChannelMask;
+				timeRange = _currentRamp.TimeRange;
+				return _currentRamp.Gradient;
 			}
 			else
 				return null;
@@ -1069,38 +1080,36 @@ namespace LWGUI
 			// Create a Ramp
 			if (rampAtlasSO)
 			{
-				var newIndex = rampAtlasSO.ramps.Count;
-				
-				rampAtlasSO.ramps.Add(new Ramp()
-				{
-					name = defaultRampName,
-					colorSpace = colorSpace,
-					channelMask = viewChannelMask,
-					timeRange = timeRange
-				});
-				
+				var newIndex = rampAtlasSO.RampCount;
+
+				var newRamp = rampAtlasSO.AddRamp();
+				newRamp.Name = defaultRampName;
+				newRamp.ColorSpace = colorSpace;
+				newRamp.ChannelMask = viewChannelMask;
+				newRamp.TimeRange = timeRange;
+
 				prop.SetNumericValue(newIndex);
-				if (newIndex >= rampAtlasSO.rampAtlasHeight)
+
+				if (rampAtlasSO.TotalRowCount > rampAtlasSO.rampAtlasHeight)
 					rampAtlasSO.rampAtlasHeight *= 2;
+
 				rampAtlasSO.UpdateTexturePixels();
 			}
 			// Create a Ramp Atlas SO
 			else
 			{
-				var rampAtlasProp = metaDatas.GetProperty(rampAtlasPropName);
 				var newRampAtlasSO = LwguiRampAtlas.CreateRampAtlasSO(rampAtlasProp, metaDatas);
 				if (newRampAtlasSO)
 				{
 					rampAtlasSO = newRampAtlasSO;
-					rampAtlasProp.textureValue = rampAtlasSO?.rampAtlasTexture;
+					rampAtlasProp.textureValue = rampAtlasSO.rampAtlasTexture;
 				}
 			}
 		}
 
-		protected override void SwitchRampMap(MaterialProperty prop, Texture2D newRampMap, int index)
+		protected void SwitchRamp(MaterialProperty prop, int index)
 		{
 			prop.SetNumericValue(index);
-			OnSwitchRampMap(prop, newRampMap, index);
 			LWGUI.OnValidate(metaDatas);
 		}
 
@@ -1108,20 +1117,18 @@ namespace LWGUI
 		{
 			rampAtlasSO?.DiscardChanges();
 			_currentRamp = rampAtlasSO?.GetRamp((int)prop.GetNumericValue());
-			return _currentRamp?.gradient;
+			return _currentRamp?.Gradient;
 		}
 
-		protected override void DrawRampSelector(Rect selectButtonRect, MaterialProperty prop, LwguiGradient gradient)
-		{
-			if (!_rampAtlasSOHasMixedValue)
-				RampHelper.RampIndexSelectorOverride(selectButtonRect, prop, rampAtlasSO, SwitchRampMap);
-		}
+		// Selector button is drawn together with preview in DrawRampObjectField
+		protected override void DrawRampSelector(Rect selectButtonRect, MaterialProperty prop, LwguiGradient gradient) { }
 
+		/// <summary>
+		/// Draw rampAtlasSO Fallback Field
+		/// </summary>
 		protected override void DrawRampObjectField(Rect rampFieldRect, MaterialProperty prop, LwguiGradient gradient)
 		{
-			if (rampAtlasSO && !_rampAtlasSOHasMixedValue)
-				EditorGUI.ObjectField(rampFieldRect, gradient?.GetPreviewRampTexture(), typeof(Texture2D), false);
-			else
+			if (!rampAtlasSO || _rampAtlasSOHasMixedValue)
 			{
 				EditorGUI.BeginChangeCheck();
 				var newRampAtlasSO = EditorGUI.ObjectField(rampFieldRect, rampAtlasSO, typeof(LwguiRampAtlas), false) as LwguiRampAtlas;
@@ -1133,15 +1140,71 @@ namespace LWGUI
 			}
 		}
 
-		protected override void DrawPreviewTextureOverride(Rect previewRect, MaterialProperty prop, LwguiGradient gradient)
+		/// <summary>
+		/// Draw Ramp Preview And Selector
+		/// </summary>
+		protected override void DrawPreviewTextureOverride(Rect previewRect, Rect fieldRect, MaterialProperty prop, LwguiGradient gradient)
 		{
-			if (gradient != null && !EditorGUI.showMixedValue)
-				LwguiGradientEditorHelper.DrawGradientWithSeparateAlphaChannel(previewRect, gradient, colorSpace, viewChannelMask);
+			if (!rampAtlasSO || _rampAtlasSOHasMixedValue)
+				return;
+
+			var previewWidth = previewRect.width;
+			var selectorButtonWidth = EditorGUIUtility.singleLineHeight;
+
+			if (_currentRamp == null || _isOutOfRange || EditorGUI.showMixedValue)
+			{
+				// Draw Invalid Ramp Fallback
+				// Draw border
+				GUI.Box(fieldRect, "None", EditorStyles.objectField);
+
+				// Draw button
+				var buttonRect = new Rect(previewRect.xMax - 1, fieldRect.y + 1, selectorButtonWidth - 0, rampPreviewHeight - 2);
+				if (GUI.Button(buttonRect, GUIContent.none, GUIStyles.objectFieldButton))
+				{
+					RampSelectorWindow.ShowWindow(prop, rampAtlasSO, SwitchRamp);
+				}
+			}
+			else
+			{
+				var gradients = _currentRamp.GetGradients();
+				var gradientCount = gradients?.Length ?? 0;
+				if (gradientCount == 0) return;
+
+				// Draw gradient previews (clickable to edit)
+				for (int i = 0; i < gradientCount; i++)
+				{
+					if (gradients[i] == null) continue;
+
+					var rowY = fieldRect.y + i * (_previewRowHeight + _previewRowSpacing);
+					var rowRect = new Rect(fieldRect.x, rowY, previewWidth, _previewRowHeight);
+
+					// Draw border
+					GUI.Box(rowRect, GUIContent.none, EditorStyles.objectField);
+
+					// Draw gradient with alpha channel (clickable to edit)
+					var innerRect = new Rect(rowRect.x + 1, rowRect.y + 1, rowRect.width - 2, rowRect.height - 2);
+					LwguiGradientEditorHelper.GradientPreviewField(innerRect, gradients[i], colorSpace, viewChannelMask, timeRange, OnGradientEditorChange);
+				}
+
+				// Draw selector button (ObjectField picker style, stretches to cover all preview rows)
+				{
+					// Draw border
+					var selectButtonRect = new Rect(previewRect.xMax - 2, fieldRect.y, selectorButtonWidth + 2, rampPreviewHeight);
+					GUI.Box(selectButtonRect, GUIContent.none, EditorStyles.objectField);
+
+					// Draw button
+					var innerRect = new Rect(selectButtonRect.x + 0, selectButtonRect.y + 1, selectButtonRect.width - 1, selectButtonRect.height - 2);
+					if (GUI.Button(innerRect, GUIContent.none, GUIStyles.objectFieldButton))
+					{
+						RampSelectorWindow.ShowWindow(prop, rampAtlasSO, SwitchRamp);
+					}
+				}
+			}
 		}
 
 		public override void DrawProp(Rect position, MaterialProperty prop, GUIContent label, MaterialEditor editor)
 		{
-			var rampAtlasProp = metaDatas.GetProperty(rampAtlasPropName);
+			rampAtlasProp = metaDatas.GetProperty(rampAtlasPropName);
 			if (rampAtlasProp == null || rampAtlasProp.GetPropertyType() != ShaderPropertyType.Texture)
 			{
 				Helper.DrawShaderPropertyWithErrorLabel(position, prop, label, editor, "Invalid rampAtlasPropName");
@@ -1154,12 +1217,15 @@ namespace LWGUI
 			label.tooltip += $"\nCurrent Value: {currentIndex}";
 			if (rampAtlasSO)
 			{
-				var isOutOfRange = currentIndex >= rampAtlasSO.ramps.Count;
-				var info = isOutOfRange ? "OUT OF RANGE!" : rampAtlasSO.ramps[currentIndex].name;
-				label.text += $" ({ currentIndex }: { info } - { rampAtlasSO.ramps.Count })";
+				_isOutOfRange = currentIndex >= rampAtlasSO.RampCount;
+				var info = _isOutOfRange ? "OUT OF RANGE!" : rampAtlasSO.GetRamp(currentIndex)?.Name ?? "NULL";
+				label.text += $" ({ currentIndex }: { info } - { rampAtlasSO.RampCount })";
 			}
 			else
+			{
+				_isOutOfRange = false;
 				label.text += $" ({ currentIndex } - NULL)";
+			}
 
 			// Handle Mixed Value
 			_rampAtlasSOHasMixedValue = rampAtlasProp.hasMixedValue;
@@ -1171,6 +1237,7 @@ namespace LWGUI
 			
 			
 			// Clear
+			_rampAtlasProp = null;
 			_rampAtlasSO = null;
 			_currentRamp = null;
 			EditorGUI.showMixedValue = showMixedValue;
@@ -1291,12 +1358,11 @@ namespace LWGUI
 		public LwguiGradient.GradientTimeRange timeRange = LwguiGradient.GradientTimeRange.One;
 		public bool doRegisterUndo;
 
-		private static readonly GUIContent _iconMixImage = EditorGUIUtility.IconContent("darkviewbackground");
-
-		private static readonly float _rampPreviewHeight = EditorGUIUtility.singleLineHeight;
 		private static readonly float _rampButtonsHeight = EditorGUIUtility.singleLineHeight;
-		
-		protected override float GetVisibleHeight(MaterialProperty prop) { return _rampPreviewHeight + _rampButtonsHeight; }
+
+		protected virtual float rampPreviewHeight => EditorGUIUtility.singleLineHeight;
+
+		protected override float GetVisibleHeight(MaterialProperty prop) { return rampPreviewHeight + _rampButtonsHeight; }
 
 		public RampDrawer() : this(String.Empty) { }
 
@@ -1455,7 +1521,7 @@ namespace LWGUI
 			}
 		}
 
-		protected virtual void DrawPreviewTextureOverride(Rect previewRect, MaterialProperty prop, LwguiGradient gradient)
+		protected virtual void DrawPreviewTextureOverride(Rect previewRect, Rect fieldRect, MaterialProperty prop, LwguiGradient gradient)
 		{
 			if (!prop.hasMixedValue && gradient != null)
 			{
@@ -1475,7 +1541,7 @@ namespace LWGUI
 			// Draw Label
 			var labelRect = new Rect(position);
 			{
-				labelRect.height = _rampPreviewHeight;
+				labelRect.height = rampPreviewHeight;
 				EditorGUI.PrefixLabel(labelRect, label);
 			}
 
@@ -1484,7 +1550,7 @@ namespace LWGUI
 			{
 				EditorGUIUtility.labelWidth = 0;
 				EditorGUI.indentLevel = 0;
-				buttonRect.yMin = buttonRect.yMax - _rampPreviewHeight;
+				buttonRect.yMin = buttonRect.yMax - EditorGUIUtility.singleLineHeight;
 				buttonRect = MaterialEditor.GetRectAfterLabelWidth(buttonRect);
 				if (buttonRect.width < 50f) return;
 			}
@@ -1538,6 +1604,7 @@ namespace LWGUI
 
 			// Texture Object Field, handle switch texture event
 			var rampFieldRect = MaterialEditor.GetRectAfterLabelWidth(labelRect);
+			rampFieldRect.height = labelRect.height;
 			var previewRect = new Rect(rampFieldRect.x + 0.5f, rampFieldRect.y + 0.5f, rampFieldRect.width - 18, rampFieldRect.height - 0.5f);
 			{
 				var selectButtonRect = new Rect(previewRect.xMax, rampFieldRect.y, rampFieldRect.width - previewRect.width, rampFieldRect.height);
@@ -1547,7 +1614,7 @@ namespace LWGUI
 			}
 
 			// Preview texture override (larger preview, hides texture name)
-			DrawPreviewTextureOverride(previewRect, prop, gradient);
+			DrawPreviewTextureOverride(previewRect, rampFieldRect, prop, gradient);
 
 			EditorGUIUtility.labelWidth = labelWidth;
 			EditorGUI.indentLevel = indentLevel;
@@ -1566,7 +1633,9 @@ namespace LWGUI
 	/// rootPath: the default directory when creating a Ramp Atlas SO, replace '/' with '.' (for example: Assets.Art.RampAtlas). (Default: Assets)
 	/// colorSpace: the Color Space of Ramp Atlas Texture. (sRGB/Linear) (Default: sRGB)
 	/// defaultWidth: default Ramp Atlas Texture width (Default: 256)
+	/// defaultHeight: default Ramp Atlas Texture height (Default: 4)
 	/// showAtlasPreview: Draw the preview of Ramp Atlas below (True/False) (Default: True)
+	/// rampAtlasTypeName: custom RampAtlas type name for user-defined RampAtlas classes (Default: LwguiRampAtlas)
 	/// Target Property Type: Texture2D
 	/// </summary>
 	public class RampAtlasDrawer : SubDrawer
@@ -1577,6 +1646,7 @@ namespace LWGUI
 		public int defaultAtlasWidth = 256;
 		public int defaultAtlasHeight = 2;
 		public bool showAtlasPreview = true;
+		public Type rampAtlasType = typeof(LwguiRampAtlas);
 		
 		protected LwguiRampAtlas _rampAtlasSO;
 		
@@ -1594,7 +1664,9 @@ namespace LWGUI
 		
 		public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, defaultHeight, "true") { }
 		
-		public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight, string showAtlasPreview)
+		public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight, string showAtlasPreview) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, defaultHeight, showAtlasPreview, "") { }
+
+		public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight, string showAtlasPreview, string rampAtlasTypeName)
 		{
 			if (!rootPath.StartsWith(this.rootPath))
 			{
@@ -1608,6 +1680,20 @@ namespace LWGUI
 			this.defaultAtlasWidth = (int)Mathf.Max(2, defaultWidth);
 			this.defaultAtlasHeight = (int)Mathf.Max(2, defaultHeight);
 			this.showAtlasPreview = Helper.StringToBool(showAtlasPreview);
+			
+			// Resolve custom RampAtlas type
+			if (!string.IsNullOrEmpty(rampAtlasTypeName))
+			{
+				var customType = ReflectionHelper.GetTypeByName(rampAtlasTypeName);
+				if (customType != null && typeof(LwguiRampAtlas).IsAssignableFrom(customType))
+				{
+					rampAtlasType = customType;
+				}
+				else
+				{
+					Debug.LogError($"LWGUI: RampAtlas type '{rampAtlasTypeName}' not found or not derived from LwguiRampAtlas!");
+				}
+			}
 		}
 
 		protected override bool IsMatchPropType(MaterialProperty property) => property.GetPropertyType() == ShaderPropertyType.Texture;
@@ -1621,7 +1707,7 @@ namespace LWGUI
 			menu.AddSeparator("");
 			menu.AddItem(new GUIContent("Create Ramp Atlas"), false, () =>
 			{
-				_rampAtlasSO = LwguiRampAtlas.CreateRampAtlasSO(prop, metaDatas);
+				_rampAtlasSO = LwguiRampAtlas.CreateRampAtlasSO(prop, metaDatas, rampAtlasType);
 				if (_rampAtlasSO)
 				{
 					prop.textureValue = _rampAtlasSO.rampAtlasTexture;
@@ -1633,7 +1719,7 @@ namespace LWGUI
 			{
 				menu.AddItem(new GUIContent("Clone Ramp Atlas"), false, () =>
 				{
-					var newRampAtlasSO = LwguiRampAtlas.CloneRampAtlasSO(_rampAtlasSO);
+					var newRampAtlasSO = LwguiRampAtlas.CloneRampAtlasSO(_rampAtlasSO, rampAtlasType);
 					if (newRampAtlasSO)
 					{
 						_rampAtlasSO = newRampAtlasSO;
@@ -1668,7 +1754,7 @@ namespace LWGUI
 			}
 			
 			EditorGUI.BeginChangeCheck();
-			_rampAtlasSO = (LwguiRampAtlas)EditorGUI.ObjectField(rampAtlasSORect, GUIContent.none, _rampAtlasSO, typeof(LwguiRampAtlas), false);
+			_rampAtlasSO = (LwguiRampAtlas)EditorGUI.ObjectField(rampAtlasSORect, GUIContent.none, _rampAtlasSO, rampAtlasType, false);
 			if (EditorGUI.EndChangeCheck())
 			{
 				prop.textureValue = LwguiRampAtlas.LoadRampAtlasTexture(_rampAtlasSO);
@@ -1686,6 +1772,9 @@ namespace LWGUI
 				EditorGUI.DrawPreviewTexture(rampAtlasTextureRect, prop.textureValue);
 				prop.textureValue.filterMode = filter;
 			}
+
+			EditorGUIUtility.labelWidth = labelWidth;
+			EditorGUI.indentLevel = indentLevel;
 		}
 	}
 

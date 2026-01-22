@@ -1,4 +1,4 @@
-﻿// Copyright (c) Jason Ma
+// Copyright (c) Jason Ma
 
 using System;
 using System.Collections.Generic;
@@ -11,6 +11,7 @@ namespace LWGUI.LwguiGradientEditor
     public static class LwguiGradientEditorHelper
     {
         private static readonly int s_LwguiGradientHash = "s_LwguiGradientHash".GetHashCode();
+        private static readonly int s_LwguiGradientPreviewHash = "s_LwguiGradientPreviewHash".GetHashCode();
         private static int s_LwguiGradientID;
 
         // GradientEditor.DrawGradientWithBackground()
@@ -153,6 +154,57 @@ namespace LWGUI.LwguiGradientEditor
                     property.SetLwguiGradientValue(LwguiGradientWindow.instance.lwguiGradient);
             }
             EditorGUI.EndProperty();
+        }
+        
+        /// <summary>
+        /// Draw a clickable gradient preview that opens the gradient editor when clicked.
+        /// This method handles change detection and Undo/Redo like GradientEditButton.
+        /// </summary>
+        public static bool GradientPreviewField(Rect rect, LwguiGradient gradient, 
+            ColorSpace colorSpace, 
+            LwguiGradient.ChannelMask viewChannelMask, 
+            LwguiGradient.GradientTimeRange timeRange,
+            LwguiGradientWindow.ChangeGradientCallback onChange = null)
+        {
+            int id = GUIUtility.GetControlID(s_LwguiGradientPreviewHash, FocusType.Keyboard, rect);
+            var evt = Event.current;
+            
+            // When drawing the modifying Gradient Field and it has changed
+            if ((GUIUtility.keyboardControl == id || s_LwguiGradientID == id)
+                && evt.GetTypeForControl(id) == EventType.ExecuteCommand 
+                && evt.commandName == LwguiGradientWindow.LwguiGradientChangedCommand)
+            {
+                GUI.changed = true;
+                HandleUtility.Repaint();
+            }
+
+            // Sync Undo/Redo result to editor window
+            if (s_LwguiGradientID == id 
+                && evt.commandName == "UndoRedoPerformed")
+            {
+                LwguiGradientWindow.UpdateCurrentGradient(gradient);
+            }
+            
+            // Draw gradient preview
+            if (evt.type == EventType.Repaint)
+            {
+                DrawGradientWithSeparateAlphaChannel(rect, gradient, colorSpace, viewChannelMask);
+            }
+            
+            // Handle click to open editor
+            bool clicked = false;
+            if (evt.type == EventType.MouseDown && evt.button == 0 && rect.Contains(evt.mousePosition))
+            {
+                clicked = true;
+                evt.Use();
+                
+                s_LwguiGradientID = id;
+                GUIUtility.keyboardControl = id;
+                LwguiGradientWindow.Show(gradient, colorSpace, viewChannelMask, timeRange, GUIView.current, onChange);
+                GUIUtility.ExitGUI();
+            }
+            
+            return clicked;
         }
 
         public static bool GradientEditButton(Rect position, GUIContent icon, LwguiGradient gradient,

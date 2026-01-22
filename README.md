@@ -578,12 +578,14 @@ The new LWGUI Gradient Editor integrates with Unity's built-in [Gradient Editor]
 /// Note: Currently, the material only saves Texture reference and Int value,  
 ///      if you manually modify the Ramp Atlas, the references will not update automatically!
 ///  
-/// group: parent group name (Default: none)  
-/// defaultFileName: the default file name when creating a Ramp Atlas SO (Default: RampAtlas)  
-/// rootPath: the default directory when creating a Ramp Atlas SO, replace '/' with '.' (for example: Assets.Art.RampAtlas). (Default: Assets)  
-/// colorSpace: the Color Space of Ramp Atlas Texture. (sRGB/Linear) (Default: sRGB)  
-/// defaultWidth: default Ramp Atlas Texture width (Default: 256)  
+/// group: parent group name (Default: none)
+/// defaultFileName: the default file name when creating a Ramp Atlas SO (Default: RampAtlas)
+/// rootPath: the default directory when creating a Ramp Atlas SO, replace '/' with '.' (for example: Assets.Art.RampAtlas). (Default: Assets)
+/// colorSpace: the Color Space of Ramp Atlas Texture. (sRGB/Linear) (Default: sRGB)
+/// defaultWidth: default Ramp Atlas Texture width (Default: 256)
+/// defaultHeight: default Ramp Atlas Texture height (Default: 4)
 /// showAtlasPreview: Draw the preview of Ramp Atlas below (True/False) (Default: True)
+/// rampAtlasTypeName: custom RampAtlas type name for user-defined RampAtlas classes (Default: LwguiRampAtlas)
 /// Target Property Type: Texture2D
 public RampAtlasDrawer() : this(string.Empty) { }  
 public RampAtlasDrawer(string group) : this(group, "RampAtlas") { }  
@@ -591,8 +593,9 @@ public RampAtlasDrawer(string group, string defaultFileName) : this(group, defau
 public RampAtlasDrawer(string group, string defaultFileName, string rootPath) : this(group, defaultFileName, rootPath, "sRGB") { }  
 public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace) : this(group, defaultFileName, rootPath, colorSpace, 256) { } 
 public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, 4) { }  
-public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight)
-public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight, string showAtlasPreview)
+public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, defaultHeight, "true") { }  
+public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight, string showAtlasPreview) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, defaultHeight, showAtlasPreview, "") { }  
+public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight, string showAtlasPreview, string rampAtlasTypeName)
 ```
 Example:
 ```c#

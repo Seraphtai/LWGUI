@@ -1,12 +1,10 @@
-﻿// Copyright (c) Jason Ma
-using System;
+// Copyright (c) Jason Ma
 using System.IO;
 using System.Linq;
 using LWGUI.LwguiGradientEditor;
 using LWGUI.Runtime.LwguiGradient;
 using UnityEditor;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace LWGUI
 {
@@ -260,33 +258,40 @@ namespace LWGUI
 			}
 		}
 
-		public static void RampIndexSelectorOverride(Rect rect, MaterialProperty prop, LwguiRampAtlas rampAtlas, RampSelectorWindow.SwitchRampMapCallback switchRampMapEvent)
-		{
-			if (!rampAtlas)
-				return;
-			
-			var e = Event.current;
-			if (e.type == UnityEngine.EventType.MouseDown && rect.Contains(e.mousePosition))
-			{
-				e.Use();
-				RampSelectorWindow.ShowWindow(prop, rampAtlas.GetTexture2Ds(LwguiGradient.ChannelMask.RGB), switchRampMapEvent);
-			}
-		}
 		#endregion
 	}
 
 	public class RampSelectorWindow : EditorWindow
 	{
 		public delegate void SwitchRampMapCallback(MaterialProperty prop, Texture2D newRampMap, int index);
-		
+		public delegate void SwitchRampCallback(MaterialProperty prop, int rampIndex);
+
+		private LwguiRampAtlas _rampAtlas;
 		private Texture2D[] _rampMaps;
 		private Vector2 _scrollPosition;
 		private MaterialProperty _prop;
+		private SwitchRampCallback _switchRampEvent;
 		private SwitchRampMapCallback _switchRampMapEvent;
+
+		private const float RowHeight = 18f;
+		private const float RowSpacing = 2f;
+
+		public static void ShowWindow(MaterialProperty prop, LwguiRampAtlas rampAtlas, SwitchRampCallback switchRampEvent)
+		{
+			LwguiGradientWindow.CloseWindow();
+			var window = CreateInstance<RampSelectorWindow>();
+			window.titleContent = new GUIContent("Ramp Selector (Atlas)");
+			window.minSize = new Vector2(400, 500);
+			window._rampAtlas = rampAtlas;
+			window._prop = prop;
+			window._switchRampEvent = switchRampEvent;
+			window.ShowAuxWindow();
+		}
 
 		public static void ShowWindow(MaterialProperty prop, Texture2D[] rampMaps, SwitchRampMapCallback switchRampMapEvent)
 		{
-			RampSelectorWindow window = ScriptableObject.CreateInstance<RampSelectorWindow>();
+			LwguiGradientWindow.CloseWindow();
+			var window = CreateInstance<RampSelectorWindow>();
 			window.titleContent = new GUIContent("Ramp Selector");
 			window.minSize = new Vector2(400, 500);
 			window._rampMaps = rampMaps;
@@ -297,32 +302,88 @@ namespace LWGUI
 		
 		private void OnGUI()
 		{
+			if (_rampAtlas != null)
+				DrawRampAtlasSelector();
+			else if (_rampMaps != null)
+				DrawRampMapSelector();
+			else
+				EditorGUILayout.HelpBox("No Ramp data available", MessageType.Error);
+		}
+
+		private void DrawRampAtlasSelector()
+		{
+			EditorGUILayout.BeginVertical();
+			_scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
+
+			for (int i = 0; i < _rampAtlas.RampCount; i++)
+			{
+				var ramp = _rampAtlas.GetRamp(i);
+				if (ramp == null) continue;
+
+				var previewTextures = ramp.GetPreviewTexturesForRampSelector(_rampAtlas.rampAtlasWidth);
+				var textureCount = previewTextures?.Length ?? 0;
+				var totalHeight = Mathf.Max(1, textureCount) * RowHeight + Mathf.Max(0, textureCount - 1) * RowSpacing;
+
+				var rect = EditorGUILayout.GetControlRect(GUILayout.Height(totalHeight));
+				var guiContent = new GUIContent($"{i}. {ramp.Name}");
+				var buttonWidth = Mathf.Min(300f, Mathf.Max(GUI.skin.button.CalcSize(guiContent).x, rect.width * 0.35f));
+				var buttonRect = new Rect(rect.x + rect.width - buttonWidth, rect.y, buttonWidth, totalHeight);
+				var previewWidth = rect.width - buttonWidth - 3.0f;
+
+				// Draw preview textures vertically
+				if (previewTextures != null)
+				{
+					for (int j = 0; j < previewTextures.Length; j++)
+					{
+						if (previewTextures[j] == null) continue;
+						var previewRect = new Rect(rect.x, rect.y + j * (RowHeight + RowSpacing), previewWidth, RowHeight);
+						EditorGUI.DrawPreviewTexture(previewRect, previewTextures[j]);
+					}
+				}
+
+				// Draw button (stretches to cover all preview rows)
+				if (GUI.Button(buttonRect, guiContent, GUIStyles.rampSelectButton) && _switchRampEvent != null)
+				{
+					_switchRampEvent(_prop, i);
+					LwguiGradientWindow.CloseWindow();
+					Close();
+				}
+
+				GUILayout.Space(RowSpacing);
+			}
+
+			EditorGUILayout.EndScrollView();
+			EditorGUILayout.EndVertical();
+		}
+
+		private void DrawRampMapSelector()
+		{
 			EditorGUILayout.BeginVertical();
 			_scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
 
 			for (int i = 0; i < _rampMaps.Length; i++)
 			{
 				var rampMap = _rampMaps[i];
-				EditorGUILayout.BeginHorizontal();
-				if (rampMap != null)
+				if (rampMap == null) continue;
+
+				var rect = EditorGUILayout.GetControlRect(GUILayout.Height(RowHeight));
+				var guiContent = new GUIContent($"{i}. {rampMap.name}");
+				var buttonWidth = Mathf.Min(300f, Mathf.Max(GUI.skin.button.CalcSize(guiContent).x, rect.width * 0.35f));
+				var buttonRect = new Rect(rect.x + rect.width - buttonWidth, rect.y, buttonWidth, RowHeight);
+				var previewRect = new Rect(rect.x, rect.y, rect.width - buttonWidth - 3.0f, RowHeight);
+
+				EditorGUI.DrawPreviewTexture(previewRect, rampMap);
+
+				if (GUI.Button(buttonRect, guiContent, GUIStyles.rampSelectButton) && _switchRampMapEvent != null)
 				{
-					var guiContent = new GUIContent($"{ i }. { rampMap.name }");
-					var rect = EditorGUILayout.GetControlRect();
-					var buttonWidth = Mathf.Min(300f, Mathf.Max(GUI.skin.button.CalcSize(guiContent).x, rect.width * 0.35f));
-					var buttonRect = new Rect(rect.x + rect.width - buttonWidth, rect.y, buttonWidth, rect.height);
-					var previewRect = new Rect(rect.x, rect.y, rect.width - buttonWidth - 3.0f, rect.height);
-					
-					if (GUI.Button(buttonRect, guiContent, GUIStyles.rampSelectButton) && _switchRampMapEvent != null)
-					{
-						_switchRampMapEvent(_prop, rampMap, i);
-						LwguiGradientWindow.CloseWindow();
-						Close();
-					}
-					EditorGUI.DrawPreviewTexture(previewRect, rampMap);
+					_switchRampMapEvent(_prop, rampMap, i);
+					LwguiGradientWindow.CloseWindow();
+					Close();
 				}
-				EditorGUILayout.EndHorizontal();
+
+				GUILayout.Space(RowSpacing);
 			}
-			
+
 			EditorGUILayout.EndScrollView();
 			EditorGUILayout.EndVertical();
 		}
