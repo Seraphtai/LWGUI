@@ -206,6 +206,8 @@
   },
   "active": "d93ffc2d4e7b14bd",
   "lastOpenFiles": [
+    "Editor/ShaderDrawers.meta",
+    "Editor/ShaderDrawers",
     "README.md",
     "README_CN.md",
     "Editor/ShaderDrawer.cs~",
@@ -217,7 +219,6 @@
     "Editor/ScriptableObject/GradientObject.cs.meta",
     "Editor/ScriptableObject/LwguiRampAtlas.cs",
     "Editor/ScriptableObject/GradientObject.cs",
-    "Editor/ScriptableObject",
     "assets~/Pasted image 20250523120309.png",
     "assets~/Pasted image 20250522183200.png",
     "assets~/Pasted image 20250321174432.png",

@@ -15,106 +15,110 @@ MonoBehaviour:
   rampAtlasWidth: 256
   rampAtlasHeight: 4
   rampAtlasSRGB: 1
+  _saveTextureToggle: 0
   _ramps:
   - name: 0
-    gradient:
-      _curves:
-      - serializedVersion: 2
-        m_Curve:
-        - serializedVersion: 3
-          time: 0.5
-          value: 0
-          inSlope: 0
-          outSlope: 2
-          tangentMode: 69
-          weightedMode: 0
-          inWeight: 0
-          outWeight: 0
-        - serializedVersion: 3
-          time: 1
-          value: 1
-          inSlope: 2
-          outSlope: 0
-          tangentMode: 69
-          weightedMode: 0
-          inWeight: 0
-          outWeight: 0
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
-      - serializedVersion: 2
-        m_Curve:
-        - serializedVersion: 3
-          time: 0.5
-          value: 0
-          inSlope: 0
-          outSlope: 2
-          tangentMode: 69
-          weightedMode: 0
-          inWeight: 0
-          outWeight: 0
-        - serializedVersion: 3
-          time: 1
-          value: 1
-          inSlope: 2
-          outSlope: 0
-          tangentMode: 69
-          weightedMode: 0
-          inWeight: 0
-          outWeight: 0
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
-      - serializedVersion: 2
-        m_Curve:
-        - serializedVersion: 3
-          time: 0.5
-          value: 0
-          inSlope: 0
-          outSlope: 2
-          tangentMode: 69
-          weightedMode: 0
-          inWeight: 0
-          outWeight: 0
-        - serializedVersion: 3
-          time: 1
-          value: 1
-          inSlope: 2
-          outSlope: 0
-          tangentMode: 69
-          weightedMode: 0
-          inWeight: 0
-          outWeight: 0
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
-      - serializedVersion: 2
-        m_Curve:
-        - serializedVersion: 3
-          time: 0.5
-          value: 0
-          inSlope: 0
-          outSlope: 2
-          tangentMode: 69
-          weightedMode: 0
-          inWeight: 0
-          outWeight: 0
-        - serializedVersion: 3
-          time: 1
-          value: 1
-          inSlope: 2
-          outSlope: 0
-          tangentMode: 69
-          weightedMode: 0
-          inWeight: 0
-          outWeight: 0
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
     colorSpace: 1
     channelMask: -1
     timeRange: 1
+    gradient:
+      _curves:
+      - serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0.5
+          value: 0
+          inSlope: 0
+          outSlope: 2
+          tangentMode: 69
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 2
+          outSlope: 0
+          tangentMode: 69
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      - serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0.5
+          value: 0
+          inSlope: 0
+          outSlope: 2
+          tangentMode: 69
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 2
+          outSlope: 0
+          tangentMode: 69
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      - serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0.5
+          value: 0
+          inSlope: 0
+          outSlope: 2
+          tangentMode: 69
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 2
+          outSlope: 0
+          tangentMode: 69
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      - serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0.5
+          value: 0
+          inSlope: 0
+          outSlope: 2
+          tangentMode: 69
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 2
+          outSlope: 0
+          tangentMode: 69
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
   - name: 1
+    colorSpace: 1
+    channelMask: -1
+    timeRange: 1
     gradient:
       _curves:
       - serializedVersion: 2
@@ -123,16 +127,16 @@ MonoBehaviour:
           time: 0
           value: 0
           inSlope: 0
-          outSlope: 0.18938056
+          outSlope: 1.8975205
           tangentMode: 69
           weightedMode: 0
           inWeight: 0
           outWeight: 0
         - serializedVersion: 3
-          time: 0.5522972
-          value: 0.10459435
-          inSlope: 0.18938056
-          outSlope: 2
+          time: 0.40370455
+          value: 0.7660377
+          inSlope: 1.8975205
+          outSlope: 0.39235967
           tangentMode: 69
           weightedMode: 0
           inWeight: 0.33333334
@@ -140,7 +144,7 @@ MonoBehaviour:
         - serializedVersion: 3
           time: 1
           value: 1
-          inSlope: 2
+          inSlope: 0.39235967
           outSlope: 0
           tangentMode: 69
           weightedMode: 0
@@ -155,16 +159,16 @@ MonoBehaviour:
           time: 0
           value: 0
           inSlope: 0
-          outSlope: 0.18938056
+          outSlope: 0.5978979
           tangentMode: 69
           weightedMode: 0
           inWeight: 0
           outWeight: 0
         - serializedVersion: 3
-          time: 0.5522972
-          value: 0.10459435
-          inSlope: 0.18938056
-          outSlope: 2
+          time: 0.40370455
+          value: 0.2413741
+          inSlope: 0.5978979
+          outSlope: 1.2722315
           tangentMode: 69
           weightedMode: 0
           inWeight: 0.33333334
@@ -172,7 +176,7 @@ MonoBehaviour:
         - serializedVersion: 3
           time: 1
           value: 1
-          inSlope: 2
+          inSlope: 1.2722315
           outSlope: 0
           tangentMode: 69
           weightedMode: 0
@@ -187,16 +191,16 @@ MonoBehaviour:
           time: 0
           value: 0
           inSlope: 0
-          outSlope: 0.18938056
+          outSlope: 0.5978979
           tangentMode: 69
           weightedMode: 0
           inWeight: 0
           outWeight: 0
         - serializedVersion: 3
-          time: 0.5522972
-          value: 0.10459435
-          inSlope: 0.18938056
-          outSlope: 2
+          time: 0.40370455
+          value: 0.2413741
+          inSlope: 0.5978979
+          outSlope: 1.2722315
           tangentMode: 69
           weightedMode: 0
           inWeight: 0.33333334
@@ -204,7 +208,7 @@ MonoBehaviour:
         - serializedVersion: 3
           time: 1
           value: 1
-          inSlope: 2
+          inSlope: 1.2722315
           outSlope: 0
           tangentMode: 69
           weightedMode: 0
@@ -245,7 +249,3 @@ MonoBehaviour:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-    colorSpace: 1
-    channelMask: -1
-    timeRange: 1
-  _saveTextureToggle: 0
