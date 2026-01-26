@@ -1,4 +1,4 @@
-﻿// Copyright (c) Jason Ma
+// Copyright (c) Jason Ma
 
 using System;
 using System.Collections.Generic;
@@ -32,20 +32,33 @@ namespace LWGUI.PerformanceMonitor
 
             foreach (var localKeyword in material.enabledKeywords)
             {
-                output.Add(localKeyword.name);
+                if (ToolbarHelper.IsUserKeywordOverride(shaderUID, localKeyword.name))
+                {
+                    if (ToolbarHelper.IsUserKeywordEnabled(shaderUID, localKeyword.name))
+                        output.Add(localKeyword.name);
+                }
+                else
+                {
+                    output.Add(localKeyword.name);
+                }
             }
 
             foreach (var keyword in material.shader.keywordSpace.keywords)
             {
-                if (!keyword.isValid)
-                    continue;
-                
-                // Is a global keyword?
-                if (keyword.isOverridable && Shader.IsKeywordEnabled(keyword.name))
-                    output.Add(keyword.name);
-
-                if (ToolbarHelper.IsUserKeywordOverrideAndEnabled(shaderUID, keyword.name))
-                    output.Add(keyword.name);
+                if (ToolbarHelper.IsUserKeywordOverride(shaderUID, keyword.name))
+                {
+                    if (ToolbarHelper.IsUserKeywordEnabled(shaderUID, keyword.name))
+                        output.Add(keyword.name);
+                }
+                else
+                {
+                    if (!keyword.isValid)
+                        continue;
+                    
+                    // Is a global keyword?
+                    if (keyword.isOverridable && Shader.IsKeywordEnabled(keyword.name))
+                        output.Add(keyword.name);
+                }
             }
 
             return output.Distinct().ToList();

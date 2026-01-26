@@ -1,4 +1,4 @@
-﻿using UnityEditor;
+using UnityEditor;
 using UnityEngine;
 
 namespace LWGUI
@@ -11,6 +11,7 @@ namespace LWGUI
         private static GUIStyle _foldout;
         private static GUIStyle _helpbox;
         private static GUIStyle _rampSelectButton;
+        private static GUIStyle _objectFieldButton;
         private static GUIStyle _toolbarSearchTextFieldPopup;
         private static GUIStyle _label_monospace;
 
@@ -35,8 +36,20 @@ namespace LWGUI
             fontSize = EditorStyles.boldLabel.fontSize + 1
         };
 
-        public static GUIStyle helpbox          => _helpbox ?? new GUIStyle(EditorStyles.helpBox) { fontSize = 12 };
-        public static GUIStyle rampSelectButton => _rampSelectButton ?? new GUIStyle(EditorStyles.miniButton) { alignment = TextAnchor.MiddleLeft };
+        public static GUIStyle helpbox => _helpbox ?? new GUIStyle(EditorStyles.helpBox) { fontSize = 12 };
+
+        public static GUIStyle rampSelectButton => _rampSelectButton ?? new GUIStyle(EditorStyles.miniButton)
+        {
+            fixedHeight = 0,
+            stretchHeight = true,
+            alignment = TextAnchor.MiddleLeft
+        };
+
+        public static GUIStyle objectFieldButton => _objectFieldButton ?? new GUIStyle("ObjectFieldButton")
+        {
+            fixedHeight = 0,
+            stretchHeight = true
+        };
 
         public static GUIStyle toolbarSearchTextFieldPopup
         {

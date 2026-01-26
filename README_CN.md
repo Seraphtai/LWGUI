@@ -573,12 +573,14 @@ Result:
 /// 与RampAtlasIndexer()一起使用, 以在Shader中使用Index采样特定Ramp, 类似于UE的Curve Atlas.  
 /// 注意: 目前材质球仅保存Texture引用和Int值, 如果你手动修改了Ramp Atlas则不会自动更新引用!  
 ///  
-/// group: parent group name (Default: none)  
-/// defaultFileName: the default file name when creating a Ramp Atlas SO (Default: RampAtlas)  
-/// rootPath: the default directory when creating a Ramp Atlas SO, replace '/' with '.' (for example: Assets.Art.RampAtlas). (Default: Assets)  
-/// colorSpace: the Color Space of Ramp Atlas Texture. (sRGB/Linear) (Default: sRGB)  
-/// defaultWidth: default Ramp Atlas Texture width (Default: 256)  
+/// group: parent group name (Default: none)
+/// defaultFileName: the default file name when creating a Ramp Atlas SO (Default: RampAtlas)
+/// rootPath: the default directory when creating a Ramp Atlas SO, replace '/' with '.' (for example: Assets.Art.RampAtlas). (Default: Assets)
+/// colorSpace: the Color Space of Ramp Atlas Texture. (sRGB/Linear) (Default: sRGB)
+/// defaultWidth: default Ramp Atlas Texture width (Default: 256)
+/// defaultHeight: default Ramp Atlas Texture height (Default: 4)
 /// showAtlasPreview: Draw the preview of Ramp Atlas below (True/False) (Default: True)
+/// rampAtlasTypeName: custom RampAtlas type name for user-defined RampAtlas classes (Default: LwguiRampAtlas)
 /// Target Property Type: Texture2D
 public RampAtlasDrawer() : this(string.Empty) { }  
 public RampAtlasDrawer(string group) : this(group, "RampAtlas") { }  
@@ -587,7 +589,8 @@ public RampAtlasDrawer(string group, string defaultFileName, string rootPath) : 
 public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace) : this(group, defaultFileName, rootPath, colorSpace, 256) { } 
 public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, 4) { }  
 public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, defaultHeight, "true") { }  
-public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight, string showAtlasPreview)
+public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight, string showAtlasPreview) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, defaultHeight, showAtlasPreview, "") { }  
+public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight, string showAtlasPreview, string rampAtlasTypeName)
 ```
 Example:
 ```c#

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Jason Ma
+// Copyright (c) Jason Ma
 
 using UnityEditor;
 using UnityEngine;
@@ -230,6 +230,20 @@ namespace LWGUI
 			else
 			{
 				if (!hasChange) hasChange = true;
+			}
+		}
+		
+		[MenuItem("CONTEXT/Material/Reimport Shader", false, 100)]
+		static void MenuItem_ReimportShader(MenuCommand command)
+		{
+			var mat = command.context as Material;
+			if (mat != null)
+			{
+				var path = AssetDatabase.GetAssetPath(mat.shader);
+				if (!string.IsNullOrEmpty(path))
+				{
+					AssetDatabase.ImportAsset(path);
+				}
 			}
 		}
 	}

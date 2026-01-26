@@ -1,4 +1,4 @@
-﻿// Copyright (c) Jason Ma
+// Copyright (c) Jason Ma
 
 using System;
 using System.Linq;
@@ -371,8 +371,6 @@ namespace LWGUI
 
         public static bool IsUserKeywordEnabled(string shaderUID, string keyword) => EditorPrefs.GetBool(GetKeywordEnabledPreferenceKey(shaderUID, keyword), false);
 
-        public static bool IsUserKeywordOverrideAndEnabled(string shaderUID, string keyword) => IsUserKeywordOverride(shaderUID, keyword) && IsUserKeywordEnabled(shaderUID, keyword);
-
         private static void SetShowKeywordOverridesEnabled(string shaderUID, bool enabled)
         {
             if (enabled)
@@ -422,7 +420,19 @@ namespace LWGUI
                 var allKeywords = shader.keywordSpace.keywords.Select(k => k.name).ToList();
                 foreach (var keyword in allKeywords)
                 {
-                    EditorGUILayout.BeginHorizontal();
+                    var rect = EditorGUILayout.BeginHorizontal();
+                    
+                    // Context Menu
+                    if (Event.current.type == EventType.ContextClick && rect.Contains(Event.current.mousePosition))
+                    {
+                        Event.current.Use();
+                        var menu = new GenericMenu();
+                        menu.AddItem(new GUIContent("Copy Keyword"), false, () =>
+                        {
+                            EditorGUIUtility.systemCopyBuffer = keyword;
+                        });
+                        menu.ShowAsContext();
+                    }
 
                     bool currentOverride = IsUserKeywordOverride(shaderUID, keyword);
                     bool currentEnabled = currentOverride ? IsUserKeywordEnabled(shaderUID, keyword) : activeKeywords.Contains(keyword);
