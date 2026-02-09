@@ -76,8 +76,8 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
             compiledShader = Encoding.UTF8.GetString(compileInfo.ShaderData);
 
             // Fix Mali Compiler Errors
-            // compiledShader = compiledShader.Replace("#version 300 es", "#version 320 es");
-            // compiledShader = compiledShader.Replace("#version 310 es", "#version 320 es");
+            compiledShader = compiledShader.Replace("#version 300 es", "#version 320 es");
+            compiledShader = compiledShader.Replace("#version 310 es", "#version 320 es");
             IOHelper.WriteTextFile(shaderPerfData.compiledShaderPath, compiledShader);
 
             return !string.IsNullOrWhiteSpace(compiledShader);
