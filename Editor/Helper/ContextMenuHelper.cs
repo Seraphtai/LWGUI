@@ -19,7 +19,7 @@ namespace LWGUI
 			_copiedMaterial = Object.Instantiate(mat);
 		}
 		
-		public static void DoPasteMaterialProperties(LWGUIMetaDatas metaDatas, uint valueMask)
+		public static void PastePropertiesToMaterials(LWGUIMetaDatas metaDatas, uint valueMask)
 		{
 			if (!_copiedMaterial)
 			{
@@ -37,17 +37,33 @@ namespace LWGUI
 			Undo.RecordObjects(targetMaterials, "LWGUI: Paste Material Properties");
 			foreach (Material material in targetMaterials)
 			{
-				for (int i = 0; i < _copiedMaterial.shader.GetPropertyCount(); i++)
-				{
-					var name = _copiedMaterial.shader.GetPropertyName(i);
-					var type = _copiedMaterial.shader.GetPropertyType(i);
-					PastePropertyValueToMaterial(material, name, name, type, valueMask);
-				}
-				if ((valueMask & (uint)ToolbarHelper.CopyMaterialValueMask.Keyword) != 0)
-					material.shaderKeywords = _copiedMaterial.shaderKeywords;
-				if ((valueMask & (uint)ToolbarHelper.CopyMaterialValueMask.RenderQueue) != 0)
-					material.renderQueue = _copiedMaterial.renderQueue;
+				PastePropertiesToMaterial(material, valueMask);
 			}
+		}
+
+		public static void PastePropertiesToMaterial(Material target, uint valueMask = ToolbarHelper.CopyMaterialValueMaskAll)
+		{
+			if (!_copiedMaterial)
+			{
+				Debug.LogError("LWGUI: Please copy Material Properties first!");
+				return;
+			}
+			if (!VersionControlHelper.Checkout(target))
+			{
+				Debug.LogError("LWGUI: Unable to write material!");
+				return;
+			}
+			Undo.RecordObject(target, "LWGUI: Paste Material Properties");
+			for (int i = 0; i < _copiedMaterial.shader.GetPropertyCount(); i++)
+			{
+				var name = _copiedMaterial.shader.GetPropertyName(i);
+				var type = _copiedMaterial.shader.GetPropertyType(i);
+				PastePropertyValueToMaterial(target, name, name, type, valueMask);
+			}
+			if ((valueMask & (uint)ToolbarHelper.CopyMaterialValueMask.Keyword) != 0)
+				target.shaderKeywords = _copiedMaterial.shaderKeywords;
+			if ((valueMask & (uint)ToolbarHelper.CopyMaterialValueMask.RenderQueue) != 0)
+				target.renderQueue = _copiedMaterial.renderQueue;
 		}
 
 		private static void PastePropertyValueToMaterial(Material material, string srcName, string dstName)

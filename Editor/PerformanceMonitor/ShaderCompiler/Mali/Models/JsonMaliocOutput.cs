@@ -8,13 +8,27 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler.Mali
     [Serializable]
     internal class JsonMaliocOutput
     {
+        public Schema schema;
         public Shader[] shaders;
+
+        [Serializable]
+        public class Schema
+        {
+            public string name;
+            public int version;
+        }
 
         [Serializable]
         public class Shader
         {
+            // Normal output fields
             public ShaderProperty[] properties;
             public ShaderVariant[] variants;
+
+            // Error output fields
+            public string[] errors;
+            public string[] warnings;
+            public string filename;
         }
 
         [Serializable]

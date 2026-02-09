@@ -18,6 +18,9 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler.Mali
             Texture,
         }
 
+        public bool HasErrors;
+        public List<string> Errors;
+        public List<string> Warnings;
         public List<ShaderProperty> Properties;
         public List<ShaderVariant> Variants;
 

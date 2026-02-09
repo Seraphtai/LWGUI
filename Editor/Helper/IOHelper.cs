@@ -144,10 +144,10 @@ namespace LWGUI
 
             if (p.ExitCode != 0)
             {
-                Debug.LogError($"LWGUI: Process Exit Code {p.ExitCode}: {stderr}" +
+				output = stderr.ToString() + output;
+                Debug.LogError($"LWGUI: Process Exit Code {p.ExitCode}: {output}" +
                                $"File: {file}\n" +
                                $"Args: {args}");
-                output = stderr.ToString();
                 return false;
             }
 
