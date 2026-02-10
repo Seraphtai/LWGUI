@@ -33,8 +33,25 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler.Mali
 
             var shader = jsonModel.shaders[0];
 
+            // Check if this is an error response
+            bool isErrorResponse = jsonModel.schema?.name == "error";
+            if (isErrorResponse || (shader.errors != null && shader.errors.Length > 0))
+            {
+                return new RuntimeMaliocShader
+                {
+                    HasErrors = true,
+                    Errors = shader.errors?.ToList() ?? new System.Collections.Generic.List<string>(),
+                    Warnings = shader.warnings?.ToList() ?? new System.Collections.Generic.List<string>(),
+                    Properties = new System.Collections.Generic.List<RuntimeMaliocShader.ShaderProperty>(),
+                    Variants = new System.Collections.Generic.List<RuntimeMaliocShader.ShaderVariant>(),
+                };
+            }
+
             return new RuntimeMaliocShader
             {
+                HasErrors = false,
+                Errors = new System.Collections.Generic.List<string>(),
+                Warnings = shader.warnings?.ToList() ?? new System.Collections.Generic.List<string>(),
                 Properties = shader.properties.Select(ConvertProperty).ToList(),
                 Variants = shader.variants.Select(variant =>
                     {

@@ -12,10 +12,13 @@ namespace LWGUI
 	{
 		#region RampEditor
 
-		private static readonly GUIContent _iconAdd     = new GUIContent(EditorGUIUtility.IconContent("d_Toolbar Plus").image, "Add"),
-										   _iconEdit    = new GUIContent(EditorGUIUtility.IconContent("editicon.sml").image, "Edit"),
-										   _iconDiscard = new GUIContent(EditorGUIUtility.IconContent("d_TreeEditor.Refresh").image, "Discard"),
-										   _iconSave    = new GUIContent(EditorGUIUtility.IconContent("SaveActive").image, "Save");
+		private const string _iconCloneGUID = "9cdef444d18d2ce4abb6bbc4fed4d109";
+
+		private static readonly GUIContent _iconAdd     = new (EditorGUIUtility.IconContent("d_Toolbar Plus").image, "Add"),
+										   _iconClone   = new (EditorGUIUtility.IconContent("AnimatorController Icon").image, "Clone"),
+										   _iconEdit    = new (EditorGUIUtility.IconContent("editicon.sml").image, "Edit"),
+										   _iconDiscard = new (EditorGUIUtility.IconContent("d_TreeEditor.Refresh").image, "Discard"),
+										   _iconSave    = new (EditorGUIUtility.IconContent("SaveActive").image, "Save");
 
 		public static void RampEditor(
 			Rect buttonRect,
@@ -27,6 +30,7 @@ namespace LWGUI
 			out bool hasChange,
 			out bool doEditWhenNoGradient,
 			out bool doRegisterUndo,
+			out bool doClone,
 			out bool doCreate,
 			out bool doSave,
 			out bool doDiscard,
@@ -36,11 +40,12 @@ namespace LWGUI
 			var hasNoGradient = gradient == null;
 			var _doEditWhenNoGradient = false;
 			var doOpenWindow = false;
-			var singleButtonWidth = buttonRect.width * 0.25f;
+			var singleButtonWidth = buttonRect.width * 0.2f;
 			var editRect = new Rect(buttonRect.x + singleButtonWidth * 0, buttonRect.y, singleButtonWidth, buttonRect.height);
 			var saveRect = new Rect(buttonRect.x + singleButtonWidth * 1, buttonRect.y, singleButtonWidth, buttonRect.height);
-			var addRect = new Rect(buttonRect.x + singleButtonWidth * 2, buttonRect.y, singleButtonWidth, buttonRect.height);
-			var discardRect = new Rect(buttonRect.x + singleButtonWidth * 3, buttonRect.y, singleButtonWidth, buttonRect.height);
+			var cloneRect = new Rect(buttonRect.x + singleButtonWidth * 2, buttonRect.y, singleButtonWidth, buttonRect.height);
+			var addRect = new Rect(buttonRect.x + singleButtonWidth * 3, buttonRect.y, singleButtonWidth, buttonRect.height);
+			var discardRect = new Rect(buttonRect.x + singleButtonWidth * 4, buttonRect.y, singleButtonWidth, buttonRect.height);
 
 			// Edit button event
 			hasChange = false;
@@ -74,6 +79,8 @@ namespace LWGUI
 			}
 			doEditWhenNoGradient = _doEditWhenNoGradient;
 
+			// Clone button
+			doClone = GUI.Button(cloneRect, _iconClone);
 			
 			// Create button
 			doCreate = GUI.Button(addRect, _iconAdd);
@@ -187,9 +194,9 @@ namespace LWGUI
 			return subJSONs[0] != subJSONs[1];
 		}
 
-		public static bool CreateAndSaveNewGradientTexture(int width, int height, string unityPath, bool isLinear)
+		public static bool CreateAndSaveNewGradientTexture(int width, int height, string unityPath, bool isLinear, LwguiGradient sourceGradient = null)
 		{
-			var gradient = new LwguiGradient();
+			var gradient = sourceGradient != null ? new LwguiGradient(sourceGradient) : new LwguiGradient();
 
 			var ramp = gradient.GetPreviewRampTexture(width, height, ColorSpace.Linear);
 			var png = ramp.EncodeToPNG();

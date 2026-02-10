@@ -77,6 +77,7 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
 
             // Fix Mali Compiler Errors
             compiledShader = compiledShader.Replace("#version 300 es", "#version 320 es");
+            compiledShader = compiledShader.Replace("#version 310 es", "#version 320 es");
             IOHelper.WriteTextFile(shaderPerfData.compiledShaderPath, compiledShader);
 
             return !string.IsNullOrWhiteSpace(compiledShader);
@@ -117,41 +118,53 @@ namespace LWGUI.PerformanceMonitor.ShaderCompiler
         {
             EditorGUILayout.BeginHorizontal();
 
-            if (shaderPerfData.stats is RuntimeMaliocShader { Variants: { Count: > 0 } } stats
-                && stats.Variants[0].Pipelines is { Count : > 0 })
+            if (shaderPerfData.stats is RuntimeMaliocShader stats)
             {
-                var variant = stats.Variants[0];
-                var cycles = Enumerable.Repeat(0.0f, variant.Pipelines.Count).ToList();
-
-                for (int i = 0; i < variant.Pipelines.Count; i++)
+                if (stats.Variants is { Count: > 0 } && stats.Variants[0].Pipelines is { Count: > 0 })
                 {
-                    cycles[i] = Mathf.Max(Mathf.Max(variant.ShortestPathCycles.PipelineCycles[i],
-                            variant.LongestPathCycles.PipelineCycles[i]),
-                        variant.TotalCycles.PipelineCycles[i]);
-                }
+                    var variant = stats.Variants[0];
+                    var cycles = Enumerable.Repeat(0.0f, variant.Pipelines.Count).ToList();
 
-                // https://developer.arm.com/documentation/101863/8-8/Using-Mali-Offline-Compiler/Performance-analysis/Performance-table
-                float arithmeticCycle = 0;
-                float loadStoreCycle = 0;
-                float varyingCycle = 0;
-                float textureCycle = 0;
-                for (int i = 0; i < variant.Pipelines.Count; i++)
-                {
-                    switch (variant.Pipelines[i])
+                    for (int i = 0; i < variant.Pipelines.Count; i++)
                     {
-                        case RuntimeMaliocShader.ShaderVariantPipelineType.Arithmetic: arithmeticCycle = cycles[i]; break;
-                        case RuntimeMaliocShader.ShaderVariantPipelineType.LoadStore:  loadStoreCycle = cycles[i]; break;
-                        case RuntimeMaliocShader.ShaderVariantPipelineType.Varying:    varyingCycle = cycles[i]; break;
-                        case RuntimeMaliocShader.ShaderVariantPipelineType.Texture:    textureCycle = cycles[i]; break;
+                        cycles[i] = Mathf.Max(Mathf.Max(variant.ShortestPathCycles.PipelineCycles[i],
+                                variant.LongestPathCycles.PipelineCycles[i]),
+                            variant.TotalCycles.PipelineCycles[i]);
                     }
+
+                    // https://developer.arm.com/documentation/101863/8-8/Using-Mali-Offline-Compiler/Performance-analysis/Performance-table
+                    float arithmeticCycle = 0;
+                    float loadStoreCycle = 0;
+                    float varyingCycle = 0;
+                    float textureCycle = 0;
+                    for (int i = 0; i < variant.Pipelines.Count; i++)
+                    {
+                        switch (variant.Pipelines[i])
+                        {
+                            case RuntimeMaliocShader.ShaderVariantPipelineType.Arithmetic: arithmeticCycle = cycles[i]; break;
+                            case RuntimeMaliocShader.ShaderVariantPipelineType.LoadStore:  loadStoreCycle = cycles[i]; break;
+                            case RuntimeMaliocShader.ShaderVariantPipelineType.Varying:    varyingCycle = cycles[i]; break;
+                            case RuntimeMaliocShader.ShaderVariantPipelineType.Texture:    textureCycle = cycles[i]; break;
+                        }
+                    }
+
+                    var statsStr = $"{arithmeticCycle,8:0.0} {loadStoreCycle,9:0.0} {varyingCycle,7:0.0} {textureCycle,6:0.0}";
+                    EditorGUILayout.LabelField($"{shaderPerfData.passName} | {shaderPerfData.shaderTypeName}", statsStr, GUIStyles.label_monospace);
+
+                    ToolbarHelper.DrawShaderPerformanceStatsLineButtons(shaderPerfData);
+                    if (GUILayout.Button("Json", GUILayout.MaxWidth(40)))
+                        IOHelper.OpenFile(GetMaliJsonOutputPath(shaderPerfData));
                 }
-
-                var statsStr = $"{arithmeticCycle,8:0.0} {loadStoreCycle,9:0.0} {varyingCycle,7:0.0} {textureCycle,6:0.0}";
-                EditorGUILayout.LabelField($"{shaderPerfData.passName} | {shaderPerfData.shaderTypeName}", statsStr, GUIStyles.label_monospace);
-
-                ToolbarHelper.DrawShaderPerformanceStatsLineButtons(shaderPerfData);
-                if (GUILayout.Button("Json", GUILayout.MaxWidth(40)))
-                    IOHelper.OpenFile(GetMaliJsonOutputPath(shaderPerfData));
+                else
+                {
+                    EditorGUILayout.LabelField($"{shaderPerfData.passName} | {shaderPerfData.shaderTypeName}", "ANALYSIS FAILED");
+                }
+                
+                if (stats.HasErrors)
+                {
+					var errorMsg = stats.Errors.Count > 0 ? stats.Errors[0] : "Unknown Error";
+					Debug.LogError($"LWGUI: {shaderPerfData.passName} | {shaderPerfData.shaderTypeName} Error:\n{errorMsg}");
+                }
             }
             else
             {

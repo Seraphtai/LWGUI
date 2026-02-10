@@ -7,6 +7,7 @@ using UnityEngine.Rendering;
 namespace LWGUI
 {
 	public delegate void LWGUICustomGUIEvent(LWGUI lwgui);
+	public delegate void LWGUIToolbarExtensionEvent(LWGUI lwgui, ref Rect toolBarRect);
 
 	public class LWGUI : ShaderGUI
 	{
@@ -15,6 +16,8 @@ namespace LWGUI
 
 		public static LWGUICustomGUIEvent onDrawCustomHeader;
 		public static LWGUICustomGUIEvent onDrawCustomFooter;
+		public static LWGUIToolbarExtensionEvent onDrawToolbarLeft;
+		public static LWGUIToolbarExtensionEvent onDrawToolbarRight;
 
 		/// <summary>
 		/// Called when switch to a new Material Window, each window has a LWGUI instance
@@ -50,7 +53,9 @@ namespace LWGUI
 				var toolBarRect = EditorGUILayout.GetControlRect();
 				toolBarRect.xMin = 2;
 
+				onDrawToolbarLeft?.Invoke(this, ref toolBarRect);
 				ToolbarHelper.DrawToolbarButtons(ref toolBarRect, metaDatas);
+				onDrawToolbarRight?.Invoke(this, ref toolBarRect);
 				ToolbarHelper.DrawSearchField(toolBarRect, metaDatas);
 
 				GUILayoutUtility.GetRect(0, 0); // Space(0)

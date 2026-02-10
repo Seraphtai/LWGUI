@@ -134,18 +134,22 @@ namespace LWGUI
 				return null;
 		}
 
-		protected override void CreateNewRampMap(MaterialProperty prop, MaterialEditor editor)
+		protected override void CloneRampMap(MaterialProperty prop, MaterialEditor editor, LwguiGradient gradient)
 		{
-			// Create a Ramp
+			// Create or Clone a Ramp
 			if (rampAtlasSO)
 			{
+				bool shouldCreateRamp = gradient == null || _currentRamp == null;
 				var newIndex = rampAtlasSO.RampCount;
+				var newRamp = rampAtlasSO.AddRamp(shouldCreateRamp ? null : _currentRamp);
 
-				var newRamp = rampAtlasSO.AddRamp();
-				newRamp.Name = defaultRampName;
-				newRamp.ColorSpace = colorSpace;
-				newRamp.ChannelMask = viewChannelMask;
-				newRamp.TimeRange = timeRange;
+				if (shouldCreateRamp)
+				{
+					newRamp.Name = defaultRampName;
+					newRamp.ColorSpace = colorSpace;
+					newRamp.ChannelMask = viewChannelMask;
+					newRamp.TimeRange = timeRange;
+				}
 
 				prop.SetNumericValue(newIndex);
 

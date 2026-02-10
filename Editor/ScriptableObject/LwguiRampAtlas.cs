@@ -151,15 +151,18 @@ namespace LWGUI
 
 		public int TotalRowCount => RampCount * RowCountPerRamp;
 
-		public virtual IRamp CreateRamp()
+		public virtual IRamp CreateRamp(IRamp srcRamp = null)
 		{
-			return new Ramp();
+			var newRamp = new Ramp();
+			if (srcRamp != null)
+				newRamp.CopyFrom(srcRamp);
+			return newRamp;
 		}
 
-		public virtual IRamp AddRamp()
+		public virtual IRamp AddRamp(IRamp srcRamp = null)
 		{
 			_ramps ??= new List<Ramp>();
-			var newRamp = CreateRamp();
+			var newRamp = CreateRamp(srcRamp);
 			_ramps.Add(newRamp as Ramp);
 			return newRamp;
 		}

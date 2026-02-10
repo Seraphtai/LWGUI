@@ -23,6 +23,8 @@ namespace LWGUI
             All         = (1 << 5) - 1,
         }
 
+        public const uint CopyMaterialValueMaskAll = (uint)CopyMaterialValueMask.All;
+
         private static GUIContent[] _pasteMaterialMenus = new[]
         {
             new GUIContent("Paste Number Values"),
@@ -102,13 +104,13 @@ namespace LWGUI
                 && buttonRect.Contains(Event.current.mousePosition))
             {
                 EditorUtility.DisplayCustomMenu(new Rect(Event.current.mousePosition.x, Event.current.mousePosition.y, 0, 0), _pasteMaterialMenus, -1,
-                    (data, options, selected) => { ContextMenuHelper.DoPasteMaterialProperties(metaDatas, _pasteMaterialMenuValueMasks[selected]); }, null);
+                    (data, options, selected) => { ContextMenuHelper.PastePropertiesToMaterials(metaDatas, _pasteMaterialMenuValueMasks[selected]); }, null);
                 Event.current.Use();
             }
             // Left Click
             if (GUI.Button(buttonRect, _guiContentPaste, GUIStyles.iconButton))
             {
-                ContextMenuHelper.DoPasteMaterialProperties(metaDatas, (uint)CopyMaterialValueMask.All);
+                ContextMenuHelper.PastePropertiesToMaterials(metaDatas, (uint)CopyMaterialValueMask.All);
             }
 
             //----------------------------------------------------------------------------------------------------------------
@@ -247,6 +249,11 @@ namespace LWGUI
         }
 
         public static Func<Renderer, Material, Material> onFindMaterialAssetInRendererByMaterialInstance;
+
+        public static bool FindMaterialAsset(LWGUIMetaDatas metaDatas, out Material materialAsset)
+        {
+            return FindMaterialAssetByMaterialInstance(metaDatas.GetMaterial(), metaDatas, out materialAsset);
+        }
 
         private static bool FindMaterialAssetByMaterialInstance(Material material, LWGUIMetaDatas metaDatas, out Material materialAsset)
         {

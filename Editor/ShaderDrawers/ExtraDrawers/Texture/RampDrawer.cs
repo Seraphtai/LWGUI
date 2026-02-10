@@ -122,6 +122,11 @@ namespace LWGUI
 		
 		protected virtual void CreateNewRampMap(MaterialProperty prop, MaterialEditor editor)
 		{
+			CloneRampMap(prop, editor, null);
+		}
+
+		protected virtual void CloneRampMap(MaterialProperty prop, MaterialEditor editor, LwguiGradient gradient)
+		{
 			string createdFileRelativePath = string.Empty;
 			while (true)
 			{
@@ -151,8 +156,11 @@ namespace LWGUI
 
 			if (!string.IsNullOrEmpty(createdFileRelativePath))
 			{
-				RampHelper.CreateAndSaveNewGradientTexture(defaultWidth, defaultHeight, createdFileRelativePath, colorSpace == ColorSpace.Linear);
+				var width = prop.textureValue != null ? prop.textureValue.width : defaultWidth;
+				var height = prop.textureValue != null ? prop.textureValue.height : defaultHeight;
+				RampHelper.CreateAndSaveNewGradientTexture(width, height, createdFileRelativePath, colorSpace == ColorSpace.Linear, gradient);
 				prop.textureValue = AssetDatabase.LoadAssetAtPath<Texture2D>(createdFileRelativePath);
+				EditorGUIUtility.PingObject(prop.textureValue);
 			}
 		}
 
@@ -240,6 +248,7 @@ namespace LWGUI
 				out bool hasGradientChanges, 
 				out bool doEditWhenNoGradient, 
 				out doRegisterUndo, 
+				out bool doClone,
 				out bool doCreate, 
 				out bool doSaveGradient, 
 				out bool doDiscardGradient,
@@ -249,6 +258,15 @@ namespace LWGUI
 			if (doEditWhenNoGradient)
 			{
 				EditWhenNoRampMap(prop, editor);
+			}
+
+			// Clone
+			if (doClone)
+			{
+				LwguiGradientWindow.CloseWindow();
+				CloneRampMap(prop, editor, gradient);
+				OnCreateNewRampMap(prop);
+				LWGUI.OnValidate(metaDatas);
 			}
 			
 			// Create
