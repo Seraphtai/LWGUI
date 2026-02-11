@@ -31,6 +31,7 @@ namespace LWGUI
         public bool   hasChildrenModified     = false;        // Are Children properties modified in the material?
         public bool   hasRevertChanged        = false;        // Used to call property EndChangeCheck()
         public bool   isShowing               = true;         // ShowIf() result
+        public bool   isActive                = true;         // ActiveIf() result
         public bool   isAnimated              = false;        // Material Parameter Animation preview in Timeline is activated
     }
 
@@ -168,6 +169,10 @@ namespace LWGUI
 
                 // Get ShowIf() results
                 ShowIfDecorator.GetShowIfResult(propStaticData, propDynamicData, this);
+                
+                // Get ActiveIf() results
+                if (propStaticData.activeIfDatas.Count > 0)
+                    propDynamicData.isActive = ShowIfDecorator.GetShowIfResultFromMaterial(propStaticData.activeIfDatas, this.material);
             }
 
             // Get Shader Perf Stats

@@ -67,6 +67,7 @@ It significantly shortens iteration cycles while improving collaboration between
       * [Condition Display](#condition-display)
          * [Hidden](#hidden)
          * [ShowIf](#showif)
+         * [ActiveIf](#activeif)
    * [LWGUI Timeline Tracks](#lwgui-timeline-tracks)
       * [MaterialKeywordToggleTrack](#materialkeywordtoggletrack)
    * [Unity Builtin Drawers](#unity-builtin-drawers)
@@ -972,6 +973,31 @@ Example:
 ![image-20231023010153213](./assets~/image-20231023010153213.png)
 
 ![image-20231023010204399](./assets~/image-20231023010204399.png)
+
+#### ActiveIf
+
+```c#
+/// Control whether a single property or a group can be edited based on multiple conditions.
+/// 
+/// logicalOperator: And | Or (Default: And).
+/// propName: Target Property Name used for comparison.
+/// compareFunction: Less (L) | Equal (E) | LessEqual (LEqual / LE) | Greater (G) | NotEqual (NEqual / NE) | GreaterEqual (GEqual / GE).
+/// value: Target Property Value used for comparison.
+/// 
+/// When the condition is false, the property is read-only.
+public ActiveIfDecorator(string propName, string comparisonMethod, float value) : this("And", propName, comparisonMethod, value) { }
+public ActiveIfDecorator(string logicalOperator, string propName, string compareFunction, float value)
+```
+
+Example:
+
+```c#
+[Main(GroupName)] _group ("Group", float) = 0
+[Sub(GroupName)][KWEnum(Key 1, _KEY1, key 2, _KEY2)] _enum ("KWEnum", float) = 0
+[Sub(GroupName)][ActiveIf(_enum, Equal, 0)] _float0 ("Editable only when key 1", float) = 0
+[Sub(GroupName)][ActiveIf(_enum, E, 1)] _float1 ("Editable only when key 2", float) = 0
+[Sub(GroupName)][ActiveIf(Or, _enum, E, 0)][ActiveIf(Or, _enum, G, 0)] _float2 ("Editable when key >= 0", float) = 0
+```
 
 ## LWGUI Timeline Tracks
 

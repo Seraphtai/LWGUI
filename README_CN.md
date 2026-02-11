@@ -67,6 +67,7 @@ LWGUI 已在诸多大型商业项目中长期验证:
       * [Condition Display](#condition-display)
          * [Hidden](#hidden)
          * [ShowIf](#showif)
+         * [ActiveIf](#activeif)
    * [LWGUI Timeline Tracks](#lwgui-timeline-tracks)
       * [MaterialKeywordToggleTrack](#materialkeywordtoggletrack)
    * [Unity Builtin Drawers](#unity-builtin-drawers)
@@ -969,6 +970,31 @@ Example:
 ![image-20231023010153213](./assets~/image-20231023010153213.png)
 
 ![image-20231023010204399](./assets~/image-20231023010204399.png)
+
+#### ActiveIf
+
+```c#
+/// 基于多个条件控制单个属性或一组属性是否可编辑.
+/// 
+/// logicalOperator: And | Or (默认: And).
+/// propName: 用于比较的目标属性名.
+/// compareFunction: Less (L) | Equal (E) | LessEqual (LEqual / LE) | Greater (G) | NotEqual (NEqual / NE) | GreaterEqual (GEqual / GE).
+/// value: 用于比较的目标值.
+/// 
+/// 当条件为 false 时, 属性会变为只读.
+public ActiveIfDecorator(string propName, string comparisonMethod, float value) : this("And", propName, comparisonMethod, value) { }
+public ActiveIfDecorator(string logicalOperator, string propName, string compareFunction, float value)
+```
+
+示例:
+
+```c#
+[Main(GroupName)] _group ("Group", float) = 0
+[Sub(GroupName)][KWEnum(Key 1, _KEY1, key 2, _KEY2)] _enum ("KWEnum", float) = 0
+[Sub(GroupName)][ActiveIf(_enum, Equal, 0)] _float0 ("Editable only when key 1", float) = 0
+[Sub(GroupName)][ActiveIf(_enum, E, 1)] _float1 ("Editable only when key 2", float) = 0
+[Sub(GroupName)][ActiveIf(Or, _enum, E, 0)][ActiveIf(Or, _enum, G, 0)] _float2 ("Editable when key >= 0", float) = 0
+```
 
 ## LWGUI Timeline Tracks
 

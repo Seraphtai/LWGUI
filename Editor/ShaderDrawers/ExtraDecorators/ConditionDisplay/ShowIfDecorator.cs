@@ -35,7 +35,7 @@ namespace LWGUI
 
 		public ShowIfData showIfData = new();
 		
-		private readonly Dictionary<string, string> _compareFunctionLUT = new()
+		private static readonly Dictionary<string, string> _compareFunctionLUT = new()
 		{
 			{ "Less", "Less" },
 			{ "L", "Less" },
@@ -54,18 +54,27 @@ namespace LWGUI
 			{ "GE", "GreaterEqual" },
 		};
 
+		public static CompareFunction ParseCompareFunction(string compareFunction)
+		{
+			if (!_compareFunctionLUT.TryGetValue(compareFunction, out var compareFunctionName)
+				|| !Enum.IsDefined(typeof(CompareFunction), compareFunctionName))
+			{
+				Debug.LogError("LWGUI: Invalid compareFunction: '"
+							 + compareFunction
+							 + "', Must be one of the following: Less (L) | Equal (E) | LessEqual (LEqual / LE) | Greater (G) | NotEqual (NEqual / NE) | GreaterEqual (GEqual / GE).");
+				return CompareFunction.Equal;
+			}
+
+			return (CompareFunction)Enum.Parse(typeof(CompareFunction), compareFunctionName);
+		}
+
 		public ShowIfDecorator(string propName, string comparisonMethod, float value) : this("And", propName, comparisonMethod, value) { }
 
 		public ShowIfDecorator(string logicalOperator, string propName, string compareFunction, float value)
 		{
 			showIfData.logicalOperator = logicalOperator.ToLower() == "or" ? LogicalOperator.Or : LogicalOperator.And;
 			showIfData.targetPropertyName = propName;
-			if (!_compareFunctionLUT.ContainsKey(compareFunction) || !Enum.IsDefined(typeof(CompareFunction), _compareFunctionLUT[compareFunction]))
-				Debug.LogError("LWGUI: Invalid compareFunction: '"
-							 + compareFunction
-							 + "', Must be one of the following: Less (L) | Equal (E) | LessEqual (LEqual / LE) | Greater (G) | NotEqual (NEqual / NE) | GreaterEqual (GEqual / GE).");
-			else
-				showIfData.compareFunction = (CompareFunction)Enum.Parse(typeof(CompareFunction), _compareFunctionLUT[compareFunction]);
+			showIfData.compareFunction = ParseCompareFunction(compareFunction);
 			showIfData.value = value;
 		}
 

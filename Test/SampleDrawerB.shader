@@ -18,12 +18,12 @@
 		[Sub(Group1)] [HDR] _color1 ("Sub HDR Color", color) = (0.7, 0.7, 1, 1)
 
 		[SubTitle(Group1, Conditional Display Samples       Enum)]
-		[KWEnum(Group1, Name 1, _KEY1, Name 2, _KEY2, Name 3, _KEY3)] _enum ("KWEnum", float) = 0
-		[Sub(Group1)][ShowIf(_enum, Equal, 0)] _key1_Float1 ("Key1 Float", float) = 0
-		[Sub(Group1)][ShowIf(_enum, Equal, 1)] _key2_Float2 ("Key2 Float", float) = 0
-		[SubIntRange(Group1)][ShowIf(_enum, Equal, 2)] _key3_Int_Range ("Key3 Int Range", Range(0, 10)) = 0
-		[ShowIf(_enum, Equal, 0)][ShowIf(Or, _enum, Equal, 2)]
-		[SubPowerSlider(Group1, 3)] _key13_PowerSlider ("Key1 or Key3 Power Slider", Range(0, 1)) = 0
+		[KWEnum(Group1, Keyword 1, _Keyword1, Keyword 2, _Keyword2, Keyword 3, _Keyword3)] _enum ("KWEnum", float) = 0
+		[ShowIf(_enum, Equal, 0)][Sub(Group1)] _Keyword1_Float1 ("Show If Keyword1", float) = 0
+		[ShowIf(_enum, Equal, 1)][Sub(Group1)] _Keyword2_Float2 ("Show If Keyword2", float) = 0
+		[ShowIf(_enum, Equal, 2)][SubIntRange(Group1)] _Keyword3_Int_Range ("Show If Keyword3", Range(0, 10)) = 0
+		[ShowIf(_enum, Equal, 0)][ShowIf(Or, _enum, Equal, 2)][SubPowerSlider(Group1, 3)] _Keyword13_PowerSlider ("Show If Keyword 1 or 3", Range(0, 1)) = 0
+		[ActiveIf(_enum, E, 1)][Sub(Group1)] _Keyword1_Float2 ("Active If Keyword2", float) = 0
 
 
 		[Main(Group2, _, off, off)] _group2 ("Group - Without Toggle", float) = 0

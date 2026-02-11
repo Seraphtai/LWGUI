@@ -57,6 +57,7 @@ namespace LWGUI
         public bool                             isReadOnly                = false;                                  // [ReadOnly]
         public bool                             isHidden                  = false;                                  // [Hidden]
         public List<ShowIfDecorator.ShowIfData> showIfDatas               = new List<ShowIfDecorator.ShowIfData>(); // [ShowIf()]
+        public List<ShowIfDecorator.ShowIfData> activeIfDatas             = new List<ShowIfDecorator.ShowIfData>(); // [ActiveIf()]
         public string                           conditionalDisplayKeyword = string.Empty;                           // [Group(groupName_conditionalDisplayKeyword)]
 
         // Drawers
