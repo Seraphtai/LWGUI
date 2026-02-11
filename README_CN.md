@@ -4,24 +4,26 @@
 
 [![](https://dcbadge.vercel.app/api/server/WwBYGXqPEh)](https://discord.gg/WwBYGXqPEh)
 
-一个轻量, 灵活, 强大的**Unity Shader GUI**系统.
+一个轻量, 灵活, 强大的 **Unity Shader GUI** 系统, 专为提升材质面板生产力而设计.
 
-已经过诸多大型商业项目的验证, 使用简洁的Material Property Drawer语法实现功能强大的Shader GUI, 节省大量开发时间, 易于使用和扩展, 有效提升美术人员的使用体验.
+LWGUI 已在诸多大型商业项目中长期验证:  
+使用简洁的 Material Property Drawer 语法快速搭建复杂 Inspector, 同时提供模块化 Drawer/Decorator 扩展体系、稳定的 MetaData 生命周期缓存、完善的 Ramp/Preset/Toolbar 工具链与 Timeline 集成能力.
+
+在保证高扩展性的同时显著缩短开发迭代周期, 并大幅提升美术与技术美术的协作体验.
 
 ![809c4a1c-ce80-48b1-b415-7e8d4bea716e](assets~/809c4a1c-ce80-48b1-b415-7e8d4bea716e-16616214059841.png)
 
 ![LWGUI](assets~/LWGUI.png)
 
-| ![image-20240716183800118](./assets~/image-20240716183800118.png)   | ![](assets~/Pasted%20image%2020250522183200.png)                  |
-| ------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| 比UE更加强大的Gradient编辑器, 同时支持Shader和C#                                  | **NEW: 使用Ramp Atlas在一个Texture中包含多个Ramp**                          |
-| ![image-20250314160119094](./assets~/image-20250314160119094.png)   | ![image-20220926025611208](./assets~/image-20220926025611208.png) |
-| **NEW: Timeline中录制材质参数动画时, 自动捕获Toggle的Keyword更改, 以便运行时切换材质Keyword** | 功能丰富的工具栏                                                          |
+| ![image-20240716183800118](./assets~/image-20240716183800118.png)                                     | ![](assets~/Pasted%20image%2020250522183200.png)                  |
+| --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| 比UE更加强大的Gradient编辑器, 同时支持Shader和C#                                                    | **NEW: 使用Ramp Atlas在一个Texture中包含多个Ramp**        |
+| ![image-20250314160119094](./assets~/image-20250314160119094.png)                                     | ![image-20220926025611208](./assets~/image-20220926025611208.png) |
+| **NEW: Timeline中录制材质参数动画时, 自动捕获Toggle的Keyword更改, 以便运行时切换材质Keyword** | 功能丰富的工具栏                                                |
 
-| With your sponsorship, I will update more actively. | 有你的赞助我会更加积极地更新                                                                              |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [paypal.me/JasonMa0012](paypal.me/JasonMa0012)      | ![723ddce6-fb86-48ff-9683-a12cf6cff7a0](./assets~/723ddce6-fb86-48ff-9683-a12cf6cff7a0.jpg) |
-
+| With your sponsorship, I will update more actively. | 有你的赞助我会更加积极地更新                                                              |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| [paypal.me/JasonMa0012](paypal.me/JasonMa0012)         | ![723ddce6-fb86-48ff-9683-a12cf6cff7a0](./assets~/723ddce6-fb86-48ff-9683-a12cf6cff7a0.jpg) |
 
 <!--ts-->
 * [LWGUI (Light Weight Shader GUI)](#lwgui-light-weight-shader-gui)
@@ -38,9 +40,6 @@
          * [KWEnum](#kwenum)
          * [SubEnum &amp; SubKeywordEnum](#subenum--subkeywordenum)
          * [Preset](#preset)
-            * [Create Preset File](#create-preset-file)
-            * [Edit Preset](#edit-preset)
-         * [BitMask](#bitmask)
          * [RampAtlasIndexer](#rampatlasindexer)
       * [Texture](#texture)
          * [Tex](#tex)
@@ -68,6 +67,7 @@
       * [Condition Display](#condition-display)
          * [Hidden](#hidden)
          * [ShowIf](#showif)
+         * [ActiveIf](#activeif)
    * [LWGUI Timeline Tracks](#lwgui-timeline-tracks)
       * [MaterialKeywordToggleTrack](#materialkeywordtoggletrack)
    * [Unity Builtin Drawers](#unity-builtin-drawers)
@@ -85,19 +85,30 @@
       * [Custom Header and Footer](#custom-header-and-footer)
       * [Custom Drawer](#custom-drawer)
    * [Contribution](#contribution)
+   * [开发指南](#开发指南)
+      * [项目定位与核心目标](#项目定位与核心目标)
+      * [架构与分层原理](#架构与分层原理)
+      * [代码结构与职责总览](#代码结构与职责总览)
+      * [MetaData 详细说明: 数据结构与生命周期](#metadata-详细说明-数据结构与生命周期)
+         * [1) PerInspectorData (Inspector 作用域)](#1-perinspectordata-inspector-作用域)
+         * [2) PerMaterialData (Material 作用域)](#2-permaterialdata-material-作用域)
+         * [3) PerShaderData (Shader 作用域)](#3-pershaderdata-shader-作用域)
+         * [MetaData 整体生命周期流转(推荐理解模型)](#metadata-整体生命周期流转推荐理解模型)
+      * [ShaderGUI 重要事件与调用时机](#shadergui-重要事件与调用时机)
+      * [排查建议(按调用时序)](#排查建议按调用时序)
 <!--te-->
 
 ## Installation
 
 1. 确保你的Unity版本兼容LWGUI
+
    - LWGUI <1.17: **Unity 2017.4+**
    - LWGUI >=1.17: **Unity 2021.3+**
      - **推荐的最低版本: Unity 2022.2+, 更低版本虽然能使用但可能有BUG**
-   
 2. 打开已有工程
-3. （可能需要全局代理）`Window > Package Manager > Add > Add package from git URL` 输入`https://github.com/JasonMa0012/LWGUI.git`
+3. （可能需要全局代理）`Window > Package Manager > Add > Add package from git URL` 输入 `https://github.com/JasonMa0012/LWGUI.git`
 
-   - 你也可以选择手动从Github下载Zip，然后从`Package Manager > Add package from disk`添加Local Package
+   - 你也可以选择手动从Github下载Zip，然后从 `Package Manager > Add package from disk`添加Local Package
    - **对于Unity 2017, 请直接将Zip解压到Assets目录**
 
 ## Getting Started
@@ -106,10 +117,9 @@
 2. 在代码编辑器中打开Shader
 3. 在Shader最底部, 最后一个大括号之前, 添加行:`CustomEditor "LWGUI.LWGUI"`
 4. 完成! 开始使用以下功能强大的Drawer轻松绘制你的ShaderGUI吧
-   - MaterialPropertyDrawer是一种类似C# Attribute的语法, 在MaterialProperty前加上Drawer可以更改绘制方式, 更多信息可以查看官方文档:`https://docs.unity3d.com/ScriptReference/MaterialPropertyDrawer.html`
-   - 每个Property只能有一个Drawer
-   - 每个Property可以有多个Decorator
-
+   - MaterialPropertyDrawer是一种类似C# Attribute的语法, 在MaterialProperty前加上Drawer可以更改绘制方式, 更多信息可以查看[官方文档](https://docs.unity3d.com/ScriptReference/MaterialPropertyDrawer.html)
+   - 你可以参考Test目录中的示例Shader
+   - ***请注意: 每个Property只能有一个Drawer, 但是可以有多个Decorator***
 
 ## Basic Drawers
 
@@ -205,8 +215,6 @@ public SubToggleDrawer(string group, string keyWord) : this(group, keyWord, Stri
 public SubToggleDrawer(string group, string keyWord, string presetFileName)
 ```
 
-
-
 #### SubPowerSlider
 
 ```c#
@@ -224,7 +232,6 @@ public SubPowerSliderDrawer(string group, float power) : this(group, power, stri
 public SubPowerSliderDrawer(string group, float power, string presetFileName)
 ```
 
-
 #### SubIntRange
 
 ```c#
@@ -235,8 +242,6 @@ public SubPowerSliderDrawer(string group, float power, string presetFileName)
 public SubIntRangeDrawer(string group)
 
 ```
-
-
 
 #### MinMaxSlider
 
@@ -267,8 +272,6 @@ Result:
 
 ![image-20220828003810353](assets~/image-20220828003810353.png)
 
-
-
 #### KWEnum
 
 ```c#
@@ -284,15 +287,13 @@ public KWEnumDrawer(string n1, string k1, string n2, string k2)
 public KWEnumDrawer(string n1, string k1, string n2, string k2, string n3, string k3)
 public KWEnumDrawer(string n1, string k1, string n2, string k2, string n3, string k3, string n4, string k4)
 public KWEnumDrawer(string n1, string k1, string n2, string k2, string n3, string k3, string n4, string k4, string n5, string k5)
-    
+  
 public KWEnumDrawer(string group, string n1, string k1)
 public KWEnumDrawer(string group, string n1, string k1, string n2, string k2)
 public KWEnumDrawer(string group, string n1, string k1, string n2, string k2, string n3, string k3)
 public KWEnumDrawer(string group, string n1, string k1, string n2, string k2, string n3, string k3, string n4, string k4)
 public KWEnumDrawer(string group, string n1, string k1, string n2, string k2, string n3, string k3, string n4, string k4, string n5, string k5)
 ```
-
-
 
 #### SubEnum & SubKeywordEnum
 
@@ -319,8 +320,6 @@ public SubKeywordEnumDrawer(string group, string kw1, string kw2, string kw3, st
 
 ```
 
-
-
 #### Preset
 
 ```c#
@@ -338,7 +337,7 @@ public PresetDrawer(string group, string presetFileName)
 
 Example:
 
-~~~c#
+```c#
 [Title(Preset Samples)]
 [Preset(LWGUI_BlendModePreset)] _BlendMode ("Blend Mode Preset", float) = 0 
 [Enum(UnityEngine.Rendering.CullMode)]_Cull("Cull", Float) = 2
@@ -347,14 +346,14 @@ Example:
 [Toggle(_)]_ZWrite("ZWrite ", Float) = 1
 [Enum(UnityEngine.Rendering.CompareFunction)]_ZTest("ZTest", Float) = 4 // 4 is LEqual
 [Enum(RGBA,15,RGB,14)]_ColorMask("ColorMask", Float) = 15 // 15 is RGBA (binary 1111)
-    
+  
 ``````
-    
+  
 Cull [_Cull]
 ZWrite [_ZWrite]
 Blend [_SrcBlend] [_DstBlend]
 ColorMask [_ColorMask]
-~~~
+```
 
 Result:
 
@@ -369,8 +368,6 @@ Result:
 ##### Edit Preset
 
 ![image-20221122232354623](assets~/image-20221122232354623.png)![image-20221122232415972](assets~/image-20221122232415972.png)![image-20221122232425194](assets~/image-20221122232425194.png)
-
-
 
 #### BitMask
 
@@ -404,25 +401,30 @@ public BitMaskDrawer(string group, string bitDescription7, string bitDescription
 ```
 
 Example:
+
 ```C#
 [BitMask(Preset)] _Stencil ("Stencil", Integer) = 0  
 [BitMask(Preset, Left, Bit6, Bit5, Bit4, Description, Bit2, Bit1, Right)] _StencilWithDescription ("Stencil With Description", Integer) = 0
 ```
+
 Result:
 ![](assets~/Pasted%20image%2020250321174432.png)
 
 > [!CAUTION]
-> 警告: 如果用于设置Stencil, 则会与SRP Batcher冲突!  
-> (在Unity 2022中复现)  
->   
-> SRP Batcher没有正确处理含有不同Stencil Ref的多个材质,  
-> 错误地将它们合并为一个Batch, 并随机选择一个材质中的Stencil Ref值作为整个Batch的值.  
-> 理论上如果不同材质有不同的Stencil Ref值, 由于Render State不同不应该被合并为一个Batch.   
->    
-> 解决方法: 
->    - 通过设置Material Property Block强制禁用SRP Batcher  
->    - 使有相同Stencil Ref的材质在一个单独的Render Queue中, 以确保Batch的Render State是正确的
+> 警告: 如果用于设置Stencil, 则会与SRP Batcher冲突!
+> (在Unity 2022中复现)
+>
+> SRP Batcher没有正确处理含有不同Stencil Ref的多个材质,
+> 错误地将它们合并为一个Batch, 并随机选择一个材质中的Stencil Ref值作为整个Batch的值.
+> 理论上如果不同材质有不同的Stencil Ref值, 由于Render State不同不应该被合并为一个Batch.
+>
+> 解决方法:
+>
+> - 通过设置Material Property Block强制禁用SRP Batcher
+> - 使有相同Stencil Ref的材质在一个单独的Render Queue中, 以确保Batch的Render State是正确的
+
 #### RampAtlasIndexer
+
 ```c#
 /// 视觉上类似Ramp(), 但RampAtlasIndexer()必须和RampAtlas()一起使用.  
 /// 实际保存的值为当前Ramp在Ramp Atlas SO中的Index, 用于在Shader中采样Ramp Atlas Texture.  
@@ -442,6 +444,7 @@ public RampAtlasIndexerDrawer(string group, string rampAtlasPropName, string def
 ```
 
 用法详见: RampAtlas()
+
 ### Texture
 
 #### Tex
@@ -544,29 +547,31 @@ Result:
 
 ##### Gradient Editor
 
-新的LWGUI Gradient Editor集成了Unity内置的[Gradient Editor](https://docs.unity3d.com/Manual/EditingValueProperties.html)和[Curve Editor](https://docs.unity3d.com/Manual/EditingCurves.html), 实现了比UE的Gradient Editor更加强大的功能. 
+新的LWGUI Gradient Editor集成了Unity内置的[Gradient Editor](https://docs.unity3d.com/Manual/EditingValueProperties.html)和[Curve Editor](https://docs.unity3d.com/Manual/EditingCurves.html), 实现了比UE的Gradient Editor更加强大的功能.
 
 ![image-20241126110012922](./assets~/image-20241126110012922.png)
 
-| 编辑器                | 解释                                                         |
-| --------------------- | ------------------------------------------------------------ |
-| Time Range            | 横轴的显示范围, 可以选择0-1 / 0-24 / 0-2400, 当横轴为时间时非常有用. 注意, 只影响显示, 横轴实际存储的值始终为0-1. |
-| Channels              | 显示的通道, 可以单独只显示某些通道.                          |
-| sRGB Preview          | 当Gradient的值为颜色时应该勾选以预览正确的颜色, 否则不需要勾选. 只影响显示, Gradient和Ramp Map存储的值始终为Linear. |
-| Value / R / G / B / A | 用于编辑已选中的Key的Value, 可以同时编辑多个Key的Value.      |
-| Time                  | 用于编辑已选中的Key的Time, 可以同时编辑多个Key的Time. 如果手动输入数字, 必须要**按回车**以结束编辑. |
-| Gradient Editor       | 类似于Unity内置的[Gradient Editor](https://docs.unity3d.com/Manual/EditingValueProperties.html), 但是将Alpha通道分离显示为黑白.<br/>注意, **从Gradient Editor添加Key时会受到最多8个Key的限制**, 从Curve Editor添加Key则数量**不受限制**. Key的数量超过限制不会影响预览和使用. |
-| Curve Editor          | 类似于Unity内置的Curve Editor, 默认显示XY 0-1的范围, 你可以用滚轮缩放或移动显示范围.<br/>如下图所示, 右键菜单中有大量控制曲线形态的功能, 你可以查阅[Unity文档](https://docs.unity3d.com/Manual/EditingCurves.html)以充分利用这些功能. |
-| Presets               | 你可以保存当前LWGUI Gradient为预设, 并随时调用这些预设. 这些预设在本地计算机的不同引擎版本之间通用, 但不会保存到项目中. |
+| 编辑器                | 解释                                                                                                                                                                                                                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Time Range            | 横轴的显示范围, 可以选择0-1 / 0-24 / 0-2400, 当横轴为时间时非常有用. 注意, 只影响显示, 横轴实际存储的值始终为0-1.                                                                                                                                                                          |
+| Channels              | 显示的通道, 可以单独只显示某些通道.                                                                                                                                                                                                                                                        |
+| sRGB Preview          | 当Gradient的值为颜色时应该勾选以预览正确的颜色, 否则不需要勾选. 只影响显示, Gradient和Ramp Map存储的值始终为Linear.                                                                                                                                                                        |
+| Value / R / G / B / A | 用于编辑已选中的Key的Value, 可以同时编辑多个Key的Value.                                                                                                                                                                                                                                    |
+| Time                  | 用于编辑已选中的Key的Time, 可以同时编辑多个Key的Time. 如果手动输入数字, 必须要**按回车**以结束编辑.                                                                                                                                                                                  |
+| Gradient Editor       | 类似于Unity内置的[Gradient Editor](https://docs.unity3d.com/Manual/EditingValueProperties.html), 但是将Alpha通道分离显示为黑白.``注意, **从Gradient Editor添加Key时会受到最多8个Key的限制**, 从Curve Editor添加Key则数量**不受限制**. Key的数量超过限制不会影响预览和使用. |
+| Curve Editor          | 类似于Unity内置的Curve Editor, 默认显示XY 0-1的范围, 你可以用滚轮缩放或移动显示范围.``如下图所示, 右键菜单中有大量控制曲线形态的功能, 你可以查阅[Unity文档](https://docs.unity3d.com/Manual/EditingCurves.html)以充分利用这些功能.                                                     |
+| Presets               | 你可以保存当前LWGUI Gradient为预设, 并随时调用这些预设. 这些预设在本地计算机的不同引擎版本之间通用, 但不会保存到项目中.                                                                                                                                                                    |
 
 ![image-20241126105823397](./assets~/image-20241126105823397.png)![image-20241126112320151](./assets~/image-20241126112320151.png)
 
-> [!NOTE] 
+> [!NOTE]
 > **已知问题:**
+>
 > - Unity 2022以下的预览图像在sRGB/Linear颜色空间之间没有区别
 > - 在编辑器帧率较低时Ctrl + Z结果可能和预期稍有偏差
 
 #### RampAtlas
+
 ```c#
 /// 绘制一个"Ramp Atlas Scriptable Object"选择器和贴图预览.  
 /// Ramp Atlas SO负责存储多个Ramp并生成对应的Ramp Atlas Texture.  
@@ -592,7 +597,9 @@ public RampAtlasDrawer(string group, string defaultFileName, string rootPath, st
 public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight, string showAtlasPreview) : this(group, defaultFileName, rootPath, colorSpace, defaultWidth, defaultHeight, showAtlasPreview, "") { }  
 public RampAtlasDrawer(string group, string defaultFileName, string rootPath, string colorSpace, float defaultWidth, float defaultHeight, string showAtlasPreview, string rampAtlasTypeName)
 ```
+
 Example:
+
 ```c#
 [RampAtlas(g2)] _RampAtlas ("Ramp Atlas", 2D) = "white" { }  
 [Space]  
@@ -605,6 +612,7 @@ Result:
 ![](assets~/Pasted%20image%2020250522183200.png)
 
 Shaderlab:
+
 ```c#
 sampler2D _RampAtlas;  
 float4 _RampAtlas_TexelSize;  
@@ -615,25 +623,29 @@ int _RampAtlasIndex0;
 float2 rampUV = float2(i.uv.x, _RampAtlas_TexelSize.y * (_RampAtlasIndex0 + 0.5f));  
 fixed4 color = tex2D(_RampAtlas, saturate(rampUV));
 ```
+
 ##### Ramp Atlas Scriptable Object
+
 Ramp Atlas SO负责存储并生成Ramp Atlas Texture:
 ![](assets~/Pasted%20image%2020250523120309.png)
-在加载SO或在材质上修改Ramp时, 会自动在与SO相同路径处创建Ramp Atlas Texture, 后缀名为`.tga`.
-在手动修改SO后需要点击`Save Texture Toggle`生成Texture.
+在加载SO或在材质上修改Ramp时, 会自动在与SO相同路径处创建Ramp Atlas Texture, 后缀名为 `.tga`.
+在手动修改SO后需要点击 `Save Texture Toggle`生成Texture.
 
 你可以用以下方式创建SO:
-- 在Project面板中右键: `Create > LWGUI > Ramp Atlas`
-- 在使用RampAtlas()的材质属性上右键: `Create Ramp Atlas`或`Clone Ramp Atlas`
-	- 用这种方式创建的SO会包含当前材质中所有Ramp的默认值
 
-你可以点击RampAtlasIndexer()的添加按钮向SO添加新的Ramp.  
+- 在Project面板中右键: `Create > LWGUI > Ramp Atlas`
+- 在使用RampAtlas()的材质属性上右键: `Create Ramp Atlas`或 `Clone Ramp Atlas`
+  - 用这种方式创建的SO会包含当前材质中所有Ramp的默认值
+
+你可以点击RampAtlasIndexer()的添加按钮向SO添加新的Ramp.
 
 右上角的上下文菜单中有一键转换颜色空间功能.
 
 > [!CAUTION]
 > 目前材质仅保存Texture引用和Int值, 如果你手动修改了Ramp Atlas SO中的Ramp数量和顺序, 那么材质中已选择的Ramp可能被打乱!
-> 
+>
 > 建议:
+>
 > - 缩小单个Ramp Atlas的使用范围
 > - 只添加Ramp
 > - 不要修改Ramp排序
@@ -692,8 +704,6 @@ Result:
 
 ![image-20220828003507825](assets~/image-20220828003507825.png)
 
-
-
 #### Channel
 
 ```c#
@@ -723,11 +733,7 @@ Example:
 float selectedChannelValue = dot(tex2D(_Tex, uv), _textureChannelMask);
 ```
 
-
-
 ![image-20220822010511978](assets~/image-20220822010511978.png)
-
-
 
 ### Other
 
@@ -765,10 +771,6 @@ Example:
 ```
 
 ![image-20241127180711449](./assets~/image-20241127180711449.png)
-
-
-
-
 
 ## Extra Decorators
 
@@ -855,16 +857,12 @@ Tips:
 
 - Tooltip可能在Editor运行时消失, 这是Unity本身的特性 (或者是bug)
 
-
-
 #### ReadOnly
 
 ```c#
 /// 将属性设为只读.
 public ReadOnlyDecorator()
 ```
-
-
 
 ### Logic
 
@@ -883,11 +881,7 @@ public PassSwitchDecorator(string   lightModeName1, string lightModeName2, strin
 
 ```
 
-
-
 ### Structure
-
-
 
 #### Advanced & AdvancedHeaderProperty
 
@@ -928,8 +922,6 @@ Tips:
 
 - LWGUI使用树状数据结构存储Group和Advanced Block及其子级的关系, 理论上可以存储无限多级父子关系, 但**目前LWGUI仅手动处理3层父子关系, 也就是说你可以将Advanced Block放在Group内, 而不能将Group放在Advanced Block内.**
 
-
-
 ### Condition Display
 
 #### Hidden
@@ -938,8 +930,6 @@ Tips:
 /// 类似于HideInInspector(), 区别在于Hidden()可以通过Display Mode按钮取消隐藏.
 public HiddenDecorator()
 ```
-
-
 
 #### ShowIf
 
@@ -981,6 +971,31 @@ Example:
 
 ![image-20231023010204399](./assets~/image-20231023010204399.png)
 
+#### ActiveIf
+
+```c#
+/// 基于多个条件控制单个属性或一组属性是否可编辑.
+/// 
+/// logicalOperator: And | Or (默认: And).
+/// propName: 用于比较的目标属性名.
+/// compareFunction: Less (L) | Equal (E) | LessEqual (LEqual / LE) | Greater (G) | NotEqual (NEqual / NE) | GreaterEqual (GEqual / GE).
+/// value: 用于比较的目标值.
+/// 
+/// 当条件为 false 时, 属性会变为只读.
+public ActiveIfDecorator(string propName, string comparisonMethod, float value) : this("And", propName, comparisonMethod, value) { }
+public ActiveIfDecorator(string logicalOperator, string propName, string compareFunction, float value)
+```
+
+示例:
+
+```c#
+[Main(GroupName)] _group ("Group", float) = 0
+[Sub(GroupName)][KWEnum(Key 1, _KEY1, key 2, _KEY2)] _enum ("KWEnum", float) = 0
+[Sub(GroupName)][ActiveIf(_enum, Equal, 0)] _float0 ("Editable only when key 1", float) = 0
+[Sub(GroupName)][ActiveIf(_enum, E, 1)] _float1 ("Editable only when key 2", float) = 0
+[Sub(GroupName)][ActiveIf(Or, _enum, E, 0)][ActiveIf(Or, _enum, G, 0)] _float2 ("Editable when key >= 0", float) = 0
+```
+
 ## LWGUI Timeline Tracks
 
 ### MaterialKeywordToggleTrack
@@ -1009,15 +1024,11 @@ MaterialHeaderDecorator(string header)
 MaterialEnumDrawer(string n1, float v1, string n2, float v2, string n3, float v3, string n4, float v4, string n5, float v5, string n6, float v6, string n7, float v7)
 ```
 
-
-
 ### IntRange
 
 ```c#
 MaterialIntRangeDrawer()
 ```
-
-
 
 ### KeywordEnum
 
@@ -1025,15 +1036,11 @@ MaterialIntRangeDrawer()
 MaterialKeywordEnumDrawer(string kw1, string kw2, string kw3, string kw4, string kw5, string kw6, string kw7, string kw8, string kw9)
 ```
 
-
-
 ### PowerSlider
 
 ```c#
 MaterialPowerSliderDrawer(float power)
 ```
-
-
 
 ### Toggle
 
@@ -1041,18 +1048,17 @@ MaterialPowerSliderDrawer(float power)
 MaterialToggleUIDrawer(string keyword)
 ```
 
-
 ## FAQs
 
 ### 在代码中修改材质后出现问题
 
-在代码中修改材质属性后, Drawer逻辑不会运行, 可能会丢失一些数据 (例如Keywords).   
-你需要手动调用`LWGUI.UnityEditorExtension.ApplyMaterialPropertyAndDecoratorDrawers()`以设置这部分数据 (实际上会调用`MaterialPropertyDrawer.Apply()`).
+在代码中修改材质属性后, Drawer逻辑不会运行, 可能会丢失一些数据 (例如Keywords).
+你需要手动调用 `LWGUI.UnityEditorExtension.ApplyMaterialPropertyAndDecoratorDrawers()`以设置这部分数据 (实际上会调用 `MaterialPropertyDrawer.Apply()`).
 
 ### 在代码中创建材质后出现问题
 
-在代码中创建材质时部分Drawer逻辑不会运行, 默认值可能不符合预期.  
-你需要手动调用`LWGUI.PresetHelper.ApplyPresetsInMaterial()`以确保默认值正确.
+在代码中创建材质时部分Drawer逻辑不会运行, 默认值可能不符合预期.
+你需要手动调用 `LWGUI.PresetHelper.ApplyPresetsInMaterial()`以确保默认值正确.
 
 ## Custom Shader GUI
 
@@ -1071,25 +1077,205 @@ Custom Header和Footer可以让你无需修改LWGUI插件的代码即可在Shade
 
 ### Custom Drawer
 
-TODO
+你可以通过继承 `SubDrawer` 来实现新的 Drawer 或 Decorator 逻辑(本项目中的 Decorator 也属于 `SubDrawer` 体系), 建议遵循以下最佳实践:
 
-
-
+1. **先定义职责边界**
+   - Drawer 负责属性输入与可视化交互.
+   - Decorator 负责结构组织、显示控制或外观增强.
+   - 避免在一个 Drawer 中混入过多无关职责.
+2. **从最小闭环开始迭代**
+   - 先实现一个最小可用版本, 再逐步补充高级能力.
+   - 优先参考 `Editor/ShaderDrawers/ExtraDrawers/` 与 `Editor/ShaderDrawers/ExtraDecorators/` 中最接近的实现.
+3. **保证逻辑幂等与低副作用**
+   - `OnGUI` 可能高频触发, 避免重复分配和不必要写操作.
+   - 仅在确实发生值变化时才写回材质或触发联动.
+4. **正确使用缓存作用域**
+   - Inspector 临时态放在 `PerInspectorData`.
+   - 材质相关状态放在 `PerMaterialData`.
+   - 可跨材质复用的 Shader 解析结果放在 `PerShaderData`.
+5. **优先复用现有 Helper 能力**
+   - 对于上下文菜单、Ramp、Preset、Toolbar 等需求, 优先接入 `Editor/Helper/` 的现有工具, 避免重复造轮子.
+6. **兼容真实生产场景**
+   - 至少验证多材质编辑、Undo/Redo、资源重导入、脚本重编译后的行为一致性.
+   - 提交前使用 `Test/` 下示例资源回归主要路径.
 
 ## Contribution
 
 1. 使用不同Unity版本创建多个空工程
 2. 拉取repo
 3. 使用符号链接将此repo放到所有工程的Assets或Packages目录内
-4. 在`ShaderDrawer.cs`内继承`SubDrawer`开始开发你的自定义Drawer
+4. 在 `ShaderDrawer.cs`内继承 `SubDrawer`开始开发你的自定义Drawer
 5. 检查功能在不同Unity版本是否正常
 6. Pull requests
 
+## 开发指南
 
+### 项目定位与核心目标
 
+LWGUI 的目标是在 Unity Inspector 中, 将 Shader 属性从“线性参数列表”升级为“可分组、可条件显示、可扩展交互”的编辑体验。
 
+它以 `ShaderGUI` 为入口, 通过属性标签与自定义规则把不同属性分发给对应 Drawer/Decorator, 并借助 Helper 与 MetaData 管理状态、缓存和资源联动。
 
+### 架构与分层原理
 
+整体可理解为三层:
 
+1. **Editor 层(核心能力)**
+   - 负责 Inspector 绘制、属性解析、UI 交互、菜单行为、状态缓存、资产同步。
+   - 主要目录: `Editor/`
+2. **Runtime 层(运行时补充)**
+   - 提供少量可在运行时复用的数据结构与 Timeline 相关功能。
+   - 主要目录: `Runtime/`
+3. **UnityEditorExtension 层(编辑器增强)**
+   - 放置附加编辑器窗口和扩展工具, 如 `LwguiGradientEditor`。
+   - 主要目录: `UnityEditorExtension/`
 
+核心调用链可概括为:
 
+1. `Editor/LWGUI.cs` 接管材质 Inspector 绘制入口。
+2. 解析 Shader 属性、MaterialProperty 与标签信息。
+3. 将属性分发给 `ShaderDrawers` / `BasicDrawers` / `ExtraDrawers` / `ExtraDecorators`。
+4. 在绘制过程中通过 `Helper` 处理上下文菜单、Ramp/Preset/Toolbar 等跨模块行为。
+5. 通过 `MetaData` 维护跨帧、跨材质、跨 Shader 的状态作用域。
+6. 由 `AssetProcessor` 与 `ScriptableObject` 处理资源导入、引用同步、图集维护等生命周期事件。
+
+### 代码结构与职责总览
+
+- `Editor/LWGUI.cs`
+  - ShaderGUI 主入口, 组织一次 Inspector 绘制流程与各阶段事件。
+- `Editor/ShaderDrawerBase.cs`
+  - Drawer 基类与通用能力, 定义扩展点与基础契约。
+- `Editor/BasicDrawers/`
+  - 基础结构 Drawer, 如折叠组、子项容器等。
+- `Editor/ShaderDrawers/`
+  - Shader 属性级绘制器, 处理属性到 UI 的核心映射。
+- `Editor/ShaderDrawers/ExtraDrawers/`
+  - 额外类型 Drawer, 如 Numeric/Texture/Vector/Other。
+- `Editor/ExtraDecorators/`
+  - 装饰器能力, 包括显示样式、条件显示、逻辑控制、结构组织。
+- `Editor/Helper/`
+  - 跨模块工具集, 如 `ContextMenuHelper`、`RampHelper`、`PresetHelper`、`ToolbarHelper`。
+- `Editor/MetaData/`
+  - 缓存与状态域管理, 分层处理 Inspector/Material/Shader 维度数据。
+- `Editor/ScriptableObject/`
+  - 资源数据定义, 如 `LwguiRampAtlas`、`LwguiShaderPropertyPreset`、`GradientObject`。
+- `Editor/AssetProcessor/`
+  - 处理资产导入、改名、变更监听, 保证编辑器逻辑与资源状态一致。
+- `Editor/Timeline/` 与 `Runtime/Timeline/`
+  - Timeline 相关编辑器与运行时能力。
+- `Runtime/LwguiGradient/`
+  - 运行时可用的渐变数据结构与相关逻辑。
+- `Test/`
+  - 回归和示例资源(Shader/Material/Preset), 用于验证主要路径。
+
+### MetaData 详细说明: 数据结构与生命周期
+
+`Editor/MetaData/` 的核心目的是“避免状态串扰并减少重复计算”, 通过不同作用域隔离缓存。
+
+#### 1) PerInspectorData (Inspector 作用域)
+
+- 作用域: 单个 Inspector 窗口/会话内。
+- 典型用途:
+  - UI 折叠展开状态。
+  - 临时交互态(当前编辑目标、当前菜单上下文等)。
+  - 本次绘制周期可复用的瞬时缓存。
+- 生命周期:
+  - Inspector 首次绘制时初始化。
+  - 每次 `OnGUI` 过程中读写更新。
+  - Inspector 销毁、重载或上下文变化时释放/重建。
+- 设计意义:
+  - 避免不同 Inspector 实例互相污染状态。
+
+#### 2) PerMaterialData (Material 作用域)
+
+- 作用域: 单个 Material 资产(或实例)维度。
+- 典型用途:
+  - 与具体材质强相关的缓存结果。
+  - 针对材质属性计算出的派生信息。
+  - 材质级别的 UI 辅助状态。
+- 生命周期:
+  - 材质首次被 Inspector/工具访问时创建。
+  - 在材质属性变更、重导入、替换 Shader 时刷新关键字段。
+  - 材质失效、移除引用或缓存清理策略触发时回收。
+- 设计意义:
+  - 保证同一 Shader 的不同材质不会共享错误状态。
+
+#### 3) PerShaderData (Shader 作用域)
+
+- 作用域: 单个 Shader 维度, 被多个材质共享。
+- 典型用途:
+  - Shader 属性元信息解析缓存(属性列表、标签解析结果、分组结构等)。
+  - 与 Shader 文本/结构相关且可复用的静态或半静态数据。
+- 生命周期:
+  - Shader 首次被使用时构建缓存。
+  - Shader 重新导入、源码变化或相关依赖更新时失效重建。
+  - 编辑器域重载后按需懒重建。
+- 设计意义:
+  - 减少重复解析成本, 提升大材质集场景下的 Inspector 性能。
+
+#### MetaData 整体生命周期流转(推荐理解模型)
+
+1. **进入 Inspector**
+   - 定位当前材质与 Shader, 获取/创建 `PerInspectorData`、`PerMaterialData`、`PerShaderData`。
+2. **绘制阶段**
+   - Drawer/Decorator 读取对应作用域数据, 执行条件显示、结构布局和交互逻辑。
+3. **交互与修改阶段**
+   - 用户修改属性后, 写回材质并更新必要缓存; 需要时触发上下文工具或资源逻辑。
+4. **资产变化阶段**
+   - 若 Shader/材质/关联资源发生导入或结构变化, 由监听逻辑使相关缓存失效并重建。
+5. **退出或重载阶段**
+   - Inspector 级临时状态释放; 材质/Shader 级缓存按策略保留或清理。
+
+该分层设计的关键收益:
+
+- 状态隔离清晰, 降低“跨材质污染”“跨 Inspector 串态”风险。
+- 缓存粒度合理, 在正确性与性能间保持平衡。
+- 便于排查: 可按 `Inspector -> Material -> Shader` 三层顺序定位问题。
+
+### ShaderGUI 重要事件与调用时机
+
+以下描述按 Unity Inspector 常见生命周期理解, 便于排查时对照:
+
+1. **入口阶段(`LWGUI` 作为 `ShaderGUI` 被调用)**
+
+   - 当材质在 Inspector 中被选中并需要重绘时触发。
+   - 典型动作: 建立上下文、准备属性列表、拉取 MetaData。
+2. **OnGUI 主绘制阶段**
+
+   - 每次 Inspector Repaint / Layout / 交互事件中都会进入。
+   - 典型动作:
+     - 解析并遍历 `MaterialProperty`。
+     - 调用各类 Drawer/Decorator 完成结构与控件绘制。
+     - 根据条件装饰器决定显示/隐藏和禁用态。
+3. **属性变更检测与写回阶段**
+
+   - 在 GUI 变更检查通过后触发。
+   - 典型动作:
+     - 将新值写回材质属性。
+     - 触发关键字、依赖属性、联动逻辑刷新。
+     - 更新 `PerMaterialData` 相关缓存。
+4. **上下文行为阶段(菜单/工具条/快捷动作)**
+
+   - 用户打开右键菜单或触发工具条功能时触发。
+   - 典型动作:
+     - 走 `ContextMenuHelper`、`ToolbarHelper`、`RampHelper`、`PresetHelper` 的逻辑路径。
+     - 可能引发资源引用更新、预设应用或图集操作。
+5. **资源生命周期联动阶段(导入/改名/重建)**
+
+   - 当 Shader、贴图、预设、ScriptableObject 等相关资产变化时触发。
+   - 典型动作:
+     - `AssetProcessor` 响应变化并同步引用关系。
+     - 标记并重建受影响的 `PerShaderData` / `PerMaterialData`。
+6. **域重载与重初始化阶段**
+
+   - 脚本重编译、进入/退出 PlayMode(视配置)后发生。
+   - 典型动作:
+     - 静态缓存失效或重置。
+     - 下一次 Inspector 绘制时按需懒初始化。
+
+### 排查建议(按调用时序)
+
+- **显示不正确/分组错乱**: 优先看 `LWGUI.cs` 与对应 Drawer/Decorator 的分发路径。
+- **菜单/工具行为异常**: 重点检查 `Editor/Helper/` 下具体 Helper 的触发条件和副作用。
+- **状态串扰或缓存过期**: 先确认 `MetaData` 作用域是否选对, 再看失效时机是否遗漏。
+- **资源变更后失效**: 检查 `AssetProcessor` 与 `ScriptableObject` 的引用同步链路。

@@ -175,7 +175,8 @@ namespace LWGUI
 			var revertButtonRect = RevertableHelper.SplitRevertButtonRect(ref rect);
 
 			var enabled = GUI.enabled;
-			if (propStaticData.isReadOnly) GUI.enabled = false;
+			if (propStaticData.isReadOnly || !propDynamicData.isActive) 
+				GUI.enabled = false;
 			Helper.BeginProperty(rect, prop, metaDatas);
 			ContextMenuHelper.DoPropertyContextMenus(rect, prop, metaDatas);
 			
