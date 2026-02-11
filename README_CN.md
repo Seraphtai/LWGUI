@@ -6,7 +6,10 @@
 
 一个轻量, 灵活, 强大的 **Unity Shader GUI** 系统, 专为提升材质面板生产力而设计.
 
-LWGUI 已在诸多大型商业项目中长期验证: 使用简洁的 Material Property Drawer 语法快速搭建复杂 Inspector, 同时提供模块化 Drawer/Decorator 扩展体系、稳定的 MetaData 生命周期缓存、完善的 Ramp/Preset/Toolbar 工具链与 Timeline 集成能力, 在保证高扩展性的同时显著缩短开发迭代周期, 并大幅提升美术与技术美术的协作体验.
+LWGUI 已在诸多大型商业项目中长期验证:  
+使用简洁的 Material Property Drawer 语法快速搭建复杂 Inspector, 同时提供模块化 Drawer/Decorator 扩展体系、稳定的 MetaData 生命周期缓存、完善的 Ramp/Preset/Toolbar 工具链与 Timeline 集成能力.
+
+在保证高扩展性的同时显著缩短开发迭代周期, 并大幅提升美术与技术美术的协作体验.
 
 ![809c4a1c-ce80-48b1-b415-7e8d4bea716e](assets~/809c4a1c-ce80-48b1-b415-7e8d4bea716e-16616214059841.png)
 

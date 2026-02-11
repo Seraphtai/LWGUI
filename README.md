@@ -6,7 +6,10 @@
 
 A lightweight, flexible, and powerful **Unity Shader GUI** system built to maximize material inspector productivity.
 
-LWGUI has been proven in many large-scale commercial projects: with concise Material Property Drawer syntax, you can build complex inspectors quickly while benefiting from a modular Drawer/Decorator extension architecture, robust MetaData lifecycle caching, a complete Ramp/Preset/Toolbar toolchain, and Timeline integration. It significantly shortens iteration cycles while improving collaboration between artists and technical artists.
+LWGUI has been proven in many large-scale commercial projects:  
+with concise Material Property Drawer syntax, you can build complex inspectors quickly while benefiting from a modular Drawer/Decorator extension architecture, robust MetaData lifecycle caching, a complete Ramp/Preset/Toolbar toolchain, and Timeline integration.   
+
+It significantly shortens iteration cycles while improving collaboration between artists and technical artists.
 
 ![809c4a1c-ce80-48b1-b415-7e8d4bea716e](assets~/809c4a1c-ce80-48b1-b415-7e8d4bea716e-16616214059841.png)
 
