@@ -867,6 +867,32 @@ Tips:
 public ReadOnlyDecorator()
 ```
 
+#### HelpURL
+
+```c#
+/// Display a Help URL button on the right side of the Group.
+/// Clicking the button opens the URL in the default browser.
+/// "https://" is automatically prepended.
+/// Each comma-separated parameter is joined with '/' to form the full URL path.
+/// 
+/// url: the document URL without "https://", each ',' = '/'. (Default: none)
+/// e.g. [HelpURL(github.com, JasonMa0012, LWGUI)] => https://github.com/JasonMa0012/LWGUI
+public HelpURLDecorator(string url)
+public HelpURLDecorator(string s1, string s2)
+...
+public HelpURLDecorator(string s1, string s2, ..., string s16)
+```
+
+Example:
+
+```c#
+[HelpURL(github.com, JasonMa0012, LWGUI)]
+[Main(GroupName)] _group ("Group", float) = 0
+
+[HelpURL(github.com, JasonMa0012, LWGUI, blob, 1.x, README.md)]
+[Main(GroupName2, _, on, off)] _group2 ("Group2", float) = 0
+```
+
 ### Logic
 
 #### PassSwitch
