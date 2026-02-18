@@ -60,6 +60,7 @@ LWGUI 已在诸多大型商业项目中长期验证:
          * [Title &amp; SubTitle](#title--subtitle)
          * [Tooltip &amp; Helpbox](#tooltip--helpbox)
          * [ReadOnly](#readonly)
+         * [HelpURL](#helpurl)
       * [Logic](#logic)
          * [PassSwitch](#passswitch)
       * [Structure](#structure)

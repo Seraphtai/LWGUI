@@ -60,6 +60,7 @@ It significantly shortens iteration cycles while improving collaboration between
          * [Title &amp; SubTitle](#title--subtitle)
          * [Tooltip &amp; Helpbox](#tooltip--helpbox)
          * [ReadOnly](#readonly)
+         * [HelpURL](#helpurl)
       * [Logic](#logic)
          * [PassSwitch](#passswitch)
       * [Structure](#structure)
