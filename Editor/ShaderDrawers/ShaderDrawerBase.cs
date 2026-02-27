@@ -33,6 +33,9 @@ namespace LWGUI
         public List<string> buttonCommands = new();
         public List<float> buttonDisplayNameWidths = new();
 
+        // HelpURLDecorator
+        public string helpURL = string.Empty;
+
         // You can add more data that is determined during the initialization of the Drawer as a cache here,
         // thereby avoiding the need to calculate it every frame in OnGUI().
         // >>>>>>>>>>>>>>>>>>>>>>>> Add new data here <<<<<<<<<<<<<<<<<<<<<<<

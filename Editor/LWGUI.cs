@@ -186,7 +186,7 @@ namespace LWGUI
 			
 			RevertableHelper.DrawRevertableProperty(revertButtonRect, prop, metaDatas, propStaticData.isMain || propStaticData.isAdvancedHeaderProperty);
 			materialEditor.ShaderProperty(rect, prop, label);
-			
+
 			Helper.EndProperty(metaDatas, prop);
 			GUI.enabled = enabled;
 		}
