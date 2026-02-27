@@ -348,10 +348,8 @@ namespace LWGUI
 
 		private void OnValidate()
 		{
-			// Skip at the end of compilation
-			if (Event.current == null
-				// Skip when editing Text Field
-				|| EditorGUIUtility.editingTextField)
+			// It is only called when the user manually saves it, avoiding some strange bugs
+			if (!_saveTextureToggle)
 				return;
 
 			InitData();
@@ -504,10 +502,7 @@ namespace LWGUI
 			string createdFileRelativePath = string.Empty;
 			while (true)
 			{
-				// TODO: Warning:
-				// PropertiesGUI() is being called recursively. If you want to render the default gui for shader properties then call PropertiesDefaultGUI() instead
-				var absPath = EditorUtility.SaveFilePanel("Create a Ramp Atlas SO", rootPath, defaultFileName, "asset");
-
+				var absPath = IOHelper.SaveFilePanel("Create a Ramp Atlas SO", rootPath, defaultFileName, "asset");
 				if (absPath.StartsWith(IOHelper.ProjectPath))
 				{
 					createdFileRelativePath = IOHelper.GetRelativePath(absPath);

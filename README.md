@@ -940,11 +940,11 @@ public HiddenDecorator()
 /// Control the show or hide of a single or a group of properties based on multiple conditions.
 ///
 /// logicalOperator: And | Or (Default: And).
-/// propName: Target Property Name used for comparison.
+/// propNameOrKeyword: Target Property Name or Keyword used for comparison. If no matching property is found, it falls back to checking material keywords (enabled = 1, disabled = 0).
 /// compareFunction: Less (L) | Equal (E) | LessEqual (LEqual / LE) | Greater (G) | NotEqual (NEqual / NE) | GreaterEqual (GEqual / GE).
 /// value: Target Property Value used for comparison.
-public ShowIfDecorator(string propName, string comparisonMethod, float value) : this("And", propName, comparisonMethod, value) { }
-public ShowIfDecorator(string logicalOperator, string propName, string compareFunction, float value)
+public ShowIfDecorator(string propNameOrKeyword, string comparisonMethod, float value) : this("And", propNameOrKeyword, comparisonMethod, value) { }
+public ShowIfDecorator(string logicalOperator, string propNameOrKeyword, string compareFunction, float value)
 ```
 
 Example:
@@ -980,13 +980,13 @@ Example:
 /// Control whether a single property or a group can be edited based on multiple conditions.
 /// 
 /// logicalOperator: And | Or (Default: And).
-/// propName: Target Property Name used for comparison.
+/// propNameOrKeyword: Target Property Name or Keyword used for comparison. If no matching property is found, it falls back to checking material keywords (enabled = 1, disabled = 0).
 /// compareFunction: Less (L) | Equal (E) | LessEqual (LEqual / LE) | Greater (G) | NotEqual (NEqual / NE) | GreaterEqual (GEqual / GE).
 /// value: Target Property Value used for comparison.
 /// 
 /// When the condition is false, the property is read-only.
-public ActiveIfDecorator(string propName, string comparisonMethod, float value) : this("And", propName, comparisonMethod, value) { }
-public ActiveIfDecorator(string logicalOperator, string propName, string compareFunction, float value)
+public ActiveIfDecorator(string propNameOrKeyword, string comparisonMethod, float value) : this("And", propNameOrKeyword, comparisonMethod, value) { }
+public ActiveIfDecorator(string logicalOperator, string propNameOrKeyword, string compareFunction, float value)
 ```
 
 Example:

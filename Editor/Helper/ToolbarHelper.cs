@@ -267,6 +267,7 @@ namespace LWGUI
                     materialAsset = onFindMaterialAssetInRendererByMaterialInstance(renderer, material);
                 }
 
+                // Look for renderer.sharedMaterials as a fallback, if the runtime has modified the sharedMaterials will not work
                 if (materialAsset == null)
                 {
                     int index = renderer.materials.ToList().FindIndex(materialInstance => materialInstance == material);

@@ -22,6 +22,8 @@ namespace LWGUI
 					)
 				{
 					var shader = AssetDatabase.LoadAssetAtPath<Shader>(assetPath);
+					if (shader == null) continue;
+					
 					MetaDataHelper.ReleaseShaderMetadataCache(shader);
 					ShaderPerfMonitor.ClearShaderPerfCache(shader);
 					ReflectionHelper.InvalidatePropertyCache(shader);
