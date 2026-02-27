@@ -40,6 +40,14 @@ namespace LWGUI
 
 		private static readonly float _rampButtonsHeight = EditorGUIUtility.singleLineHeight;
 
+
+		private static string _lastSaveDirectoryPrefKey = nameof(_lastSaveDirectoryPrefKey) + ": " + Application.dataPath;
+		private static string _lastSaveDirectory
+		{
+			get => EditorPrefs.GetString(_lastSaveDirectoryPrefKey, string.Empty);
+			set => EditorPrefs.SetString(_lastSaveDirectoryPrefKey, value);
+		}
+
 		protected virtual float rampPreviewHeight => EditorGUIUtility.singleLineHeight;
 
 		protected override float GetVisibleHeight(MaterialProperty prop) { return rampPreviewHeight + _rampButtonsHeight; }
@@ -128,16 +136,34 @@ namespace LWGUI
 		protected virtual void CloneRampMap(MaterialProperty prop, MaterialEditor editor, LwguiGradient gradient)
 		{
 			string createdFileRelativePath = string.Empty;
+
+			string dialogDirectory = rootPath;
+			string dialogFileName = defaultFileName;
+			string absRootPath = IOHelper.GetAbsPath(rootPath);
+			string lastSaveDirectory = _lastSaveDirectory;
+			string absLastSaveDirectory = IOHelper.GetAbsPath(lastSaveDirectory);
+			
+
+			if (gradient != null && prop.textureValue != null)
+			{
+				var currentPath = AssetDatabase.GetAssetPath(prop.textureValue);
+				if (!string.IsNullOrEmpty(currentPath) && currentPath.StartsWith(rootPath))
+				{
+					dialogDirectory = Path.GetDirectoryName(currentPath);
+					var baseName = Path.GetFileNameWithoutExtension(currentPath);
+					dialogFileName = IOHelper.GenerateUniqueFileName(dialogDirectory, baseName, fileExtension);
+				}
+			}
+			else if (!string.IsNullOrEmpty(lastSaveDirectory) && lastSaveDirectory.StartsWith(rootPath) && Directory.Exists(absLastSaveDirectory))
+			{
+				dialogDirectory = lastSaveDirectory;
+			}
+			
+			Directory.CreateDirectory(IOHelper.GetAbsPath(dialogDirectory));
+
 			while (true)
 			{
-				var absRootPath = IOHelper.GetAbsPath(rootPath);
-				if (!Directory.Exists(absRootPath))
-					Directory.CreateDirectory(absRootPath);
-
-				// TODO: Warning:
-				// PropertiesGUI() is being called recursively. If you want to render the default gui for shader properties then call PropertiesDefaultGUI() instead
-				var absPath = EditorUtility.SaveFilePanel(saveFilePanelTitle, rootPath, defaultFileName, fileExtension);
-					
+				var absPath = IOHelper.SaveFilePanel(saveFilePanelTitle, dialogDirectory, dialogFileName, fileExtension);
 				if (absPath.StartsWith(absRootPath))
 				{
 					createdFileRelativePath = IOHelper.GetRelativePath(absPath);
@@ -156,6 +182,8 @@ namespace LWGUI
 
 			if (!string.IsNullOrEmpty(createdFileRelativePath))
 			{
+				_lastSaveDirectory = Path.GetDirectoryName(createdFileRelativePath);
+
 				var width = prop.textureValue != null ? prop.textureValue.width : defaultWidth;
 				var height = prop.textureValue != null ? prop.textureValue.height : defaultHeight;
 				RampHelper.CreateAndSaveNewGradientTexture(width, height, createdFileRelativePath, colorSpace == ColorSpace.Linear, gradient);
@@ -224,7 +252,25 @@ namespace LWGUI
 
 			OnRampPropUpdate(position, prop, label, editor);
 
-			var gradient = GetLwguiGradient(prop, out var isDirty);
+			LwguiGradient gradient = null;
+			var isDirty = false;
+			string gradientErrorMessage = null;
+
+			try
+			{
+				gradient = GetLwguiGradient(prop, out isDirty);
+			}
+			catch (System.Exception e)
+			{
+				gradientErrorMessage = "Ramp data corrupted! Check Console for details.";
+				Debug.LogError("LWGUI: Failed to parse gradient from '" + prop.displayName + "': " + e.Message);
+			}
+
+			if (gradient == null && gradientErrorMessage == null
+				&& prop.GetPropertyType() == ShaderPropertyType.Texture && prop.textureValue != null)
+			{
+				gradientErrorMessage = "Ramp data missing or corrupted! Check Console for details.";
+			}
 
 			// Draw Label
 			var labelRect = new Rect(position);
@@ -243,61 +289,68 @@ namespace LWGUI
 				if (buttonRect.width < 50f) return;
 			}
 
-			// Draw Ramp Editor
-			RampHelper.RampEditor(buttonRect, ref gradient, colorSpace, viewChannelMask, timeRange, isDirty,  
-				out bool hasGradientChanges, 
-				out bool doEditWhenNoGradient, 
-				out doRegisterUndo, 
-				out bool doClone,
-				out bool doCreate, 
-				out bool doSaveGradient, 
-				out bool doDiscardGradient,
-				OnGradientEditorChange);
-			
-			// Edit When No Gradient
-			if (doEditWhenNoGradient)
+			if (gradientErrorMessage != null)
 			{
-				EditWhenNoRampMap(prop, editor);
+				EditorGUI.HelpBox(buttonRect, gradientErrorMessage, MessageType.Error);
 			}
+			else
+			{
+				// Draw Ramp Editor
+				RampHelper.RampEditor(buttonRect, ref gradient, colorSpace, viewChannelMask, timeRange, isDirty,  
+					out bool hasGradientChanges, 
+					out bool doEditWhenNoGradient, 
+					out doRegisterUndo, 
+					out bool doClone,
+					out bool doCreate, 
+					out bool doSaveGradient, 
+					out bool doDiscardGradient,
+					OnGradientEditorChange);
+				
+				// Edit When No Gradient
+				if (doEditWhenNoGradient)
+				{
+					EditWhenNoRampMap(prop, editor);
+				}
 
-			// Clone
-			if (doClone)
-			{
-				LwguiGradientWindow.CloseWindow();
-				CloneRampMap(prop, editor, gradient);
-				OnCreateNewRampMap(prop);
-				LWGUI.OnValidate(metaDatas);
-			}
-			
-			// Create
-			if (doCreate)
-			{
-				LwguiGradientWindow.CloseWindow();
-				CreateNewRampMap(prop, editor);
-				OnCreateNewRampMap(prop);
-				LWGUI.OnValidate(metaDatas);
-			}
+				// Clone
+				if (doClone)
+				{
+					LwguiGradientWindow.CloseWindow();
+					CloneRampMap(prop, editor, gradient);
+					OnCreateNewRampMap(prop);
+					LWGUI.OnValidate(metaDatas);
+				}
+				
+				// Create
+				if (doCreate)
+				{
+					LwguiGradientWindow.CloseWindow();
+					CreateNewRampMap(prop, editor);
+					OnCreateNewRampMap(prop);
+					LWGUI.OnValidate(metaDatas);
+				}
 
-			// Change
-			if (hasGradientChanges && gradient != null)
-			{
-				ChangeRampMap(prop, gradient);
-				OnEditRampMap(prop, gradient);
-			}
-			
-			// Save
-			if (doSaveGradient && gradient != null)
-			{
-				SaveRampMap(prop, gradient);
-				OnSaveRampMap(prop, gradient);
-			}
+				// Change
+				if (hasGradientChanges && gradient != null)
+				{
+					ChangeRampMap(prop, gradient);
+					OnEditRampMap(prop, gradient);
+				}
+				
+				// Save
+				if (doSaveGradient && gradient != null)
+				{
+					SaveRampMap(prop, gradient);
+					OnSaveRampMap(prop, gradient);
+				}
 
-			// Discard
-			if (doDiscardGradient)
-			{
-				LwguiGradientWindow.CloseWindow();
-				gradient = DiscardRampMap(prop, gradient);
-				OnDiscardRampMap(prop, gradient);
+				// Discard
+				if (doDiscardGradient)
+				{
+					LwguiGradientWindow.CloseWindow();
+					gradient = DiscardRampMap(prop, gradient);
+					OnDiscardRampMap(prop, gradient);
+				}
 			}
 
 			// Texture Object Field, handle switch texture event

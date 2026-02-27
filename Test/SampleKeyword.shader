@@ -4,11 +4,11 @@ Shader "Hidden"
 	{
 		[Preset(_, LWGUI_ShaderPropertyPreset2)] _preset2 ("Preset", float) = 0
 
-		[KeywordEnum(key1, key2)]
-		_keywordEnum ("KeywordEnum", float) = 0
+		[KeywordEnum(key1, key2)] _keywordEnum ("KeywordEnum", float) = 0
 		
-		[KWEnum(_, Name 1, _KWENUM_KEY1, Name 2, _KWENUM_KEY2)]
-		_kwenum ("KWEnum", float) = 0
+		[KWEnum(_, Name 1, _KWENUM_KEY1, Name 2, _KWENUM_KEY2)] _kwenum ("KWEnum", float) = 0
+		[ShowIf(_KWENUM_KEY1, E, 1)] _float1 ("Show If - Name 1", float) = 0
+		[ActiveIf(_KWENUM_KEY2, E, 1)] _float2 ("Active If - Name 2", float) = 0
 		
 		[Toggle(_TOGGLE_KEYWORD)] _toggle1 ("Toggle", float) = 0
 		
@@ -18,8 +18,7 @@ Shader "Hidden"
 
 		[SubEnum(g0, Off, 0, On, 1)] _ZWrite ("ZWrite Mode", Float) = 1
 		[SubToggle(g0, _SUBTOGGLE_KEYWORD)] _toggle ("Sub Toggle", float) = 0
-		[SubKeywordEnum(g0, key1, key2)]
-		_subKeywordEnum ("SubKeywordEnum", float) = 0
+		[SubKeywordEnum(g0, key1, key2)] _subKeywordEnum ("SubKeywordEnum", float) = 0
 	}
 	SubShader
 	{

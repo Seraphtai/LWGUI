@@ -114,7 +114,7 @@ namespace LWGUI
 
 		public static void ReleaseShaderMetadataCache(Shader shader)
 		{
-			if (shader && _perShaderCachesDic.ContainsKey(shader))
+			if (shader)
 				_perShaderCachesDic.Remove(shader);
 		}
 
@@ -128,18 +128,17 @@ namespace LWGUI
 		public static void ReleaseMaterialMetadataCache(Material material)
 		{
 			if (material
-			 && material.shader
-			 && _perShaderCachesDic.ContainsKey(material.shader)
-			 && _perShaderCachesDic[material.shader].perMaterialDataCachesDic.ContainsKey(material))
+			    && material.shader
+			    && _perShaderCachesDic.ContainsKey(material.shader))
 				_perShaderCachesDic[material.shader].perMaterialDataCachesDic.Remove(material);
 		}
 
 		public static void ForceUpdateAllMaterialsMetadataCache(Shader shader)
 		{
-			if (shader && _perShaderCachesDic.ContainsKey(shader))
+			if (shader && _perShaderCachesDic.TryGetValue(shader, out var perShaderCache))
 			{
-				foreach (var perMaterialCachKWPair in _perShaderCachesDic[shader].perMaterialDataCachesDic)
-					perMaterialCachKWPair.Value.perMaterialData.forceInit = true;
+				foreach (var perMaterialCacheKWPair in perShaderCache.perMaterialDataCachesDic)
+					perMaterialCacheKWPair.Value.perMaterialData.forceInit = true;
 			}
 		}
 

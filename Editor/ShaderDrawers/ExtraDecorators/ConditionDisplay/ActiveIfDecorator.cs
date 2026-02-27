@@ -9,7 +9,7 @@ namespace LWGUI
 	/// Control whether the property can be edited based on multiple conditions.
 	///
 	/// logicalOperator: And | Or (Default: And).
-	/// propName: Target Property Name used for comparison.
+	/// propNameOrKeyword: Target Property Name or Keyword used for comparison. If no matching property is found, it falls back to checking material keywords (enabled = 1, disabled = 0).
 	/// compareFunction: Less (L) | Equal (E) | LessEqual (LEqual / LE) | Greater (G) | NotEqual (NEqual / NE) | GreaterEqual (GEqual / GE).
 	/// value: Target Property Value used for comparison.
 	/// </summary>
@@ -17,12 +17,12 @@ namespace LWGUI
 	{
 		public ShowIfDecorator.ShowIfData activeIfData = new();
 
-		public ActiveIfDecorator(string propName, string comparisonMethod, float value) : this("And", propName, comparisonMethod, value) { }
+		public ActiveIfDecorator(string propNameOrKeyword, string comparisonMethod, float value) : this("And", propNameOrKeyword, comparisonMethod, value) { }
 
-		public ActiveIfDecorator(string logicalOperator, string propName, string compareFunction, float value)
+		public ActiveIfDecorator(string logicalOperator, string propNameOrKeyword, string compareFunction, float value)
 		{
 			activeIfData.logicalOperator = logicalOperator.ToLower() == "or" ? ShowIfDecorator.LogicalOperator.Or : ShowIfDecorator.LogicalOperator.And;
-			activeIfData.targetPropertyName = propName;
+			activeIfData.targetPropertyNameOrKeyword = propNameOrKeyword;
 			activeIfData.compareFunction = ShowIfDecorator.ParseCompareFunction(compareFunction);
 			activeIfData.value = value;
 		}

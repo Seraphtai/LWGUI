@@ -934,14 +934,14 @@ public HiddenDecorator()
 #### ShowIf
 
 ```c#
-/// Control the show or hide of a single or a group of properties based on multiple conditions.
+/// 基于多个条件控制单个或一组属性的显示/隐藏.
 ///
-/// logicalOperator: And | Or (Default: And).
-/// propName: Target Property Name used for comparison.
+/// logicalOperator: And | Or (默认: And).
+/// propNameOrKeyword: 用于比较的目标属性名或Keyword. 若未找到匹配的属性, 则回退为检查材质Keyword (启用 = 1, 未启用 = 0).
 /// compareFunction: Less (L) | Equal (E) | LessEqual (LEqual / LE) | Greater (G) | NotEqual (NEqual / NE) | GreaterEqual (GEqual / GE).
-/// value: Target Property Value used for comparison.
-public ShowIfDecorator(string propName, string comparisonMethod, float value) : this("And", propName, comparisonMethod, value) { }
-public ShowIfDecorator(string logicalOperator, string propName, string compareFunction, float value)
+/// value: 用于比较的目标值.
+public ShowIfDecorator(string propNameOrKeyword, string comparisonMethod, float value) : this("And", propNameOrKeyword, comparisonMethod, value) { }
+public ShowIfDecorator(string logicalOperator, string propNameOrKeyword, string compareFunction, float value)
 ```
 
 Example:
@@ -977,13 +977,13 @@ Example:
 /// 基于多个条件控制单个属性或一组属性是否可编辑.
 /// 
 /// logicalOperator: And | Or (默认: And).
-/// propName: 用于比较的目标属性名.
+/// propNameOrKeyword: 用于比较的目标属性名或Keyword. 若未找到匹配的属性, 则回退为检查材质Keyword (启用 = 1, 未启用 = 0).
 /// compareFunction: Less (L) | Equal (E) | LessEqual (LEqual / LE) | Greater (G) | NotEqual (NEqual / NE) | GreaterEqual (GEqual / GE).
 /// value: 用于比较的目标值.
 /// 
 /// 当条件为 false 时, 属性会变为只读.
-public ActiveIfDecorator(string propName, string comparisonMethod, float value) : this("And", propName, comparisonMethod, value) { }
-public ActiveIfDecorator(string logicalOperator, string propName, string compareFunction, float value)
+public ActiveIfDecorator(string propNameOrKeyword, string comparisonMethod, float value) : this("And", propNameOrKeyword, comparisonMethod, value) { }
+public ActiveIfDecorator(string logicalOperator, string propNameOrKeyword, string compareFunction, float value)
 ```
 
 示例:
