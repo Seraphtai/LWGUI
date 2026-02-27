@@ -15,6 +15,7 @@
 		
 		[Title(Title on Group)]
 		// Create a folding group with name "g1"
+		[HelpURL(github.com, JasonMa0012, LWGUI)]
 		[Main(g1)] _group ("Group", float) = 0
 		[Sub(g1)]  _float ("float", float) = 2
 		
@@ -37,6 +38,7 @@
 
 		
 		// Create a drop-down menu that opens by default, without toggle
+		[HelpURL(github.com, JasonMa0012, LWGUI, blob, 1.x, README.md)]
 		[Main(g2, _KEYWORD, on, off)] _group2 ("group2 without toggle", float) = 1
 		[Tooltip(Test Tooltip)]
 		[Helpbox(Test Helpbox)]
@@ -52,6 +54,7 @@
 		[RampAtlasIndexer(g2, _RampAtlas, Green, Linear, GA, 24)] _RampAtlasIndex2 ("Indexer Linear/Green/24", float) = 3
 
 		
+		[HelpURL(github.com, JasonMa0012, LWGUI, blob, 1.x, package.json)]
 		[Main(Preset, _, on, off)] _PresetGroup ("Preset Samples", float) = 0
 		[Preset(Preset, LWGUI_Preset_BlendMode)] _BlendMode ("Blend Mode Preset", float) = 0
 		[SubEnum(Preset, UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 2

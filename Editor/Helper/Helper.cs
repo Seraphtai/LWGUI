@@ -316,6 +316,45 @@ namespace LWGUI
 			}
 		}
 
+		public static readonly float helpURLButtonWidth = 18f;
+
+		private static GUIContent _helpURLIconCache;
+		private static GUIContent _helpURLIcon => _helpURLIconCache ??= new GUIContent(EditorGUIUtility.IconContent("_Help")) { tooltip = string.Empty };
+
+		public static Rect GetHelpURLRect(Rect parentRect)
+		{
+			return new Rect(parentRect.xMax - helpURLButtonWidth - 4f,
+							parentRect.yMax - (EditorGUIUtility.singleLineHeight + helpURLButtonWidth) * 0.5f - 4.5f,
+							helpURLButtonWidth,
+							helpURLButtonWidth);
+		}
+
+		public static void HandleHelpURLClick(Rect parentRect, string helpURL)
+		{
+			if (string.IsNullOrEmpty(helpURL)) return;
+
+			var rect = GetHelpURLRect(parentRect);
+			if (Event.current.type == EventType.MouseDown
+				&& Event.current.button == 0
+				&& rect.Contains(Event.current.mousePosition))
+			{
+				Application.OpenURL(helpURL);
+				Event.current.Use();
+			}
+		}
+
+		public static void DrawHelpURLIcon(Rect parentRect, string helpURL)
+		{
+			if (string.IsNullOrEmpty(helpURL)) return;
+
+			var rect = GetHelpURLRect(parentRect);
+			var content = new GUIContent(_helpURLIcon) { tooltip = helpURL };
+			var enabled = GUI.enabled;
+			GUI.enabled = true;
+			GUI.Label(rect, content, GUIStyles.iconButton);
+			GUI.enabled = enabled;
+		}
+
 		private static Texture _logoCache;
 		private static GUIContent _logoGuiContentCache;
 		private static Texture _logo => _logoCache = _logoCache ?? AssetDatabase.LoadAssetAtPath<Texture>(AssetDatabase.GUIDToAssetPath("26b9d845eb7b1a747bf04dc84e5bcc2c"));

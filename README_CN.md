@@ -60,6 +60,7 @@ LWGUI 已在诸多大型商业项目中长期验证:
          * [Title &amp; SubTitle](#title--subtitle)
          * [Tooltip &amp; Helpbox](#tooltip--helpbox)
          * [ReadOnly](#readonly)
+         * [HelpURL](#helpurl)
       * [Logic](#logic)
          * [PassSwitch](#passswitch)
       * [Structure](#structure)
@@ -862,6 +863,32 @@ Tips:
 ```c#
 /// 将属性设为只读.
 public ReadOnlyDecorator()
+```
+
+#### HelpURL
+
+```c#
+/// 在Group右侧显示一个帮助文档链接按钮.
+/// 点击后会在默认浏览器中打开指定URL.
+/// 自动添加"https://"前缀.
+/// 每个逗号分隔的参数以'/'连接, 组成完整URL路径.
+/// 
+/// url: 不含"https://"的文档URL, 每个','='/' (默认: 无)
+/// 例: [HelpURL(github.com, JasonMa0012, LWGUI)] => https://github.com/JasonMa0012/LWGUI
+public HelpURLDecorator(string url)
+public HelpURLDecorator(string s1, string s2)
+...
+public HelpURLDecorator(string s1, string s2, ..., string s16)
+```
+
+示例:
+
+```c#
+[HelpURL(github.com, JasonMa0012, LWGUI)]
+[Main(GroupName)] _group ("Group", float) = 0
+
+[HelpURL(github.com, JasonMa0012, LWGUI, blob, 1.x, README.md)]
+[Main(GroupName2, _, on, off)] _group2 ("Group2", float) = 0
 ```
 
 ### Logic
