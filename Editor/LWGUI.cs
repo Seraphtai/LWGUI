@@ -174,10 +174,6 @@ namespace LWGUI
 
 			var revertButtonRect = RevertableHelper.SplitRevertButtonRect(ref rect);
 
-			var hasHelpURL = propStaticData.isMain && !string.IsNullOrEmpty(propStaticData.helpURL);
-			if (hasHelpURL)
-				Helper.HandleHelpURLClick(rect, propStaticData.helpURL);
-
 			var enabled = GUI.enabled;
 			if (propStaticData.isReadOnly || !propDynamicData.isActive) 
 				GUI.enabled = false;
@@ -191,9 +187,6 @@ namespace LWGUI
 			RevertableHelper.DrawRevertableProperty(revertButtonRect, prop, metaDatas, propStaticData.isMain || propStaticData.isAdvancedHeaderProperty);
 			materialEditor.ShaderProperty(rect, prop, label);
 
-			if (hasHelpURL)
-				Helper.DrawHelpURLIcon(rect, propStaticData.helpURL);
-			
 			Helper.EndProperty(metaDatas, prop);
 			GUI.enabled = enabled;
 		}

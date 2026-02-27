@@ -33,7 +33,7 @@ namespace LWGUI
         public List<string> buttonCommands = new();
         public List<float> buttonDisplayNameWidths = new();
 
-        // HelpURL
+        // HelpURLDecorator
         public string helpURL = string.Empty;
 
         // You can add more data that is determined during the initialization of the Drawer as a cache here,

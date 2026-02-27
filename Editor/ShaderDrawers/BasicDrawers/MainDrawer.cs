@@ -22,6 +22,10 @@ namespace LWGUI
 		protected LWGUIMetaDatas metaDatas;
 
 		private static readonly float  _height = 28f;
+		private static readonly float _helpURLButtonWidth = 18f;
+		
+		private static GUIContent _helpURLIconCache;
+		private static GUIContent _helpURLIcon => _helpURLIconCache ??= new GUIContent(EditorGUIUtility.IconContent("_Help")) { tooltip = string.Empty };
 		
 		private                 bool   _isFolding;
 		private                 string _group;
@@ -68,12 +72,13 @@ namespace LWGUI
 		public override void OnGUI(Rect position, MaterialProperty prop, GUIContent label, MaterialEditor editor)
 		{
 			metaDatas = Helper.GetLWGUIMetadatas(editor);
+			var propStaticData = metaDatas.GetPropStaticData(prop);
 
 			var showMixedValue = EditorGUI.showMixedValue;
 			EditorGUI.showMixedValue = prop.hasMixedValue;
 			EditorGUI.BeginChangeCheck();
 
-			bool toggleResult = Helper.DrawFoldout(position, ref metaDatas.GetPropStaticData(prop).isExpanding, !Helper.Approximately(prop.floatValue, 0), _defaultToggleDisplayed, label);
+			bool toggleResult = DrawFoldout(position, ref propStaticData.isExpanding, !Helper.Approximately(prop.floatValue, 0), _defaultToggleDisplayed, label, propStaticData.helpURL);
 
 			if (Helper.EndChangeCheck(metaDatas, prop))
 			{
@@ -83,6 +88,7 @@ namespace LWGUI
 				PresetHelper.GetPresetAsset(_presetFileName)?.TryGetPreset(prop.floatValue)?.ApplyToEditingMaterial(editor, metaDatas.perMaterialData);
 				TimelineHelper.SetKeywordToggleToTimeline(prop, editor, keyword);
 			}
+			
 			EditorGUI.showMixedValue = showMixedValue;
 		}
 
@@ -103,6 +109,71 @@ namespace LWGUI
 				Helper.SetShaderKeywordEnabled(prop.targets, Helper.GetKeywordName(_keyword, prop.name), prop.floatValue > 0f);
 				PresetDrawer.ApplyPresetWithoutPropertyChanges(_presetFileName, prop);
 			}
+		}
+		
+		public static bool DrawFoldout(Rect rect, ref bool isFolding, bool toggleValue, bool hasToggle, GUIContent label, string helpURL)
+		{
+			var toggleRect = new Rect(rect.x + 8f, rect.y + 7f, 13f, 13f);
+			
+			bool hasHelpURL = !string.IsNullOrEmpty(helpURL);
+			var helpButtonRect = !hasHelpURL ? Rect.zero : new Rect(rect.xMax - _helpURLButtonWidth - 4f,
+				rect.yMax - (EditorGUIUtility.singleLineHeight + _helpURLButtonWidth) * 0.5f - 4.5f,
+				_helpURLButtonWidth,
+				_helpURLButtonWidth);
+
+			// Toggle Event
+			if (hasToggle)
+			{
+				if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && toggleRect.Contains(Event.current.mousePosition))
+				{
+					toggleValue = !toggleValue;
+					Event.current.Use();
+					GUI.changed = true;
+				}
+			}
+			
+			// Help URL Event
+			if (hasHelpURL)
+			{
+				if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && helpButtonRect.Contains(Event.current.mousePosition))
+				{
+					Application.OpenURL(helpURL);
+					Event.current.Use();
+				}
+			}
+
+			// Button
+			{
+				// Cancel Right Click
+				if (Event.current.type == EventType.MouseDown && Event.current.button == 1 && rect.Contains(Event.current.mousePosition))
+					Event.current.Use();
+
+				var enabled = GUI.enabled;
+				GUI.enabled = true;
+				var guiColor = GUI.backgroundColor;
+				GUI.backgroundColor = isFolding ? Color.white : new Color(0.85f, 0.85f, 0.85f);
+				
+				if (GUI.Button(rect, label, GUIStyles.foldout))
+				{
+					isFolding = !isFolding;
+					GUI.changed = false;
+				}
+				
+				GUI.backgroundColor = guiColor;
+				
+				// Help URL Icon
+				GUI.Button(helpButtonRect, _helpURLIcon, GUIStyles.iconButton);
+				
+				GUI.enabled = enabled;
+			}
+
+			// Toggle Icon
+			if (hasToggle)
+			{
+				EditorGUI.Toggle(toggleRect, string.Empty, toggleValue);
+			}
+
+			return toggleValue;
 		}
 	}
 }

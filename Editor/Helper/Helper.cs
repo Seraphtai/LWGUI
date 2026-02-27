@@ -219,49 +219,6 @@ namespace LWGUI
 			return rects;
 		}
 
-		public static bool DrawFoldout(Rect rect, ref bool isFolding, bool toggleValue, bool hasToggle, GUIContent label)
-		{
-			var toggleRect = new Rect(rect.x + 8f, rect.y + 7f, 13f, 13f);
-
-			// Toggle Event
-			if (hasToggle)
-			{
-				if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && toggleRect.Contains(Event.current.mousePosition))
-				{
-					toggleValue = !toggleValue;
-					Event.current.Use();
-					GUI.changed = true;
-				}
-			}
-
-			// Button
-			{
-				// Cancel Right Click
-				if (Event.current.type == EventType.MouseDown && Event.current.button == 1 && rect.Contains(Event.current.mousePosition))
-					Event.current.Use();
-
-				var enabled = GUI.enabled;
-				GUI.enabled = true;
-				var guiColor = GUI.backgroundColor;
-				GUI.backgroundColor = isFolding ? Color.white : new Color(0.85f, 0.85f, 0.85f);
-				if (GUI.Button(rect, label, GUIStyles.foldout))
-				{
-					isFolding = !isFolding;
-					GUI.changed = false;
-				}
-				GUI.backgroundColor = guiColor;
-				GUI.enabled = enabled;
-			}
-
-			// Toggle Icon
-			if (hasToggle)
-			{
-				EditorGUI.Toggle(toggleRect, string.Empty, toggleValue);
-			}
-
-			return toggleValue;
-		}
-
 		public static bool ToggleButton(Rect position, GUIContent label, bool on, GUIStyle style = null, float padding = 0)
 		{
 			var paddedRect = new Rect(position.x + padding, position.y, position.width - padding * 2, position.height);
@@ -316,48 +273,9 @@ namespace LWGUI
 			}
 		}
 
-		public static readonly float helpURLButtonWidth = 18f;
-
-		private static GUIContent _helpURLIconCache;
-		private static GUIContent _helpURLIcon => _helpURLIconCache ??= new GUIContent(EditorGUIUtility.IconContent("_Help")) { tooltip = string.Empty };
-
-		public static Rect GetHelpURLRect(Rect parentRect)
-		{
-			return new Rect(parentRect.xMax - helpURLButtonWidth - 4f,
-							parentRect.yMax - (EditorGUIUtility.singleLineHeight + helpURLButtonWidth) * 0.5f - 4.5f,
-							helpURLButtonWidth,
-							helpURLButtonWidth);
-		}
-
-		public static void HandleHelpURLClick(Rect parentRect, string helpURL)
-		{
-			if (string.IsNullOrEmpty(helpURL)) return;
-
-			var rect = GetHelpURLRect(parentRect);
-			if (Event.current.type == EventType.MouseDown
-				&& Event.current.button == 0
-				&& rect.Contains(Event.current.mousePosition))
-			{
-				Application.OpenURL(helpURL);
-				Event.current.Use();
-			}
-		}
-
-		public static void DrawHelpURLIcon(Rect parentRect, string helpURL)
-		{
-			if (string.IsNullOrEmpty(helpURL)) return;
-
-			var rect = GetHelpURLRect(parentRect);
-			var content = new GUIContent(_helpURLIcon) { tooltip = helpURL };
-			var enabled = GUI.enabled;
-			GUI.enabled = true;
-			GUI.Label(rect, content, GUIStyles.iconButton);
-			GUI.enabled = enabled;
-		}
-
 		private static Texture _logoCache;
 		private static GUIContent _logoGuiContentCache;
-		private static Texture _logo => _logoCache = _logoCache ?? AssetDatabase.LoadAssetAtPath<Texture>(AssetDatabase.GUIDToAssetPath("26b9d845eb7b1a747bf04dc84e5bcc2c"));
+		private static Texture _logo => _logoCache ??= AssetDatabase.LoadAssetAtPath<Texture>(AssetDatabase.GUIDToAssetPath("26b9d845eb7b1a747bf04dc84e5bcc2c"));
 		private static GUIContent _logoGuiContent => _logoGuiContentCache = _logoGuiContentCache ?? new GUIContent(string.Empty, _logo,
 																   "LWGUI (Light Weight Shader GUI)\n\n"
 																 + "A Lightweight, Flexible, Powerful Unity Shader GUI system.\n\n"
