@@ -87,16 +87,8 @@ It significantly shortens iteration cycles while improving collaboration between
       * [Custom Drawer](#custom-drawer)
    * [Contribution](#contribution)
    * [Development Guide](#development-guide)
-      * [Project Positioning and Core Goal](#project-positioning-and-core-goal)
-      * [Architecture and Layering Principles](#architecture-and-layering-principles)
-      * [Code Structure and Responsibilities](#code-structure-and-responsibilities)
-      * [MetaData Deep Dive: Data Structures and Lifecycle](#metadata-deep-dive-data-structures-and-lifecycle)
-         * [1) PerInspectorData (inspector scope)](#1-perinspectordata-inspector-scope)
-         * [2) PerMaterialData (material scope)](#2-permaterialdata-material-scope)
-         * [3) PerShaderData (shader scope)](#3-pershaderdata-shader-scope)
-         * [Overall MetaData Lifecycle Flow (recommended mental model)](#overall-metadata-lifecycle-flow-recommended-mental-model)
-      * [ShaderGUI Key Events and Invocation Timing](#shadergui-key-events-and-invocation-timing)
-      * [Troubleshooting Tips (by event order)](#troubleshooting-tips-by-event-order)
+      * [Data Structure (Shader &gt; Material &gt; Inspector)](#data-structure-shader--material--inspector)
+      * [Lifecycle](#lifecycle)
 <!--te-->
 
 ## Installation
