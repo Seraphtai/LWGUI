@@ -1140,172 +1140,36 @@ You can build new Drawer or Decorator behaviors by inheriting `SubDrawer` (Decor
 
 ## Development Guide
 
-### Project Positioning and Core Goal
+### Data Structure (Shader &gt; Material &gt; Inspector)
 
-LWGUI aims to upgrade Shader properties in Unity Inspector from a "linear parameter list" to an editing experience that is "grouped, conditionally displayed, and highly extensible."
+The core purpose of `Editor/MetaData/` is to "avoid state interference and reduce redundant calculations" by isolating caches through different scopes.
 
-It uses `ShaderGUI` as the entry point, dispatches properties to corresponding Drawers/Decorators through property tags and custom rules, and relies on Helpers plus MetaData to manage state, caching, and resource linkage.
+```
+LWGUIMetaDatas
+├─ PerShaderData (Shader scope, static and immutable)
+│  ├─ propStaticDatas: Dictionary&lt;property name, PropertyStaticData&gt;
+│  │  ├─ Static property information (group name, Drawer, display mode, parent-child relationship)
+│  │  └─ Only rebuilt when Shader is recompiled
+│  ├─ displayModeData: Display mode settings (advanced properties, hidden properties, modified properties only)
+│  ├─ searchMode/searchString: Search state
+│  └─ defaultMaterial: Default material (for comparing modifications)
+│
+├─ PerMaterialData (Material scope, material-related)
+│  ├─ propDynamicDatas: Dictionary&lt;property name, PropertyDynamicData&gt;
+│  │  ├─ Current property values, default values, modification flags, ShowIf/ActiveIf results
+│  │  └─ forceInit flag controls whether to rebuild
+│  ├─ activePresetDatas: List of active Presets
+│  ├─ modifiedCount: Number of modified properties
+│  ├─ cachedModifiedProperties: Cache when showing only modified properties
+│  └─ shaderPerfDatas: Performance statistics data
+│
+└─ PerInspectorData (Inspector scope, window-specific)
+   └─ materialEditor: Current MaterialEditor reference
+```
 
-### Architecture and Layering Principles
-
-The system can be understood in three layers:
-
-1. **Editor layer (core capabilities)**
-   - Handles inspector rendering, property parsing, UI interaction, menu behavior, state caching, and asset synchronization.
-   - Main directory: `Editor/`
-2. **Runtime layer (runtime supplement)**
-   - Provides a small set of runtime-reusable data structures and Timeline-related capabilities.
-   - Main directory: `Runtime/`
-3. **UnityEditorExtension layer (editor enhancements)**
-   - Hosts additional editor windows and extension tools, such as `LwguiGradientEditor`.
-   - Main directory: `UnityEditorExtension/`
-
-The core call chain can be summarized as:
-
-1. `Editor/LWGUI.cs` takes over the material inspector entry.
-2. Parse shader properties, `MaterialProperty`, and tag metadata.
-3. Dispatch properties to `ShaderDrawers` / `BasicDrawers` / `ExtraDrawers` / `ExtraDecorators`.
-4. During rendering, use `Helper` modules for cross-cutting behaviors such as context menu, Ramp/Preset/Toolbar.
-5. Use `MetaData` to maintain state scopes across frames, materials, and shaders.
-6. Use `AssetProcessor` and `ScriptableObject` for lifecycle tasks such as import handling, reference sync, and atlas maintenance.
-
-### Code Structure and Responsibilities
-
-- `Editor/LWGUI.cs`
-  - Main ShaderGUI entry that orchestrates one inspector draw flow and stage events.
-- `Editor/ShaderDrawerBase.cs`
-  - Base drawer and common capabilities; defines extension points and core contracts.
-- `Editor/BasicDrawers/`
-  - Basic structural drawers such as foldout groups and sub-item containers.
-- `Editor/ShaderDrawers/`
-  - Shader-property-level drawers; core mapping from properties to UI.
-- `Editor/ShaderDrawers/ExtraDrawers/`
-  - Extra type drawers such as Numeric/Texture/Vector/Other.
-- `Editor/ExtraDecorators/`
-  - Decorator capabilities including appearance, conditional display, logic, and structure.
-- `Editor/Helper/`
-  - Cross-module utilities such as `ContextMenuHelper`, `RampHelper`, `PresetHelper`, and `ToolbarHelper`.
-- `Editor/MetaData/`
-  - Cache and state-scope management across inspector/material/shader dimensions.
-- `Editor/ScriptableObject/`
-  - Resource data definitions such as `LwguiRampAtlas`, `LwguiShaderPropertyPreset`, and `GradientObject`.
-- `Editor/AssetProcessor/`
-  - Handles import, rename, and asset-change listening to keep editor logic and resource states consistent.
-- `Editor/Timeline/` and `Runtime/Timeline/`
-  - Timeline-related editor and runtime features.
-- `Runtime/LwguiGradient/`
-  - Runtime-usable gradient data structures and logic.
-- `Test/`
-  - Regression and sample assets (Shader/Material/Preset) for key-path verification.
-
-### MetaData Deep Dive: Data Structures and Lifecycle
-
-The core purpose of `Editor/MetaData/` is to avoid state contamination and reduce repeated computation by isolating caches across scopes.
-
-#### 1) PerInspectorData (inspector scope)
-
-- Scope: within a single inspector window/session.
-- Typical usage:
-  - Foldout/expand UI states.
-  - Temporary interaction states (current editing target, current menu context, etc.).
-  - Short-lived caches reusable within a draw cycle.
-- Lifecycle:
-  - Initialized when the inspector is first drawn.
-  - Read and updated during each `OnGUI` pass.
-  - Released/rebuilt when the inspector is destroyed, reloaded, or context changes.
-- Why it matters:
-  - Prevents state contamination between inspector instances.
-
-#### 2) PerMaterialData (material scope)
-
-- Scope: per material asset (or instance).
-- Typical usage:
-  - Cache results tightly coupled with a specific material.
-  - Derived data computed from material properties.
-  - Material-level UI auxiliary states.
-- Lifecycle:
-  - Created when the material is first accessed by inspector/tools.
-  - Key fields refreshed when material properties change, reimport happens, or shader is replaced.
-  - Recycled when material becomes invalid, references are removed, or cleanup policies are triggered.
-- Why it matters:
-  - Ensures different materials using the same shader do not share incorrect state.
-
-#### 3) PerShaderData (shader scope)
-
-- Scope: per shader, shared by multiple materials.
-- Typical usage:
-  - Parsed shader-property metadata cache (property list, tag parse results, grouping structure, etc.).
-  - Static or semi-static data tied to shader text/structure and reusable across materials.
-- Lifecycle:
-  - Built when a shader is used for the first time.
-  - Invalidated/rebuilt when shader source changes, reimport happens, or related dependencies update.
-  - Lazily rebuilt after editor domain reload.
-- Why it matters:
-  - Reduces repeated parsing cost and improves inspector performance for large material sets.
-
-#### Overall MetaData Lifecycle Flow (recommended mental model)
-
-1. **Enter Inspector**
-   - Locate current material and shader, then fetch/create `PerInspectorData`, `PerMaterialData`, and `PerShaderData`.
-2. **Render stage**
-   - Drawers/Decorators read scoped data to execute conditional display, structural layout, and interaction logic.
-3. **Interaction and mutation stage**
-   - After user edits, write values back to material and update required caches; trigger helper/resource logic when needed.
-4. **Asset change stage**
-   - If shader/material/related resources are imported or structurally changed, listeners invalidate and rebuild related caches.
-5. **Exit or reload stage**
-   - Inspector-level temporary state is released; material/shader caches are retained or cleaned according to policy.
-
-Key benefits of this layered design:
-
-- Clear state isolation, reducing risks of cross-material contamination and cross-inspector state leaks.
-- Reasonable cache granularity that balances correctness and performance.
-- Easier troubleshooting by following `Inspector -> Material -> Shader`.
-
-### ShaderGUI Key Events and Invocation Timing
-
-The following timing model aligns with common Unity Inspector lifecycle behavior:
-
-1. **Entry stage (`LWGUI` invoked as `ShaderGUI`)**
-
-   - Triggered when a material is selected in Inspector and needs redraw.
-   - Typical actions: establish context, prepare property list, fetch MetaData.
-2. **Main `OnGUI` rendering stage**
-
-   - Entered on each Inspector Repaint / Layout / interaction event.
-   - Typical actions:
-     - Parse and iterate `MaterialProperty`.
-     - Invoke Drawers/Decorators for structure and control rendering.
-     - Apply conditional decorators for show/hide and disabled states.
-3. **Property change detection and write-back stage**
-
-   - Triggered after GUI change checks pass.
-   - Typical actions:
-     - Write new values back to material properties.
-     - Refresh keywords, dependent properties, and linkage logic.
-     - Update related `PerMaterialData` cache.
-4. **Context behavior stage (menu/toolbar/quick actions)**
-
-   - Triggered when users open context menus or invoke toolbar features.
-   - Typical actions:
-     - Route through `ContextMenuHelper`, `ToolbarHelper`, `RampHelper`, and `PresetHelper`.
-     - May cause resource-reference updates, preset application, or atlas operations.
-5. **Resource lifecycle linkage stage (import/rename/rebuild)**
-
-   - Triggered when related assets change (shader, texture, preset, ScriptableObject, etc.).
-   - Typical actions:
-     - `AssetProcessor` responds to changes and synchronizes references.
-     - Mark and rebuild affected `PerShaderData` / `PerMaterialData`.
-6. **Domain reload and reinitialization stage**
-
-   - Occurs after script recompilation or enter/exit PlayMode (depending on settings).
-   - Typical actions:
-     - Static caches are invalidated or reset.
-     - Next inspector render performs lazy initialization on demand.
-
-### Troubleshooting Tips (by event order)
-
-- **Incorrect display/grouping**: first inspect dispatch flow in `LWGUI.cs` and corresponding Drawer/Decorator paths.
-- **Menu/tool behavior issues**: focus on trigger conditions and side effects in `Editor/Helper/`.
-- **State contamination or stale cache**: verify MetaData scope selection first, then check cache invalidation timing.
-- **Failure after asset changes**: inspect synchronization flow between `AssetProcessor` and `ScriptableObject`.
+### Lifecycle
+- **PerShaderData**: Created when Shader is first accessed, released when Shader is reimported (`ReleaseShaderMetadataCache`)
+- **PerMaterialData**: Created when material is first accessed, released when material is modified/closed/shader is changed (`ReleaseMaterialMetadataCache`)
+- **PerInspectorData**: Created independently for each LWGUI instance (Inspector window)
+- **Forced Update**: Trigger complete PerMaterialData rebuild after modifying material via code
+  - Call `PresetHelper.ApplyPresetsInMaterial` after modifying Preset values

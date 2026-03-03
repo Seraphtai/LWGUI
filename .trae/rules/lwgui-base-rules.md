@@ -1,9 +1,3 @@
----
-name: lwgui-base-rule
-description: LWGUI Base Rules
-alwaysApply: true
----
-
 ## 定位与目标
 
 LWGUI是个开源Unity Shader GUI插件, 目标是实现无需创建C#代码, 即可在Shader中通过Attribute组织灵活且强大的材质编辑面板.
