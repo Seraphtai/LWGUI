@@ -60,6 +60,9 @@ namespace LWGUI
 			{
 				SetShaderKeywordEnabled(materials, keywordNames[i], index == i);
 			}
+			
+			// Force set the currently selected Keyword
+			SetShaderKeywordEnabled(materials, keywordNames[index], true);
 		}
 
 		public static void SetShaderPassEnabled(Object[] materials, string[] lightModeNames, bool enabled)
