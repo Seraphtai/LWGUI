@@ -44,21 +44,6 @@ namespace LWGUI
 			{
 				if (propertyNameID == -1 || !material.HasProperty(propertyNameID))
 					propertyNameID = Shader.PropertyToID(propertyName);
-				if (!material.HasProperty(propertyNameID))
-				{
-					// Legacy
-					var propertyNameLower = propertyName.ToLower();
-					switch (propertyNameLower)
-					{
-						case "renderqueue":
-							material.renderQueue = (int)floatValue;
-							return;
-						default:
-							// Debug.LogWarning("Unable to find Preset Property: " + propertyName + " in Material: " + material + "!");
-							return;
-					}
-				}
-
 
 				if (isDefaultMaterial)
 				{
