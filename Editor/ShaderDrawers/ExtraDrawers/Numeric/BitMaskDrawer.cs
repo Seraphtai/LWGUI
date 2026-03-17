@@ -104,8 +104,8 @@ namespace LWGUI
 			int controlId = GUIUtility.GetControlID(_hint, FocusType.Keyboard, position);
 			var fieldRect = EditorGUI.PrefixLabel(position, controlId, label);
 			
-			if (position.width < totalButtonWidth) 
-				return;
+			// if (position.width < totalButtonWidth) 
+			// 	return;
 
 			fieldRect.xMin = fieldRect.xMax;
 			
